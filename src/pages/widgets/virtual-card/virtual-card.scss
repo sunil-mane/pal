@@ -1,0 +1,236 @@
+virtual-card-component {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+
+  .flip-container {
+    height: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+
+    .spinner-holder-virtual-card {
+      display: flex;
+      display: -webkit-flex;
+      flex-direction: column;
+      -webkit-flex-direction: column;
+      align-items: center;
+      height: 100%;
+
+      ion-spinner {
+        flex: 1 0 auto;
+        -webkit-flex: 1 0 auto;
+        * {
+          stroke: #fff;
+        }
+      }
+
+    }
+
+    .card-holder-wallet {
+      height: auto;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+
+      .front {
+        padding: 0;
+        margin: 0;
+        position: relative;
+        backface-visibility: hidden;
+        z-index: 2;
+        transform: rotateX(0deg);
+        -webkit-transform: rotateX(0deg);
+
+        .front-card-details {
+          position: absolute;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          transform: rotate(90deg);
+          -webkit-transform: rotate(90deg);
+          transform-origin: left 0 0;
+
+          h3 {
+            display: block;
+            overflow: hidden;
+            width: 100%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin: 1rem 0 0 0;
+            padding: 0;
+            text-transform: uppercase;
+          }
+
+          .row, .col-xs-2, .col-xs-3, .col-xs-5, .col-xs-6, .col-xs-12 {
+            margin: 0;
+            padding: 0;
+          }
+        }
+
+        .virtual-card-style-PAL {
+          width: 125%;
+          top: 10%;
+          left: 30%;
+          @include bp-md-max {
+            left: 25%;
+          }
+          @include bp-xs-max {
+            left: 27%;
+          }
+          @include bp-xxs-min {
+            left: 30%;
+          }
+
+          h3 {
+            color: #191618;
+            font-weight: 500;
+            font-size: 1.2rem;
+            @include bp-md-max {
+              font-size: 1.4rem;
+            }
+            @include bp-xs-max {
+              font-size: 1.3rem;
+            }
+            @include bp-xxs-min {
+              font-size: 1.2rem;
+            }
+          }
+
+          h3.valid-thru {
+            font-weight: 400;
+            font-size: 1.1rem;
+            @include bp-md-max {
+              font-size: 1.3rem;
+            }
+            @include bp-xs-max {
+              font-size: 1.2rem;
+            }
+            @include bp-xxs-min {
+              font-size: 1.1rem;
+            }
+          }
+        }
+
+        .virtual-card-style-CP {
+          width: 125%;
+          top: 7%;
+          left: 35%;
+          @include bp-md-max {
+            left: 27%;
+          }
+          @include bp-xs-max {
+            left: 31%;
+          }
+          @include bp-xxs-min {
+            left: 35%;
+          }
+
+          h3 {
+            color: #fff;
+            font-weight: 400;
+            font-size: 1.2rem;
+            @include bp-md-max {
+              font-size: 1.5rem;
+            }
+            @include bp-xs-max {
+              font-size: 1.4rem;
+            }
+            @include bp-xxs-min {
+              font-size: 1.2rem;
+            }
+          }
+
+          span {
+            margin: 0;
+            display: inline-block;
+            text-align: center;
+            color: #fff;
+            font-weight: 400;
+            font-size: 0.8rem;
+            @include bp-md-max {
+              font-size: 1.0rem;
+            }
+            @include bp-xs-max {
+              font-size: 0.9rem;
+            }
+            @include bp-xxs-min {
+              font-size: 0.8rem;
+            }
+          }
+        }
+
+        .virtual-card-style-PX {
+          width: 125%;
+          top: 11%;
+          left: 33%;
+          @include bp-md-max {
+            left: 30%;
+          }
+          @include bp-xs-max {
+            left: 32%;
+          }
+          @include bp-xxs-min {
+            left: 33%;
+          }
+
+          h3 {
+            color: #000;
+            font-weight: 600;
+            font-size: 1.4rem;
+            margin: 0;
+            @include bp-md-max {
+              font-size: 1.7rem;
+            }
+            @include bp-xs-max {
+              font-size: 1.6rem;
+            }
+            @include bp-xxs-min {
+              font-size: 1.4rem;
+            }
+          }
+
+          .hide-expiry {
+            margin-top: 0.8rem;
+          }
+        }
+      }
+
+      img {
+        border-radius: 22px;
+        padding: 0;
+        margin: 0;
+      }
+
+      .back {
+        top: 0;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        backface-visibility: hidden;
+        transform: rotateX(180deg);
+        -webkit-transform: rotateX(180deg);
+      }
+    }
+
+    .flipper {
+      transition: 0.5s;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      position: relative;
+      transform-origin: 100% 50%; /* half of height */
+      -webkit-transform-origin: 100% 50%; /* half of height */
+    }
+
+  }
+
+  .flip-container.flip .flipper {
+    transform: rotateX(-180deg);
+    -webkit-transform: rotateX(-180deg);
+  }
+}
+

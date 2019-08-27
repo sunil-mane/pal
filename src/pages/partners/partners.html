@@ -1,0 +1,37 @@
+<ion-header class=" header-dark no-back-button-text" no-border>
+    <ion-navbar color="transparent">
+        <ion-title>{{pageTitle}}</ion-title>
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()">
+                    <span class="spin-animation">
+                        <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                    </span>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content  class="contain-area" parallax-header>
+
+
+    <partners-detail-header-component></partners-detail-header-component>
+
+    <div class="contain-area" padding>
+
+        <div class="search-result-status" *ngIf="!offers || (offers.length == 0)">
+            <span>{{noOfferText}}</span>
+        </div>
+        <div *ngFor="let data of offers">
+            <expandable-component [data]="data"></expandable-component>
+        </div>
+
+        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+    </div>
+
+
+
+</ion-content>

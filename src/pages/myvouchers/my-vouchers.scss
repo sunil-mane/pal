@@ -1,0 +1,46 @@
+.voucher-search-result {
+  background-color: white;
+  padding: 10px;
+
+  .voucher {
+    border: 0px solid #fff;
+    padding: 10px 10px;
+    margin: 15px 0 -1px 0;
+    background: #6fbe80;
+    color: #fff;
+    .heading {
+      display: flex;
+    align-items: center;
+      display: flex;
+      .free-space {
+        flex: 1;
+      }
+      .miles {
+        font-size: smaller;
+        margin-right: 20px;
+      }
+      .desc{
+        font-weight: 500;
+      }
+    }
+  }
+  .voucher-strip{
+    max-height: 42px;
+  background: #002552 !important;
+  .partner{
+    display: flex;
+      align-items: center;
+      padding: 5px;
+  }
+  img{
+    height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  }
+  span{
+    color:#fff;
+    font-size: 12px;
+    padding: 0 10px;
+  }
+  }
+}

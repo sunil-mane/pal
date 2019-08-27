@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "79428182183",
+    "firebase_url": "https://mabuhay-miles-af035.firebaseio.com",
+    "project_id": "mabuhay-miles-af035",
+    "storage_bucket": "mabuhay-miles-af035.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:79428182183:android:25f7e09d6d0dbf8d",
+        "android_client_info": {
+          "package_name": "com.pal.mabuhaymiles"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "79428182183-q9qlr9477a8gjcfhsi0pq63vbrai9p0p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq_phOu4Mkay3qGwoFGnxOuzYk6chu_Fk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

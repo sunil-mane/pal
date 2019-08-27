@@ -1,0 +1,44 @@
+<ion-content padding class="target-popup">
+
+
+    <h3> {{ 'CREATE_PERSONAL_GOAL' | translate }}</h3>
+
+
+    <ion-list>
+
+        <ion-item>
+            <ion-label floating>{{ 'NAME_YOUR_GOAL' | translate }}</ion-label>
+            <ion-input type="text" [(ngModel)]="name" maxlength="50"></ion-input>
+        </ion-item>
+
+        <ion-item>
+            <ion-label floating>{{ 'POINTS_TO_EARN' | translate }}</ion-label>
+            <ion-input type="tel" [(ngModel)]="points" maxlength="9"></ion-input>
+        </ion-item>
+
+
+        <ion-item>
+            <ion-label floating>{{ 'EXPIRY_DATE' | translate }}</ion-label>
+            <ion-datetime displayFormat="DD MMMM YYYY"
+                          [min]="minDate"
+                          [max]="maxDate"
+                          [(ngModel)]="myDate"
+                          [cancelText]="cancelText"
+                          [doneText]="selectText"
+                          [monthNames]="months">
+            </ion-datetime>
+        </ion-item>
+
+    </ion-list>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <button ion-button full
+                    class="submit-btn"
+                    (click)="createTarget()">
+                {{ 'CREATE_GOAL' | translate }}
+            </button>
+        </div>
+    </div>
+
+</ion-content>

@@ -1,0 +1,577 @@
+<ion-header class="header-dark offer-popup-content">
+    <ion-navbar #navBar>
+
+        <ion-title>
+            <span *ngIf="editingProfile != true">{{'Enrollment' | translate}}</span>
+            <span *ngIf="editingProfile == true">{{'Edit Profile' | translate}}</span>
+        </ion-title>
+
+    </ion-navbar>
+</ion-header>
+<ion-content>
+    <div>
+        <div class="registration-progress" *ngIf="pageState < 5">
+            <ion-grid>
+                <ion-row>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="filled"
+                             (click)="tabButtonsTapped(1)"
+                             *ngIf="pageState == 1 && pageState < 4">
+                        <span>{{'Personal' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="not-filled"
+                             (click)="tabButtonsTapped(1)"
+                             *ngIf="pageState != 1 && pageState < 4">
+                        <span>{{'Personal' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="filled"
+                             (click)="tabButtonsTapped(2)"
+                             *ngIf="pageState == 2 && pageState < 4">
+                        <span>{{'Contact' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="not-filled"
+                             (click)="tabButtonsTapped(2)"
+                             *ngIf="pageState != 2 && pageState < 4">
+                        <span>{{'Contact' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="filled"
+                             (click)="tabButtonsTapped(3)"
+                             *ngIf="pageState == 3 && pageState < 4">
+                        <span>{{'Password' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="not-filled"
+                             (click)="tabButtonsTapped(3)"
+                             *ngIf="pageState != 3 && pageState < 4">
+                        <span>{{'Password' | translate}}</span>
+                    </ion-col>
+                    <ion-col col-sm-4 col-md-4 col-lg-4
+                             class="filled"
+                             *ngIf="pageState == 4">
+                        <span>{{'Summary' | translate}}</span>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+        <div class="registration-form" *ngIf="pageState < 5">
+            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 1">
+                <ion-list>
+                    <ul>
+                        <li>{{'Name should match travel documents such as Passport' | translate}}</li>
+                    </ul>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Title' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="titleObj"
+                                    name="titleText"
+                                    id="titleText"
+                                    [disabled]="shouldDisablePersonalInfo"
+                                    required>
+                            <ion-option *ngFor="let item of titles"
+                                        [value]="item"
+                                        [selected]="titleObj && (item.value == titleObj.value)">
+                                {{item.value}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Last Name' | translate}}</ion-label>
+                        <ion-input type="text"
+                                   [(ngModel)]="lastName"
+                                   name="lastName"
+                                   id="lastName"
+                                   spellcheck="false"
+                                   autocapitalize="sentences"
+                                   minlength="2"
+                                   maxlength="20"
+                                   pattern=""
+                                   [disabled]="shouldDisablePersonalInfo"
+                                   required>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'First Name' | translate}}</ion-label>
+                        <ion-input type="text"
+                                   [(ngModel)]="firstName"
+                                   name="firstName"
+                                   id="firstName"
+                                   spellcheck="false"
+                                   autocapitalize="sentences"
+                                   minlength="2"
+                                   maxlength="20"
+                                   pattern=""
+                                   [disabled]="shouldDisablePersonalInfo"
+                                   required>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="!shouldDisablePersonalInfo || middleName">
+                        <ion-label floating>{{'Middle Name' | translate}}</ion-label>
+                        <ion-input type="text"
+                                   [(ngModel)]="middleName"
+                                   name="middleName"
+                                   id="middleName"
+                                   spellcheck="false"
+                                   autocapitalize="sentences"
+                                   pattern=""
+                                   [disabled]="shouldDisablePersonalInfo"
+                                   maxlength="20">
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="!shouldDisablePersonalInfo || (nameSuffixLovs && nameSuffixLovs.length > 0)">
+                        <ion-label floating>{{'Suffix' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="selectedNameSuffix"
+                                    name="selectedNameSuffix"
+                                    id="selectedNameSuffix"
+                                    [disabled]="shouldDisablePersonalInfo">
+                            <ion-option *ngFor="let item of nameSuffixLovs"
+                                        [value]="item"
+                                        [selected]="selectedNameSuffix && (item.code == selectedNameSuffix.code)">
+                                {{item.code}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Date Of Birth' | translate}}</ion-label>
+                        <ion-datetime displayFormat="DD MMMM YYYY"
+                                      [min]="minDate"
+                                      [max]="maxDate"
+                                      [(ngModel)]="dobText"
+                                      [cancelText]="cancelText"
+                                      [doneText]="selectText"
+                                      [monthNames]="months"
+                                      name="dobText"
+                                      id="dobText"
+                                      [disabled]="shouldDisablePersonalInfo"
+                                      required>
+                        </ion-datetime>
+                    </ion-item>
+                </ion-list>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button #submitButton1 ion-button full class="submit-btn" type="submit">
+                            <span>{{'Continue' | translate}}</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="loading-status" *ngIf="(pageState == 2) && (shouldShowAddressLoading == true)">
+                <span>{{'Loading' | translate}} ...</span>
+            </div>
+            <form #form2="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="(pageState == 2) && (shouldShowAddressLoading != true)">
+                <ion-list>
+                    <div class="contact-number-fields">
+                        <ion-label class="required-field">{{'Preferred Contact Number' | translate}}</ion-label>
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <ion-select cancelText="{{'CANCEL' | translate}}"
+                                            okText="{{'SELECT' | translate}}"
+                                            selectedText="{{countryDialObj.isdCode}}"
+                                            (ionChange)="onSelectIsd($event)"
+                                            name="countryDialObj"
+                                            id="countryDialObj"
+                                            *ngIf="countryDialObj"
+                                            disabled="shouldHideContactNumber == true">
+                                    <ion-option *ngFor="let item of countryLovs"
+                                                [value]="item"
+                                                [selected]="countryDialObj && (item.code == countryDialObj.code)">
+                                        {{item.descr}} ({{item.isdCode}})
+                                    </ion-option>
+                                </ion-select>
+                            </div>
+                            <div class="col-xs-3">
+                                <ion-input type="tel"
+                                           [(ngModel)]="areaCode"
+                                           name="areaCode"
+                                           id="areaCode"
+                                           placeholder="{{'Area Code' | translate}}"
+                                           minlength="1"
+                                           [maxlength]="areaCodeLength"
+                                           pattern=""
+                                           required
+                                           *ngIf="shouldHideContactNumber != true">
+                                </ion-input>
+                            </div>
+                            <div class="col-xs-6">
+                                <ion-input type="tel"
+                                           [(ngModel)]="contactNumber"
+                                           name="contactNumber"
+                                           id="contactNumber"
+                                           placeholder="XXXXXXX"
+                                           minlength="5"
+                                           maxlength="8"
+                                           pattern=""
+                                           *ngIf="shouldHideContactNumber != true">
+                                </ion-input>
+                            </div>
+                        </div>
+                    </div>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Email Address' | translate}}</ion-label>
+                        <ion-input type="email"
+                                   [(ngModel)]="emailAddress"
+                                   name="emailAddress"
+                                   id="emailAddress"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="5"
+                                   maxlength="40"
+                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
+                                   required>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="countryAddressObj">
+                        <ion-label class="required-field" floating>{{'Country' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    (ionChange)="onSelectCountry($event)"
+                                    name="countryAddressObj"
+                                    id="countryAddressObj">
+                            <ion-option *ngFor="let item of countryLovs"
+                                        [value]="item"
+                                        [selected]="countryAddressObj && (item.code == countryAddressObj.code)">
+                                {{item.descr}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                    <ion-item *ngIf="stateLovs && stateLovs.length > 0">
+                        <ion-label floating>{{'State/Region' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="selectedStateLov"
+                                    name="selectedStateLov"
+                                    id="selectedStateLov">
+                            <ion-option *ngFor="let item of stateLovs"
+                                        [value]="item"
+                                        [selected]="selectedStateLov && (item.code == selectedStateLov.code)">
+                                {{item.descr}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                    <ion-item *ngIf="cityLovs && cityLovs.length > 0">
+                        <ion-label class="required-field" floating>{{'City/Province' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="selectedCityLov"
+                                    name="selectedCityLov"
+                                    id="selectedCityLov">
+                            <ion-option *ngFor="let item of cityLovs"
+                                        [value]="item"
+                                        [selected]="selectedCityLov && (item.code == selectedCityLov.code)">
+                                {{item.descr}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Number/Street' | translate}}</ion-label>
+                        <ion-input type="text"
+                                   [(ngModel)]="address1Text"
+                                   name="address1Text"
+                                   id="address1Text"
+                                   spellcheck="false"
+                                   autocapitalize="sentences"
+                                   minlength="1"
+                                   maxlength="40"
+                                   pattern=""
+                                   required>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label floating>{{'Floor/Building/Village' | translate}}</ion-label>
+                        <ion-input type="text"
+                                   [(ngModel)]="address2Text"
+                                   name="address2Text"
+                                   id="address2Text"
+                                   spellcheck="false"
+                                   autocapitalize="sentences"
+                                   minlength="1"
+                                   maxlength="40"
+                                   pattern="">
+                        </ion-input>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Postal/Zip Code' | translate}}</ion-label>
+                        <ion-input type="number"
+                                   [(ngModel)]="postalText"
+                                   name="postalText"
+                                   id="postalText"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="1"
+                                   maxlength="8"
+                                   pattern=""
+                                   required>
+                        </ion-input>
+                    </ion-item>
+                </ion-list>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button #submitButton2 ion-button full class="submit-btn" type="submit">
+                            <span *ngIf="acceptTerms != true">{{'Continue' | translate}}</span>
+                            <span *ngIf="acceptTerms == true">{{'Save' | translate}}</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <form #form3="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 3">
+                <ion-list>
+                    <ul *ngIf="passwordGuidelines">
+                        <span [innerHTML]="passwordGuidelines"></span>
+                    </ul>
+                    <ion-item *ngIf="editingProfile == true">
+                        <ion-label class="required-field" floating>{{'Current Password' | translate}}</ion-label>
+                        <ion-input type="{{shouldShowPassword? 'text' : 'password'}}"
+                                   [(ngModel)]="currentPasswordText"
+                                   name="currentPasswordText"
+                                   id="currentPasswordText"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="5"
+                                   maxlength="8"
+                                   pattern=""
+                                   required>
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showPassword()">
+                            <ion-icon name="{{shouldShowPassword?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{passwordFieldLabel}}</ion-label>
+                        <ion-input type="{{shouldShowPassword? 'text' : 'password'}}"
+                                   [(ngModel)]="passwordText"
+                                   name="passwordText"
+                                   id="passwordText"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="5"
+                                   maxlength="8"
+                                   pattern=""
+                                   required="editingProfile != true">
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showPassword()">
+                            <ion-icon name="{{shouldShowPassword?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label class="required-field" floating>{{'Reenter Password' | translate}}</ion-label>
+                        <ion-input type="{{shouldShowPassword? 'text' : 'password'}}"
+                                   [(ngModel)]="rePasswordText"
+                                   name="rePasswordText"
+                                   id="rePasswordText"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="5"
+                                   maxlength="8"
+                                   pattern=""
+                                   required="editingProfile != true">
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="questions && (questions.length > 0)">
+                        <ion-label class="required-field" floating>{{'Security Question' | translate}}</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="selectedQuestion"
+                                    name="selectedQuestion"
+                                    id="selectedQuestion"
+                                    *ngIf="recievedMemberAnswer != true">
+                            <ion-option *ngFor="let item of questions"
+                                        [value]="item"
+                                        [selected]="selectedQuestion && (item.code === selectedQuestion.code)">
+                                {{item.descr}}
+                            </ion-option>
+                        </ion-select>
+                        <ion-input value="{{selectedQuestion.descr}}"
+                                   disabled="true"
+                                   *ngIf="selectedQuestion && recievedMemberAnswer == true">
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="questions && (questions.length > 0) && selectedQuestion">
+                        <ion-label class="required-field" floating>{{'Security Answer' | translate}}</ion-label>
+                        <ion-input type="{{shouldShowAnswer? 'text' : 'password'}}"
+                                   [(ngModel)]="answerText"
+                                   name="answerText"
+                                   id="answerText"
+                                   spellcheck="false"
+                                   autocapitalize="none"
+                                   minlength="1"
+                                   maxlength="40"
+                                   pattern=""
+                                   required="editingProfile != true">
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showAnswer()">
+                            <ion-icon name="{{shouldShowAnswer?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                </ion-list>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button #submitButton3 ion-button full class="submit-btn" type="submit">
+                            <span *ngIf="acceptTerms != true">{{'Continue' | translate}}</span>
+                            <span *ngIf="acceptTerms == true">{{'Save' | translate}}</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div *ngIf="pageState == 4">
+                <ion-list>
+                    <ul *ngIf="((editingProfile != true) || formHasChanges)">
+                        <li>{{'Name should match travel documents such as Passport' | translate}}</li>
+                    </ul>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && titleObj && titleObj.value">
+                        <ion-label floating>{{'Title' | translate}}</ion-label>
+                        <ion-input value="{{titleObj.value}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && lastName && lastName.trim().length > 0">
+                        <ion-label floating>{{'Last Name' | translate}}</ion-label>
+                        <ion-input value="{{lastName}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && firstName && firstName.trim().length > 0">
+                        <ion-label floating>{{'First Name' | translate}}</ion-label>
+                        <ion-input value="{{firstName}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && middleName && middleName.trim().length > 0">
+                        <ion-label floating>{{'Middle Name' | translate}}</ion-label>
+                        <ion-input value="{{middleName}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedNameSuffix && selectedNameSuffix.code && selectedNameSuffix.descr">
+                        <ion-label floating>{{'Suffix' | translate}}</ion-label>
+                        <ion-input value="{{selectedNameSuffix.code}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && dobText && dobText.length > 0">
+                        <ion-label floating>{{'Date Of Birth' | translate}}</ion-label>
+                        <ion-input value="{{dobText}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryDialObj && areaCode && contactNumber && contactNumber.trim().length > 0">
+                        <ion-label floating>{{'Preferred Contact Number' | translate}}</ion-label>
+                        <ion-input value="{{countryDialObj.isdCode}}{{areaCode}}{{contactNumber}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && emailAddress && emailAddress.trim().length > 0">
+                        <ion-label floating>{{'Email Address' | translate}}</ion-label>
+                        <ion-input value="{{emailAddress}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address1Text && address1Text.trim().length > 0">
+                        <ion-label floating>{{'Number/Street' | translate}}</ion-label>
+                        <ion-input value="{{address1Text}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address2Text && address2Text.trim().length > 0">
+                        <ion-label floating>{{'Floor/Building/Village' | translate}}</ion-label>
+                        <ion-input value="{{address2Text}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedCityLov && selectedCityLov.code">
+                        <ion-label floating>{{'City/Province' | translate}}</ion-label>
+                        <ion-input value="{{selectedCityLov.descr}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && postalText && postalText.trim().length > 0">
+                        <ion-label floating>{{'Postal/Zip Code' | translate}}</ion-label>
+                        <ion-input value="{{postalText}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedStateLov && selectedStateLov.code">
+                        <ion-label floating>{{'State/Region' | translate}}</ion-label>
+                        <ion-input value="{{selectedStateLov.descr}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryAddressObj && countryAddressObj.code">
+                        <ion-label floating>{{'Country' | translate}}</ion-label>
+                        <ion-input value="{{countryAddressObj.descr}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="currentPasswordText && currentPasswordText.trim().length > 0">
+                        <ion-label floating>{{'Current Password' | translate}}</ion-label>
+                        <ion-input type="{{shouldShowPassword? 'text' : 'password'}}"
+                                   value="{{currentPasswordText}}"
+                                   disabled="true">
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showPassword()">
+                            <ion-icon name="{{shouldShowPassword?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                    <ion-item *ngIf="passwordText && passwordText.trim().length > 0">
+                        <ion-label floating>{{passwordFieldLabel}}</ion-label>
+                        <ion-input type="{{shouldShowPassword? 'text' : 'password'}}"
+                                   value="{{passwordText}}"
+                                   disabled="true">
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showPassword()">
+                            <ion-icon name="{{shouldShowPassword?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">
+                        <ion-label floating>{{'Security Question' | translate}}</ion-label>
+                        <ion-input value="{{selectedQuestion.descr}}" disabled="true"></ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">
+                        <ion-label floating>{{'Security Answer' | translate}}</ion-label>
+                        <ion-input type="{{shouldShowAnswer? 'text' : 'password'}}"
+                                   value="{{answerText}}"
+                                   disabled="true">
+                        </ion-input>
+                        <button type="button"
+                                ion-button clear item-right
+                                color="dark"
+                                (click)="showAnswer()">
+                            <ion-icon name="{{shouldShowAnswer?'ios-eye-outline':'ios-eye-off-outline'}}"></ion-icon>
+                        </button>
+                    </ion-item>
+                </ion-list>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button ion-button class="submit-btn" full (click)="editButtonTapped()">{{'Edit' | translate}}</button>
+                    </div>
+                </div>
+                <div class="privacy-terms-checkbox">
+                    <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>
+                    <span>{{'I have read and agree with the' | translate}}
+                        <a (click)="termsConditionsTapped()">
+                            {{'Terms n Conditions' | translate}}
+                        </a> and
+                        <a (click)="privacyPolicyTapped()">
+                            {{'Privacy Policy' | translate}}
+                        </a>.
+                    </span>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button ion-button class="submit-btn" full (click)="bottomButtonTapped()">
+                            {{'Submit' | translate}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="registration-confirmation" *ngIf="pageState == 5">
+            <h1>{{'Welcome' | translate}}</h1>
+            <h2>{{'to' | translate}} {{appDisplayName}}</h2>
+            <div [innerHTML]="confirmMsg"
+                 *ngIf="confirmMsg"
+                 class="in-app-browser-anchor"
+                 onclick="onInnerHTMLTap(event)">
+            </div>
+            <div class="row">
+                <div class="col-xs-12 button-container">
+                    <button ion-button class="submit-btn" full (click)="loginButtonTapped()">
+                        {{ 'LOGIN' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ion-content>

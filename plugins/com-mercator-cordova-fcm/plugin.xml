@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+    <plugin id="com-mercator-cordova-fcm"
+            version="1.0.0"
+            xmlns="http://apache.org/cordova/ns/plugins/1.0">
+        <name>com-mercator-cordova-fcm</name>
+        <js-module src="www/FCMPlugin.js" name="FCMPlugin">
+	<clobbers target="FCMPlugin" />
+    </js-module>
+
+    <engines>
+	<engine name="cordova-android" version=">=4.0.0" />
+    </engines>
+
+        <platform name="android">
+            <config-file target="AndroidManifest.xml" parent="/manifest/application">
+                <service android:name="com.mercator.cordova.fcm.MyFirebaseMessagingService">
+                    <intent-filter>
+                        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                    </intent-filter>
+                </service>
+                <service android:name="com.mercator.cordova.fcm.MyFirebaseInstanceIDService">
+                    <intent-filter>
+                        <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                    </intent-filter>
+                </service>
+            </config-file>
+            <config-file target="res/xml/config.xml" parent="/*">
+                <feature name="FCMPlugin">
+                    <param name="android-package" value="com.mercator.cordova.fcm.FCMPlugin" />
+                    <param name="onload" value="true" />
+                </feature>
+            </config-file>
+
+            <framework src="src/android/FCMPlugin.gradle" custom="true" type="gradleReference" />
+
+            <source-file src="src/android/FCMPlugin.java" target-dir="src/com/mercator/cordova/fcm/fcm" />
+            <source-file src="src/android/MyFirebaseMessagingService.java" target-dir="src/com/mercator/cordova/fcm/fcm" />
+            <source-file src="src/android/MyFirebaseInstanceIDService.java" target-dir="src/com/mercator/cordova;/fcm/fcm" />
+            <source-file src="src/android/SharedPreference.java" target-dir="src/com/mercator/cordova/fcm/fcm" />
+
+
+        </platform>
+    </plugin>

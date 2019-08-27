@@ -1,0 +1,53 @@
+<ion-header class="transparent-header " no-border>
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>{{ 'MY_WALLET' | translate }}</ion-title>
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()">
+                <span class="spin-animation">
+                    <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                </span>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content #myWallet class="no-scroll app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'">
+
+
+    <div class="virtual-card-holder">
+        <virtual-card-component [isFrontVisible]="isFrontVisible"
+                                (changeIsFrontVisible)="isFrontVisibleChanged($event)">
+        </virtual-card-component>
+
+
+        <div class="card-button-holder" *ngIf="hasVirtualCardData == true">
+            <ul>
+                <li>
+                    <button ion-button clear class="  button-icon-transparent" icon-only
+                            (click)="isFrontVisibleChanged(!isFrontVisible)">
+                        <ion-icon name="icon-flip"></ion-icon>
+                    </button>
+                </li>
+
+                <li>
+                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="openQR()">
+                        <ion-icon name="icon-barcode"></ion-icon>
+                    </button>
+                </li>
+                <li>
+                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="fullScreen()">
+                        <ion-icon name="icon-arrow-4"></ion-icon>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+
+</ion-content>

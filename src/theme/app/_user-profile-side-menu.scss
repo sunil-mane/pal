@@ -1,0 +1,59 @@
+.user-profile-side-menu {
+
+  text-align: center;
+	padding: 0rem 0.9rem 2rem 0.9rem;
+	background-color: $homeHeaderCardBg;
+
+  &.gold-member {
+	background-color: lighten($homeHeaderCardBg, 10%);
+  }
+
+  h1 {
+	margin: 0;
+	padding: 3rem 0 1rem;
+	@include bp-xxs-min {
+	  padding: 2rem 0 1rem;
+	}
+
+	.icon {
+	  margin-bottom: 2rem;
+	  &:before {
+		font-size: 6rem;
+		color: #fff;
+	  }
+	}
+
+	img {
+	  border-radius: 100%;
+	  width: 100px;
+	  height: 100px;
+	  box-shadow: 0 1px 5px 0 #444;
+	  @include bp-xxs-min {
+		width: 80px;
+		height: 80px;
+	  }
+	}
+  }
+
+  h2, h3 {
+	color: #fff;
+	font-weight: 300;
+	@include bp-xxs-min {
+	  font-size: 2rem;
+	}
+  }
+
+  h3 {
+	font-size: 1.8rem;
+	@include bp-xxs-min {
+	  font-size: 1.5rem;
+	}
+  }
+
+  .button-clear {
+	padding: .8rem 2.4rem;
+	border-radius: 3rem;
+	color: #fff;
+  }
+
+}

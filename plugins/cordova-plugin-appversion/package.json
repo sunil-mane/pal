@@ -1,0 +1,60 @@
+{
+  "_args": [
+    [
+      "cordova-plugin-appversion@1.0.0",
+      "C:\\Users\\204866\\Documents\\Mobile\\Code_to_sunil\\app_PAL"
+    ]
+  ],
+  "_from": "cordova-plugin-appversion@1.0.0",
+  "_id": "cordova-plugin-appversion@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha1-tgo5E+R1k1+QCJMLRpclwmOUKJE=",
+  "_location": "/cordova-plugin-appversion",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "cordova-plugin-appversion@1.0.0",
+    "name": "cordova-plugin-appversion",
+    "escapedName": "cordova-plugin-appversion",
+    "rawSpec": "1.0.0",
+    "saveSpec": null,
+    "fetchSpec": "1.0.0"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-appversion/-/cordova-plugin-appversion-1.0.0.tgz",
+  "_spec": "1.0.0",
+  "_where": "C:\\Users\\204866\\Documents\\Mobile\\Code_to_sunil\\app_PAL",
+  "author": {
+    "name": "Rareloop",
+    "url": "http://rareloop.com"
+  },
+  "bugs": {
+    "url": "https://github.com/Rareloop/cordova-plugin-app-version/issues"
+  },
+  "cordova": {
+    "id": "cordova-plugin-appversion",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "description": "Access the native app version & build number in JavaScript",
+  "homepage": "https://github.com/Rareloop/cordova-plugin-app-version",
+  "keywords": [
+    "cordova",
+    "appversion",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
+  "license": "MIT",
+  "name": "cordova-plugin-appversion",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rareloop/cordova-plugin-app-version.git"
+  },
+  "version": "1.0.0"
+}

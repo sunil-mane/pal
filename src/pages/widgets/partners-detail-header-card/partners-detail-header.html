@@ -1,0 +1,45 @@
+<div class="partners" *ngIf="partnerLocationInfo">
+    <div class="headerCard partners" [style.background-image]="'url(' + partnerLocationInfo.img + ')'" >
+
+        <h2> <img [src]="partnerLocationInfo.logo" alt=""/></h2>
+
+        <div class="row">
+            <div class="col-xs-6">
+                <h5>{{partnerLocationInfo.offersCount }} <span>{{ partnerLocationInfo.offersCount == 1 ? ('OFFER' | translate) : ('OFFERS' | translate) }}</span></h5>
+            </div>
+            <div class="col-xs-6">
+                <h5>{{partnerLocationInfo.distance | number}} <span>{{ 'KM' | translate }} {{ 'APPROX' | translate }}</span></h5>
+            </div>
+        </div>
+
+
+        <div class="footer"  >
+            <ul>
+                <li (click)="liked(partnerLocationInfo)"
+                    [ngClass]="{'itemLiked': partnerLocationInfo.isFavourite}">
+                    <a>
+                        <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>
+                        <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>
+                    </a>
+                </li>
+                <li (click)="checkIn(partnerLocationInfo)"
+                    [ngClass]="{'itemLiked': partnerLocationInfo.isCheckedIn}"
+                    *ngIf="partnerLocationInfo.addressId && !shouldHideCheckin">
+                    <a>
+                        <ion-icon name="icon-check"></ion-icon>
+                    </a>
+                </li>
+                <li (click)="openMap(partnerLocationInfo)"
+                    *ngIf="partnerLocationInfo.latitude && partnerLocationInfo.longitude">
+                    <a>
+                        <ion-icon name="icon-navigation"></ion-icon>
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+
+        <div class="overlay-black"></div>
+    </div>
+
+</div>

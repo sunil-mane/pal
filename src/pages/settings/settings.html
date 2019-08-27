@@ -1,0 +1,56 @@
+<ion-header class="header-dark no-back-button-text" no-border>
+    <ion-navbar>
+        <ion-title>{{ 'App Settings' | translate }}</ion-title>
+    </ion-navbar>
+
+</ion-header>
+
+<ion-content class="app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             padding>
+
+    <ion-list>
+        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">
+            <ion-icon name="notifications"></ion-icon>
+            {{'NOTIFICATIONS' | translate}}
+        </ion-list-header>
+
+        <ion-item class="item-transparent item-left-zero item-border-none">
+            <ion-label>{{'APP_NOTIFICATIONS' | translate}}</ion-label>
+            <ion-toggle color="primary"
+                        [(ngModel)]="appNotification"
+                        (ionChange)="appNotificationToggle()">
+            </ion-toggle>
+        </ion-item>
+        <!--<ion-item class="item-transparent item-left-zero item-border-none">-->
+        <!--<ion-label>{{'PARTNERS_NOTIFICATIONS' | translate}}</ion-label>-->
+        <!--<ion-toggle color="primary"-->
+        <!--[(ngModel)]="partnerNotification"-->
+        <!--(ionChange)="partnerNotificationToggle()">-->
+        <!--</ion-toggle>-->
+        <!--</ion-item>-->
+    </ion-list>
+
+    <ion-list *ngIf="languageList && (languageList.length > 1)">
+        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">
+            <ion-icon name="icon-location"></ion-icon>
+            {{'LANGUAGE' | translate}}
+        </ion-list-header>
+
+        <ion-item class="item-transparent item-left-zero item-border-none">
+            <ion-label> {{'LANGUAGE' | translate}}</ion-label>
+            <ion-select cancelText="{{'CANCEL' | translate}}"
+                        okText="{{'SELECT' | translate}}"
+                        (ionChange)="updateLang($event)">
+
+                <ion-option *ngFor="let lang of languageList"
+                            [value]="lang.code"
+                            [selected]="lang.code === selectedLanguageCode">
+                    {{lang.description }}
+                </ion-option>
+
+            </ion-select>
+        </ion-item>
+    </ion-list>
+
+</ion-content>

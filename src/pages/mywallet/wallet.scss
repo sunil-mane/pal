@@ -1,0 +1,130 @@
+page-wallet {
+  .content-ios, .content-md {
+    background-color: lighten($homeHeaderCardBg, 10%);
+  }
+}
+
+.virtual-card-holder {
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  content: normal;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-content: center;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 100%;
+
+  virtual-card-component {
+    -webkit-flex: 1 1 auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    -webkit-align-self: stretch;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+    height: 75vh;
+  }
+
+  .card-button-holder {
+
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: stretch;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+  }
+
+}
+
+.card-button-holder {
+  width: 100%;
+}
+
+.card-button-holder {
+  //margin-top: 2%;
+  ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    list-style: none;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    justify-content: space-around;
+    li {
+      color: #fff;
+      .button-icon-transparent {
+        color: #fff !important;
+      }
+      button {
+        ion-icon {
+          &:before {
+            font-size: 2.3rem;
+            @include bp-xxs-min {
+              font-size: 2rem;
+            }
+
+          }
+        }
+      }
+
+    }
+  }
+}
+
+.button-full-screen {
+  color: #fff;
+  font-size: 2.4rem;
+  position: absolute;
+  z-index: 1000;
+  top: 20px;
+  right: 10px;
+
+  .icon-ios {
+    right: 0;
+  }
+}
+
+.qr-code {
+  img {
+    margin-top: 15vh;
+    width: 100%;
+  }
+}
+
+.fullScreenVirtualCard {
+  .modal-wrapper {
+    transform: translateY(0%) !important;
+  }
+
+  .front-card-details {
+    left: 20%;
+  }
+
+  virtual-card-component{
+    //margin: 4rem;
+  }
+
+  .card-holder-wallet{
+    margin: 0;
+  }
+
+}

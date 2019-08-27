@@ -1,0 +1,77 @@
+<div class="expandable-card-holder app-background-image"
+     [style.background-image]="'url(' + backgroundImageURL +')'">
+    <div class="expandable-img-holder" (click)="toggle()">
+        <div class="row">
+            <img src="{{data.offerBannerPath}}" alt="">
+           <span class="badge-holder"
+                 *ngIf="data.earnBurnFlag"
+                 [ngClass]="{'badge-earn': data.earnBurnFlag == 'E'}">
+                    <div class="ribbonz"> {{ (data.earnBurnFlag == 'E' ? 'EARN' : languageConstants.BURN) | translate }}</div>
+            </span>
+        </div>
+
+        <div class="special-offers"  *ngIf="data.special === 'Y'">
+            <ion-icon name="star"></ion-icon>
+        </div>
+    </div>
+    <div class="expandable-strip-holder" (click)="toggle()">
+
+        <div class="row">
+            <div class="strip-logo-content" [ngClass]="{'col-xs-9': (data.isTarget === 'Y') && (myTarget != null)}">
+                <div class="expandable-logo">
+                    <img [src]="data.partnerLogoPath" alt="" />
+                    <h3>{{data.partnerName}}
+                        <span *ngIf="data.partnerLoationCount == 'ALL'">
+                            - {{ 'ALL_LOCATIONS' | translate }}
+                        </span>
+                        <span *ngIf="data.partnerLoationCount && data.partnerLoationCount != 'ALL' && data.partnerLoationCount != '0'">
+                            - {{data.partnerLoationCount}} {{ 'LOCATIONS' | translate }}
+                        </span>
+                    </h3>
+                    <h4>{{data.offerName}}</h4>
+                </div>
+            </div>
+            <div class="col-xs-3" *ngIf="(data.isTarget === 'Y') && (myTarget != null)">
+                <div class="position-relative rounded-progress-position">
+                    <round-progress [current]="myTarget"
+                                    [radius]="radius"
+                                    [max]="max"
+                                    [duration]="3000"
+                                    [stroke]="4"
+                                    [responsive]="responsive"
+                                    [clockwise]="clockwise">
+                    </round-progress>
+                    <h6>{{myTarget}}%</h6>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>
+        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.description"></p>
+    </div>
+    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut] >
+        <ul>
+            <li [ngClass]="{'itemLiked': data.isFavorite === 'Y'}">
+                <a (click)="updateOfferAsFavourite(data)">
+                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>
+                    <ion-spinner *ngIf="showSpinner"></ion-spinner>
+                </a>
+            </li>
+
+            <li *ngIf="data.earnBurnFlag != 'E'"
+                [ngClass]="{'itemLiked': (data.isTarget === 'Y')}">
+                <a (click)="updateOfferAsTarget(data)">
+                    <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>
+                    <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>
+                </a>
+            </li>
+            <li *ngIf="data.partnerCode">
+                <a (click)="openLocation(data)">
+                    <ion-icon name="icon-navigation"></ion-icon>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+</div>

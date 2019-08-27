@@ -1,0 +1,28 @@
+<ion-header class="header-dark no-back-button-text" no-border>
+
+    <ion-navbar>
+        <ion-title>{{pageTitle | translate}}</ion-title>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content class="dark-body-color my-targets-page" no-bounce>
+
+
+    <component-swiper *ngIf="offerTargetList && personalTargetList"
+            [data]="offerTargetList"
+            [activeSlide]="currentIndex"
+            [personalTargetData]="personalTargetList"
+            [showTemplate]="4"
+            [isMyTarget]="true"
+    >
+    </component-swiper>
+
+    <div class="add-new-target">
+        <ion-icon name="ios-add-circle-outline" (click)="setTarget()"></ion-icon>
+    </div>
+
+</ion-content>
+
+

@@ -1,0 +1,692 @@
+<ion-slides class="Swipertemplate1 custom" #Template1 *ngIf="showTemplate == 1" (ionSlideDidChange)="slideDidChange(this.data)">
+    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">
+        <div class="slider-holder app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, index)"
+            tappable>
+
+            <div class="row slider-holder-img">
+                <img src="{{i.img}}" alt="">
+                <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{'badge-earn': i.earnBurn == 'E'}">
+                    <div class="ribbonz"> {{ (i.earnBurn == 'E' ? 'EARN' : languageConstants.BURN) | translate }}</div>
+                </span>
+                <div class="special-offers" *ngIf="i.special === 'Y'">
+                    <ion-icon name="star"></ion-icon>
+                </div>
+            </div>
+            <div class="row slider-holder-content">
+                <div class="col-xs-12">
+                    <div class="row">
+                        <div class="strip-logo-content" [ngClass]="{'col-xs-9': i.myTarget != null}">
+                            <div class="card-logo">
+                                <img [src]="i.logo" alt="" />
+                                <h3>{{i.name}}
+                                    <span *ngIf="i.location"> - {{i.location}}</span>
+                                </h3>
+                                <h4>{{i.title}}</h4>
+                            </div>
+                        </div>
+                        <div class="col-xs-3" *ngIf="i.myTarget != null">
+                            <div class="rounded-progress-position">
+                                <div class="" [@visibilityChanged]="i.isSlidActive">
+                                    <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                        [clockwise]="clockwise">
+                                    </round-progress>
+                                    <h6>{{i.myTarget}}%</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-slide>
+</ion-slides>
+
+
+<ion-slides class=" swiper-big-holder custom" *ngIf="showTemplate == 2" #Template2 (ionSlideDidChange)="slideDidChange(this.data)">
+    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index">
+        <div class="swiper-wrapper swiper-wrapper-big">
+            <div class="swiper-slide-big-holder">
+                <div class="slider-holder-top-clear app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" tappable>
+                    <div class="row slider-holder-img">
+                        <img src="{{i.img}}" alt="">
+                        <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{'badge-earn': i.earnBurn == 'E'}">
+                            <div class="ribbonz"> {{ (i.earnBurn == 'E' ? 'EARN' : languageConstants.BURN) | translate }}</div>
+                        </span>
+                        <div class="special-offers" *ngIf="i.special === 'Y'">
+                            <ion-icon name="star"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content" [ngClass]="{'col-xs-9': i.myTarget != null}">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}</h3>
+                                        <h4 *ngIf="i.location">
+                                            {{i.location}}
+                                        </h4>
+                                        <h4 *ngIf="!i.location">
+                                            <span *ngIf="i.offersCount && i.offersCount > 0">
+                                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;
+                                            </span>
+                                            <span *ngIf="i.distance && i.distance > 0">
+                                                {{i.distance | number}} {{i.distanceDenom}}
+                                            </span>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3" *ngIf="i.isSlidActive && i.myTarget != null">
+                                    <div class="rounded-progress-position">
+                                        <div class="" [@visibilityChanged]="i.isSlidActive">
+                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                                [clockwise]="clockwise">
+                                            </round-progress>
+                                            <h6>{{i.myTarget}}%</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-holder-middle">
+                    <h2>{{i.title}} </h2>
+
+                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="i.description"></p>
+
+                    <div class="moreInfo" (click)="moreInfo(i)">{{ 'MORE_INFO' | translate }}</div>
+
+                </div>
+
+                <div class="slider-holder-footer">
+                    <ul>
+                        <li [ngClass]="{'itemLiked': i.isFavourite}">
+                            <a (click)="liked(i)">
+                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>
+                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>
+                            </a>
+                        </li>
+
+                        <li *ngIf="i.offerId && (i.earnBurn != 'E')" [ngClass]="{'itemLiked': i.isTarget}">
+                            <a (click)="setAsTarget(i,id)">
+                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>
+                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>
+                            </a>
+                        </li>
+
+                        <li *ngIf="!i.targetId && !i.offerId && i.addressId && !shouldHideCheckin" [ngClass]="{'itemLiked': i.isCheckedIn}">
+                            <a (click)="checkIn(i)">
+                                <ion-icon name="icon-check"></ion-icon>
+                            </a>
+                        </li>
+                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">
+                            <a (click)="openLocation(i)">
+                                <ion-icon name="icon-navigation"></ion-icon>
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </ion-slide>
+</ion-slides>
+
+
+<ion-slides class=" Swipertemplate3 custom" *ngIf="showTemplate == 3" #Template3>
+    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">
+        <div class="slider-holder app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, index)"
+            tappable>
+
+            <div class="row slider-holder-img">
+                <img src="{{i.img}}" alt="">
+            </div>
+            <div class="row slider-holder-content">
+                <div class="strip-logo-content col-xs-12">
+                    <div class="card-logo">
+                        <img [src]="i.logo" alt="" />
+                        <h3>{{i.name}}
+                            <span *ngIf="i.storeName"> - {{i.storeName}}</span>
+                        </h3>
+                        <h4>
+                            <span *ngIf="i.offersCount && i.offersCount > 0">
+                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;
+                            </span>
+                            <span *ngIf="i.distance && i.distance > 0">
+                                {{i.distance | number}} {{i.distanceDenom}}
+                            </span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </ion-slide>
+</ion-slides>
+<!--My vouchers --start-->
+<ion-slides class=" Swipertemplate6 custom" *ngIf="showTemplate == 6" #Template6>
+    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">
+        <div class="slider-holder app-background-image" [style.background-image]="'url(' + backgroundImageURL + ')'" tappable>
+            <div class="row slider-holder-img">
+                <div class="voucher slider-holder-color">
+                    <div class="heading" style="    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;">
+                        <span class="desc">{{i.voucherDescription}}</span>
+                        <span class="free-space"></span>
+                        <span class="miles" style="font-size:12px">-for points miles</span>
+                    </div>
+                    <div class="margin-bottom"></div>
+                    <div style="font-size:12px;">
+                        Valid for 0 months.
+                    </div>
+                    <div>
+                        <span style="font-size:12px;">Can be used at any location</span>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row slider-holder-content">
+                <div class="strip-logo-content col-xs-12">
+                    <div class="card-logo">
+                        <img [src]="i.logo" alt="" />
+                        <h3>
+                            <span> Starbucks</span>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-slide>
+    <!-- <ion-slide class="swiper-slide">
+        <div class="slider-holder app-background-image" [style.background-image]="'url(' + backgroundImageURL + ')'" tappable>
+            <div class="row slider-holder-img">
+                <div class="voucher slider-holder-color">
+                    <div class="heading">
+                        <span class="desc">Desc</span>
+                        <span class="free-space"></span>
+                        <span class="miles">-for points miles</span>
+                    </div>
+                    <div class="margin-bottom"></div>
+                    <div style="font-size:11px;">
+                        Valid for 0 months.
+                    </div>
+                    <div>
+                        <span style="font-size:11px;">Can be used at any location</span>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row slider-holder-content">
+                <div class="strip-logo-content col-xs-12">
+                    <div class="card-logo">
+                        <img src="" alt="" />
+                        <h3>
+                            name
+                            <span> - star bucks</span>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-slide> -->
+</ion-slides>
+<!--My vouchers --end-->
+
+<ion-slides class="  swiper-big-holder custom" *ngIf="showTemplate == 4" #usefulSwiperTemplate4>
+
+
+    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">
+
+        <div class="swiper-wrapper swiper-wrapper-big">
+
+            <!--Target In Progress-->
+            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == '' || i.targetStatus == 'I'">
+
+                <div class="slider-holder-top-clear app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" tappable>
+                    <div class="row slider-holder-img">
+                        <img src="{{i.img}}" alt="">
+                        <div class="special-offers" *ngIf="i.special === 'Y'">
+                            <ion-icon name="star"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content" [ngClass]="{'col-xs-9': i.myTarget != null}">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}</h3>
+                                        <h4>{{i.location}}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3">
+                                    <div class="position-relative rounded-progress-position" *ngIf="i.myTarget != null">
+                                        <div class="" [@visibilityChanged]="i.isSlidActive">
+                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                                [clockwise]="clockwise">
+                                            </round-progress>
+                                            <h6>{{i.myTarget}}%</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-holder-middle">
+                    <h2>{{i.title}} </h2>
+                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" *ngIf="i.description" [innerHTML]="i.description"></p>
+                </div>
+
+                <div class="slider-holder-footer">
+                    <ul>
+                        <li [ngClass]="{'itemLiked': i.isFavourite}">
+                            <a (click)="liked(i)">
+                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>
+                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>
+                            </a>
+                        </li>
+                        <li *ngIf="shouldHideSocialShare == false">
+                            <a (click)="openShareModal(targetShareRequestTag)">
+                                <ion-icon name="icon-share"></ion-icon>
+                            </a>
+                        </li>
+                        <li [ngClass]="{'itemLiked': i.isTarget}">
+                            <a (click)="setAsTarget(i, id)">
+                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>
+                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>
+                            </a>
+                        </li>
+                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">
+                            <a (click)="openLocation(i)">
+                                <ion-icon name="icon-navigation"></ion-icon>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <!--Target Achieve-->
+            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == 'A'">
+                <div class="slider-holder-top-clear app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" tappable>
+                    <div class="row slider-holder-img">
+                        <img src="{{i.img}}" alt="">
+                        <div class="special-offers" *ngIf="i.special === 'Y'">
+                            <ion-icon name="star"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content" [ngClass]="{'col-xs-9': i.myTarget != null}">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}</h3>
+                                        <h4>{{i.location}}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3" *ngIf="i.myTarget != null">
+                                    <div class="position-relative rounded-progress-position">
+                                        <div class="" [@visibilityChanged]="i.isSlidActive">
+                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                                [clockwise]="clockwise">
+                                            </round-progress>
+                                            <h6>{{i.myTarget}}%</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-holder-middle">
+                    <h2>{{i.title}} </h2>
+                    <div class="user-target-card-holder">
+                        <div class="congratulations -template-4">
+                            <h3>{{ 'CONGRATULATIONS_TARGET_ACHIEVED' | translate }}</h3>
+
+                            <h2>
+                                <ion-icon name="icon-check"></ion-icon>
+                            </h2>
+                            <h6>
+                                <ion-icon name="calendar"></ion-icon>
+                                {{i.targetEndDateString}}
+                                <span></span>
+                                <ion-icon name="flag"></ion-icon>
+                                {{i.points}} {{ languageConstants.POINTS | translate }}
+                            </h6>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="slider-holder-footer">
+                    <ul>
+                        <li *ngIf="shouldHideSocialShare == false">
+                            <a (click)="openShareModal(targetShareRequestTag)">
+                                <ion-icon name="icon-share"></ion-icon>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <!--Target Expired-->
+            <div class="swiper-slide-big-holder -target-expired-image" *ngIf="i.targetStatus == 'E'">
+                <div class="slider-holder-top-clear app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" tappable>
+                    <div class="row slider-holder-img">
+                        <img src="{{i.img}}" alt="">
+                        <div class="special-offers" *ngIf="i.special === 'Y'">
+                            <ion-icon name="star"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}</h3>
+                                        <h4>{{i.location}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-holder-middle">
+                    <h2>{{i.title}} </h2>
+
+                    <div class="user-target-card-holder">
+                        <div class="congratulations -template-4">
+                            <h3>{{ 'EXPIRED' | translate }}</h3>
+                            <h2>
+                                <ion-icon name="close-circle"></ion-icon>
+                            </h2>
+                            <h6>
+                                <ion-icon name="calendar"></ion-icon>
+                                {{i.targetEndDateString}}
+                                <span></span>
+                                <ion-icon name="flag"></ion-icon>
+                                {{i.points}} {{ languageConstants.POINTS | translate }}
+                            </h6>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="slider-holder-footer">
+                    <ul>
+                        <li *ngIf="shouldHideSocialShare == false">
+                            <a (click)="openShareModal(targetShareRequestTag)">
+                                <ion-icon name="icon-share"></ion-icon>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </ion-slide>
+    <div class="swiper-slide swiper-slide-big my-targets" *ngIf="personalTargetData && (personalTargetData.length > 0)">
+
+        <component-personal-target [personalTargetData]="personalTargetData"></component-personal-target>
+    </div>
+</ion-slides>
+
+
+<ion-slides class="swiper-container custom c" *ngIf="showTemplate == 5" #usefulSwiperTemplate5>
+    <div class="swiper-wrapper">
+
+
+        <div class="add-new-target-profile" *ngIf="!data || data.length == 0" (click)="setTarget()" tappable>
+
+            <h3>
+                <ion-icon name="ios-add-circle-outline"></ion-icon>
+                <span>{{'CREATE_PERSONAL_GOAL' | translate }}</span>
+            </h3>
+
+        </div>
+
+        <ion-slide class="swiper-slide" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">
+
+
+            <!--OFFER BASED -->
+            <div *ngIf="i.offerId != 0">
+                <!--<div *ngIf="i.offerId != 0">-->
+
+                <!--Target In Progress-->
+                <div class="slider-holder app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, index)"
+                    *ngIf="i.targetStatus == '' || i.targetStatus == 'I'" tappable>
+
+                    <div class="row slider-holder-img">
+                        <img src="{{i.img}}" alt="">
+                        <div class="special-offers" *ngIf="i.special === 'Y'">
+                            <ion-icon name="star"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content" [ngClass]="{'col-xs-9': i.myTarget != null}">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}
+                                            <span *ngIf="i.location"> - {{i.location}}</span>
+                                        </h3>
+                                        <h4>{{i.title}}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3" *ngIf="i.myTarget != null">
+                                    <div class="position-relative rounded-progress-position">
+                                        <div class="" [@visibilityChanged]="i.isSlidActive">
+                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                                [clockwise]="clockwise">
+                                            </round-progress>
+                                            <h6>{{i.myTarget}}%</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Target Achieved-->
+                <div class="slider-holder-target app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, id)"
+                    tappable *ngIf="i.targetStatus == 'A'">
+                    <div class="row slider-holder-img -target-completed">
+                        <div class="user-target-card-holder">
+                            <div class="congratulations">
+                                <h3>{{ 'CONGRATULATIONS_TARGET_ACHIEVED' | translate }}</h3>
+
+                                <h2>
+                                    <ion-icon name="icon-check"></ion-icon>
+                                </h2>
+                                <h6>
+                                    <ion-icon name="calendar"></ion-icon>
+                                    {{i.targetEndDateString}}
+                                    <span></span>
+                                    <ion-icon name="flag"></ion-icon>
+                                    {{i.points}} {{ languageConstants.POINTS | translate }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}
+                                            <span *ngIf="i.location"> - {{i.location}}</span>
+                                        </h3>
+                                        <h4>{{i.title}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Target Expired-->
+                <div class="slider-holder-target app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, id)"
+                    tappable *ngIf="i.targetStatus == 'E'">
+
+                    <div class="row slider-holder-img -target-expired-image" [style.background-image]="'url(' + i.img + ')'">
+                        <div class="user-target-card-holder">
+                            <div class="congratulations">
+                                <h3>Expired</h3>
+                                <h2>
+                                    <ion-icon name="close-circle"></ion-icon>
+                                </h2>
+                                <h6>
+                                    <ion-icon name="calendar"></ion-icon>
+                                    {{i.targetEndDateString}}
+                                    <span></span>
+                                    <ion-icon name="flag"></ion-icon>
+                                    {{i.points}} {{ languageConstants.POINTS | translate }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo">
+                                        <img [src]="i.logo" alt="" />
+                                        <h3>{{i.name}}
+                                            <span *ngIf="i.location"> - {{i.location}}</span>
+                                        </h3>
+                                        <h4>{{i.title}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--NOT OFFER BASED -->
+            <div *ngIf="i.offerId == 0">
+
+                <!--Target In Progress-->
+                <div class="slider-holder-target app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, id)"
+                    tappable *ngIf="i.targetStatus == '' || i.targetStatus == 'I'">
+                    <div class="row slider-holder-img personal-targets-item">
+                        <div class="round-progress-holder">
+                            <div class="_round-progress">
+                                <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"
+                                    [clockwise]="clockwise">
+                                </round-progress>
+                                <h6>{{i.myTarget}}%</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo -icon-user">
+                                        <ion-icon name="icon-user"></ion-icon>
+                                        <h3>{{i.title}}</h3>
+                                        <h4>{{i.targetEndDateString}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!--Target Achieved-->
+                <div class="slider-holder-target app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, id)"
+                    tappable *ngIf="i.targetStatus == 'A'">
+                    <div class="row slider-holder-img -target-completed">
+                        <div class="user-target-card-holder">
+                            <div class="congratulations">
+                                <h3>{{ 'CONGRATULATIONS_TARGET_ACHIEVED' | translate }}</h3>
+
+                                <h2>
+                                    <ion-icon name="icon-check"></ion-icon>
+                                </h2>
+                                <h3>{{i.name}}</h3>
+                                <h6>
+                                    <ion-icon name="calendar"></ion-icon>
+                                    {{i.targetEndDateString}}
+                                    <span></span>
+                                    <ion-icon name="flag"></ion-icon>
+                                    {{i.points}} {{ languageConstants.POINTS | translate }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo -icon-user">
+                                        <ion-icon name="icon-user"></ion-icon>
+                                        <h3>{{i.title}}</h3>
+                                        <h4>{{i.targetEndDateString}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Target Expired-->
+                <div class="slider-holder-target app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'" (click)="goToPage(data, id)"
+                    tappable *ngIf="i.targetStatus == 'E'">
+                    <div class="row slider-holder-img -target-expired">
+                        <div class="user-target-card-holder">
+                            <div class="congratulations">
+                                <h3>{{ 'EXPIRED' | translate }}</h3>
+                                <h2>
+                                    <ion-icon name="close-circle"></ion-icon>
+                                </h2>
+                                <h3>{{i.name}}</h3>
+                                <h6>
+                                    <ion-icon name="calendar"></ion-icon>
+                                    {{i.targetEndDateString}}
+                                    <span></span>
+                                    <ion-icon name="flag"></ion-icon>
+                                    {{i.points}} {{ languageConstants.POINTS | translate }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row slider-holder-content">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="strip-logo-content">
+                                    <div class="card-logo -icon-user">
+                                        <ion-icon name="icon-user"></ion-icon>
+                                        <h3>{{i.title}}</h3>
+                                        <h4>{{i.targetEndDateString}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </ion-slide>
+    </div>
+</ion-slides>

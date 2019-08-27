@@ -1,0 +1,242 @@
+miles-calculator-page {
+
+    .content-ios, .content-md {
+        background-color: #fff;
+    }
+
+    .back-button-text {
+        display: none;
+    }
+
+    .swiper-template-1 {
+        margin-bottom: 1rem;
+        .slider-holder {
+            position: relative;
+            background-size: cover;
+            height: 75px;
+            width: 100%;
+            max-width: 100%;
+            max-height: 75px;
+            background-color: $defaultThemeColor;
+            box-shadow: 2px 3px 7px -3px rgba(0, 0, 0, 0.75);
+            margin: .5rem;
+            &:before {
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, .6);
+                position: absolute;
+                content: '';
+                left: 0;
+                top: 0;
+                z-index: 0;
+            }
+
+            &.industry-all {
+                &:before {
+                    display: none;
+                }
+            }
+
+        }
+
+        .industryTypeSelected {
+            border: 1px solid $check-box-background;
+        }
+
+        .slider-content {
+
+            position: absolute;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+
+            display: -webkit-flex;
+            display: flex;
+
+            -webkit-flex-direction: row;
+            flex-direction: row;
+
+            -webkit-flex-wrap: wrap;
+            flex-wrap: wrap;
+
+            -webkit-justify-content: center;
+            justify-content: center;
+
+            -webkit-align-content: stretch;
+            align-content: stretch;
+
+            -webkit-align-items: center;
+            align-items: center;
+
+            span {
+                text-align: center;
+                font-size: 1rem;
+                z-index: 1;
+                position: relative;
+                font-weight: 400;
+                color: #fff;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                flex: 0 1 auto;
+                -webkit-flex: 0 1 auto;
+
+                -webkit-order: 0;
+                order: 0;
+                -webkit-align-self: center;
+                align-self: center;
+            }
+
+            h5 {
+                display: inline-block;
+            }
+        }
+
+        $curve: cubic-bezier(0.650, 0.000, 0.450, 1.000);
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: $check-box-background;
+            fill: none;
+            animation: stroke .6s $curve forwards;
+        }
+
+        .checkmark {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            position: absolute;
+            bottom: 2px;
+            left: 3px;
+            margin: 0 auto;
+            box-shadow: inset 0px 0px 0px $check-box-background;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke .3s $curve .8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.2, 1.2, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0 0 0 30px $check-box-background;
+            }
+        }
+    }
+
+    .user-form {
+
+        .segment-ios .segment-button, .segment-md .segment-button {
+            border-color: $themeColorPrimary;
+            color: $themeColorPrimary;
+        }
+
+        .segment-md .segment-button {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-ios .segment-button.segment-activated, .segment-md .segment-button.segment-activated {
+            background-color: $themeColorPrimary;
+            color: #fff;
+        }
+
+        .location-finder-input {
+            margin: 2rem 0;
+            input {
+                width: 100%;
+                padding: 1rem;
+                border: 1px solid #bbb;
+                font-size: 1.5rem;
+            }
+        }
+
+        .list-ios > .item-block:first-child {
+            border-top: 0px !important;
+        }
+
+        //.list-ios > .item-block:last-child {
+        //    border-bottom: 0px !important;
+        //}
+
+        //.list-md .item-input:last-child {
+        //    border-bottom: 0px !important;
+        //    box-shadow: none !important;
+        //}
+
+        .list-md .item-inner {
+            border-bottom: 1px solid #bbb !important;
+            box-shadow: none !important;
+        }
+
+        .item-ios, .item-md, .item-ios.item-label-stacked .text-input, .item-ios.item-label-floating .text-input {
+            font-size: 1.5rem;
+            padding-left: 0;
+        }
+
+        .item-ios, .item-md {
+            margin-top: 1rem;
+        }
+    }
+
+    .submit-btn {
+        background: $submitButtonColor;
+        border: 1px solid $submitButtonColor;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .submit-btn.button-ios.activated, .submit-btn.button-md.activated {
+        background: darken($submitButtonColor, 10%);
+        border: 1px solid darken($submitButtonColor, 10%);
+    }
+
+    table {
+        width: 100%;
+        margin-bottom: 2rem;
+
+        th, td {
+            border: 1px solid $themeColorPrimary;
+            border-collapse: collapse;
+            padding: 1.5rem;
+            font-size: 1.3rem;
+            color: $themeColorPrimary;
+        }
+
+        tr:first-child {
+            td {
+                background-color: $themeColorPrimary;
+                color: #fff;
+            }
+        }
+
+        tr {
+            td:last-child {
+                text-align: center;
+            }
+        }
+    }
+}

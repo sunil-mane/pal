@@ -1,0 +1,104 @@
+<ion-header class="header-dark" no-border>
+
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>{{appDisplayName}}</ion-title>
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()">
+                <span class="spin-animation">
+                    <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                </span>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content no-bounce>
+    <div class="header-container" no-bounce>
+        <!--header card -->
+        <login-component *ngIf="!memberInfo"></login-component>
+        <loggedin-component *ngIf="memberInfo" [data]="memberInfo">
+        </loggedin-component>
+        <!--header card end here-->
+    </div>
+
+
+    <!--<ion-title>{{ 'HOME.TITLE' |  translate:param }}</ion-title>-->
+    <!--Content Area start-->
+    <div class="contain-area " no-bounce>
+        <div class="location-finder">
+            <div class="location-finder-input" (click)="doLocationSearch()" *ngIf="userLocationFinderStatus">
+                <div *ngIf="selectedLocationObj && selectedLocationObj.formatted_address">
+                    {{selectedLocationObj.formatted_address}}
+                </div>
+                <div *ngIf="!selectedLocationObj || !selectedLocationObj.formatted_address">
+                    {{ 'PLEASE_SELECT_YOUR_LOCATION' | translate }}
+                </div>
+            </div>
+
+            <div class="location-finder-input location-finder-dot" *ngIf="!userLocationFinderStatus">
+                <ion-spinner name="dots"></ion-spinner>
+            </div>
+
+            <div class="location-finder-button">
+                <button (click)="findMyCurrentLocation()" *ngIf="userLocationFinderStatus">
+                    <ion-icon name="navigate"></ion-icon>
+                </button>
+
+                <div class="spinner-holder" *ngIf="!userLocationFinderStatus">
+                    <ion-spinner></ion-spinner>
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <h2 class="title" *ngIf="nearByOffersData && nearByOffersData.length > 0">
+            {{ 'NEAR_ME_OFFERS' | translate }}
+        </h2>
+        <component-swiper *ngIf="nearByOffersData && nearByOffersData.length > 0"
+                          [data]="nearByOffersData"
+                          [showTemplate]="1"
+        >
+        </component-swiper>
+
+
+        <h2 class="title"
+            *ngIf="nearByParnersData && nearByParnersData.length > 0">
+            {{ 'NEAR_ME_STORES' | translate }}
+        </h2>
+        <component-swiper *ngIf="nearByParnersData && nearByParnersData.length > 0"
+                          [data]="nearByParnersData"
+                          [showTemplate]="3">
+        </component-swiper>
+
+
+        <h2 class="title"
+            *ngIf="recomOffersData && recomOffersData.length > 0">
+            {{ 'RECOMMENDED_OFFERS' | translate }}
+        </h2>
+        <component-swiper *ngIf="recomOffersData && recomOffersData.length > 0"
+                          [data]="recomOffersData"
+                          [showTemplate]="1">
+        </component-swiper>
+
+
+        <h2 class="title"
+            *ngIf="partnersData && partnersData.length > 0">
+            {{ 'FEATURED_PARTNERS' | translate }}
+        </h2>
+        <div class="card-holder"
+             *ngIf="partnersData && partnersData.length > 0">
+            <span *ngFor="let i of partnersData">
+                <partners-card-component [data]="i"></partners-card-component>
+            </span>
+        </div>
+
+    </div>
+    <!--Content Area End-->
+</ion-content>

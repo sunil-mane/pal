@@ -1,0 +1,25 @@
+<div class="headerCard app-background-image"
+     [style.background-image]="'url(' + backgroundImageURL +')'">
+    <div class="row">
+        <div class="col-xs-7">
+            <h4>{{ languageConstants.POINTS | translate }}</h4>
+            <h3 *ngIf="shouldShowInfo === true">{{data.availableBalanceMiles | number}}</h3>
+            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>
+        </div>
+        <div class="col-xs-5" *ngIf="data.tierDescr">
+            <h4>{{ languageConstants.LEVEL | translate }}</h4>
+            <h3 *ngIf="shouldShowInfo === true">{{data.tierDescr | translate }}</h3>
+            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <h6 *ngIf="shouldShowInfo === true">
+                <span *ngIf="expiryMessage">
+                {{ expiryMessage }}
+                </span>
+            </h6>
+            <h6 *ngIf="shouldShowInfo === false">&nbsp;</h6>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="com-mercator-cordova-pushnotification"
+        version="1.0.0"
+        xmlns="http://apache.org/cordova/ns/plugins/1.0">
+  <name>com-mercator-cordova-pushnotification</name>
+  
+  <js-module src="www/push.js" name="PushNotification">
+    <clobbers target="cordova.plugins.PushNotification"/>
+  </js-module>
+
+  <engines>
+    <engine name="cordova" version=">=3.6.3"/>
+    <engine name="cordova-ios" version=">=4.1.0"/>
+  </engines>
+
+  <platform name="ios">
+
+    <config-file target="config.xml" parent="/*">
+      <feature name="PushNotification">
+        <param name="ios-package" value="PushPlugin"/>
+      </feature>
+    </config-file>
+
+    <config-file target="*-Info.plist" parent="UIBackgroundModes">
+      <array>
+        <string>remote-notification</string>
+      </array>
+    </config-file>
+
+    <source-file src="src/ios/AppDelegate+notification.m"/>
+    <source-file src="src/ios/PushPlugin.m"/>
+    <header-file src="src/ios/AppDelegate+notification.h"/>
+    <header-file src="src/ios/PushPlugin.h"/>
+
+  </platform>
+
+</plugin>

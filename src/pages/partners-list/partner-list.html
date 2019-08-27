@@ -1,0 +1,89 @@
+<ion-header class=" header-dark no-back-button-text" no-border>
+    <ion-navbar color="transparent">
+        <ion-buttons start>
+            <button menuToggle>
+                <ion-icon name="menu"></ion-icon>
+            </button>
+        </ion-buttons>
+
+        <ion-title>{{ 'PARTNER_LOCATIONS' | translate }}</ion-title>
+
+
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="openWebSite(partnerDetail)" *ngIf="partnerDetail.terms">
+                <ion-icon name="information-circle"></ion-icon>
+            </button>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()">
+                <span class="spin-animation">
+                    <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                </span>
+            </button>
+        </ion-buttons>
+
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content class="contain-area">
+
+    <div class="partners-list" [style.background-image]="'url(' + partnerDetail.partnerImagePath + ')'">
+
+        <h2> <img [src]="partnerDetail.partnerLogoPath" alt=""/></h2>
+
+        <div class="row">
+            <div class="col-xs-12" *ngIf="partnerDetail.organizationDescription">
+                <h3>{{partnerDetail.organizationDescription}}</h3>
+            </div>
+            <div class="col-xs-12" *ngIf="partnerDetail.partnerName">
+                <h3>{{partnerDetail.partnerName}}</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <h5>{{partnerDetail.offersCount}} <span>{{ 'OFFERS' | translate }}</span></h5>
+            </div>
+            <div class="col-xs-6">
+                <h5>{{partnerDetail.partnerLocationCount}} <span>{{ 'LOCATIONS' | translate }}</span></h5>
+            </div>
+        </div>
+
+        <div class="overlay-black"></div>
+    </div>
+
+
+    <div class="contain-area" padding>
+
+        <div class="search-result-status" *ngIf="!partnerLocations || (partnerLocations.length == 0)">
+            <span>{{noLocationText}}</span>
+        </div>
+        <div *ngIf="partnerLocations && (partnerLocations.length > 0)">
+            <div *ngFor="let i of partnerLocations">
+                <div class="card-item">
+                    <div class="row main-row" (click)="viewDetails(i)">
+                        <div class="col-xs-12">
+                            <div class="row small-icon">
+                                <div class="col-xs-12">
+                                    <h3>{{i.storeName}}</h3>
+                                </div>
+                                <div class="col-xs-6">
+                                    <ion-icon name="icon-offers"></ion-icon>
+                                    {{i.numberOfOffers}} {{ 'OFFERS' | translate }}
+                                </div>
+                                <div class="col-xs-6">
+                                    <ion-icon name="icon-location"></ion-icon>
+                                    {{i.distance | number}} {{ 'KM' | translate }} {{ 'APPROX' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+
+    </div>
+
+</ion-content>

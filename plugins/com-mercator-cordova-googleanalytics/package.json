@@ -1,0 +1,20 @@
+{
+  "name": "com-mercator-cordova-googleanalytics",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "com-mercator-cordova-googleanalytics",
+    "platforms": [
+      "android",
+      "ios",
+      "wp8",
+      "browser"
+    ]
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova": ">=3.0.0"
+      }
+    }
+  }
+}

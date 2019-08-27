@@ -1,0 +1,31 @@
+<ion-content class=" login-modal-small no-scroll">
+    <div class="login-box">
+        <div class="container">
+            <div style="margin-bottom:2rem;">
+                {{UpdateMessage}}
+            </div>
+            <!-- <div class="row">
+                <div class="col-xs-12">
+                    <div class="privacy-terms-checkbox">
+                        <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>
+                        <span>{{'I have read and agree with the' | translate}}
+                            <a (click)="termsConditionsTapped()">
+                                {{'Terms n Conditions' | translate}}
+                            </a> and
+                            <a (click)="privacyPolicyTapped()">
+                                {{'Privacy Policy' | translate}}
+                            </a>.
+                        </span>
+                    </div>
+                </div>
+            </div> -->
+            <div class="row">
+                <div class="col-xs-12 button-container" style="margin-top: 2rem;">
+                    <button ion-button class="submit-btn nochnageonhover" full (click)="submitButtonTapped()">
+                        {{'OK' | translate}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ion-content>

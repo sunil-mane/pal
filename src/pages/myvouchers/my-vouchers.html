@@ -1,0 +1,114 @@
+<ion-header class="header-dark  " no-border>
+    <ion-navbar>
+        <ion-title>{{ pageTitle | translate }}</ion-title>
+    </ion-navbar>
+    <div class="inline-tabs">
+        <ion-segment [(ngModel)]="activeTab">
+            <ion-segment-button value="tab01" (click)="activeTabEvent(ALL_VOUCHERS_TAB)">
+                {{ 'ALL' | translate }}
+            </ion-segment-button>
+            <ion-segment-button value="tab02" (click)="activeTabEvent(UTILIZED_VOUCHERS_TAB)">
+                {{ 'UTILIZED' | translate }}
+            </ion-segment-button>
+        </ion-segment>
+    </div>
+</ion-header>
+
+
+<ion-content class="contain-area-full" padding no-bounce>
+    <!-- <form action=".">
+            <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"
+                (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"
+                [animated]="false" [value]="" name="search">
+            </ion-searchbar>
+        </form>
+
+        <div class="margin-bottom"></div> -->
+    <div [ngSwitch]="activeTab" style="padding:0px">
+        <!--Tabs 01 start-->
+        <div class="tab01-holder " *ngSwitchCase="ALL_VOUCHERS_TAB">
+            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">
+                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>
+                <span>{{ searchNoVoucherText }}</span>
+            </div>
+            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">
+                <div *ngFor="let voucher of myVouchers">
+                    <div class="voucher" > 
+                        <div class="heading">
+                            <span class="desc">{{voucher.voucherDescription}}</span>
+                            <span class="free-space"></span>
+                            <span class="miles">-for {{ voucher.points }} miles</span>
+                        </div>
+                        <div class="margin-bottom"></div>
+                        <div style="font-size:11px;" *ngIf="voucher.issueDate">
+                            Issued on {{voucher.issueDate|date}}.
+                        </div>
+                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate&&voucher.voucherUtilized=='Y'">
+                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.
+                        </div>
+                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">
+                            Valid until {{voucher.expiryDate|date}}.
+                        </div>
+                        <div>
+                            <span style="font-size:11px;">Can be used at any location</span>
+                        </div>
+
+                    </div>
+                    <div class="voucher-strip">
+                        <div class="partner">
+                            <img [src]="voucher.partnerLogoPath" alt="" />
+                            <span>{{voucher.partnerDescription}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+        </div>
+        <div class="tab02-holder " *ngSwitchCase="UTILIZED_VOUCHERS_TAB">
+            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">
+                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>
+                <span>{{ searchNoVoucherText }}</span>
+            </div>
+            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">
+                <div *ngFor="let voucher of myVouchers">
+                    <div class="voucher">
+                        <div class="heading">
+                            <span class="desc">{{voucher.voucherDescription}}</span>
+                            <span class="free-space"></span>
+                            <span class="miles">-for {{ voucher.points }} miles</span>
+                        </div>
+                        <div class="margin-bottom"></div>
+                        <div style="font-size:11px;" *ngIf="voucher.issueDate">
+                            Issued on {{voucher.issueDate|date}}.
+                        </div>
+                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate">
+                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.
+                        </div>
+                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">
+                            Valid until {{voucher.expiryDate|date}}.
+                        </div>
+                        <div>
+                            <span style="font-size:11px;">Can be used at any location</span>
+                        </div>
+
+                    </div>
+                    <div class="voucher-strip">
+                        <div class="partner">
+                            <img [src]="voucher.partnerLogoPath" alt="" />
+                            <span>{{voucher.partnerDescription}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+        </div>
+
+    </div>
+
+</ion-content>

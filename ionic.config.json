@@ -1,0 +1,7 @@
+{
+  "name": "mEngage",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}

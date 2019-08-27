@@ -1,0 +1,72 @@
+
+component-personal-target {
+  background: $themeColorSecondary;
+  margin: 10px;
+  width: 100%;
+  height: 100%;
+
+  h3 {
+    text-align: left;
+    font-size: 1.5rem;
+    padding-left: 2rem;
+    color: #fff;
+    border-bottom: 0;
+    padding-bottom: 2rem;
+  }
+
+  .round-bar-holder {
+    display: inline-block;
+    width: 20%;
+    vertical-align: top;
+    max-width: 100px;
+    h6 {
+      margin: 0;
+    }
+  }
+  .target-text-holder {
+    display: inline-block;
+    width: 59%;
+    h4, h5 {
+      margin: 0;
+      padding: 0;
+      text-align: left;
+      font-size: 1.5rem;
+      color: #fff;
+      font-weight: 400;
+    }
+
+    h5 {
+      font-size: 1.2rem;
+      padding-top: .6rem;
+      span {
+        display: inline-block;
+        float: right;
+      }
+    }
+
+  }
+  .ellipsis-holder {
+    display: inline-block;
+    width: 10%;
+    color: #fff;
+    vertical-align: top;
+  }
+
+  .personal-targets-block{
+    height: 100%;
+  }
+  .personal-targets-holder{
+    overflow: auto;
+    height:100%;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    li {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+  }
+}

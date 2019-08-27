@@ -1,0 +1,72 @@
+.card-body {
+  padding: 1rem;
+  background: #fff;
+}
+
+.card-header-1 {
+  padding: 1rem;
+  background: #fff;
+  h2 {
+	font-weight: 400;
+	font-size: 1.8rem;
+	margin: 0;
+	color: #666666;
+	padding-top: .5rem;
+  }
+  .button[icon-only] {
+	height: auto;
+	color: $blueLight;
+  }
+
+}
+
+.date-row {
+  background: #ddd;
+  padding: 1rem;
+  font-weight: 400;
+}
+
+.data-row-recent {
+  padding: 1rem;
+  background: #fff;
+  position: relative;
+  border-bottom: 1px solid #EEEEEE;
+  .col-xs-3 {
+	position: relative;
+  }
+  .points {
+	position: absolute;
+	right: .5rem;
+	top: 30%;
+	font-size: 1.25rem;
+	font-weight: 400;
+	&.points-green {
+	  color: $PointsGreen;
+	}
+	&.points-red {
+	  color: $PointsRed;
+	}
+  }
+
+  h4, h5 {
+	margin: 0;
+	padding: 0;
+	font-weight: 400;
+  }
+  h4 {
+	font-size: 1.6rem;
+	padding: .5rem 0;
+  }
+  h5 {
+	font-size: 1.3rem;
+	font-weight: 300;
+
+  }
+
+}
+
+.small-icon {
+  .icon:before {
+	font-size: 1.5rem;
+  }
+}

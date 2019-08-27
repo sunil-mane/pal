@@ -1,0 +1,260 @@
+<div>
+
+
+    <!--Offer based targets -->
+
+    <div *ngIf="data.offerId != 0">
+
+        <!-- In progress targets -->
+        <div class="expandable-card-holder app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == '' || data.targetStatus == 'I'">
+            <div class="expandable-img-holder -card-default-background" (click)="toggle()">
+                <img src="{{data.offerBannerPath}}" alt="">
+                <div class="special-offers"  *ngIf="data.special === 'Y'">
+                    <ion-icon name="star"></ion-icon>
+                </div>
+            </div>
+            <div class="expandable-strip-holder" (click)="toggle()">
+                <div class="row">
+                    <div class="strip-logo-content col-xs-9">
+                        <div class="expandable-logo">
+                            <img [src]="data.partnerLogoPath" alt="" />
+                            <h3>{{data.partnerName}}</h3>
+                            <h4 *ngIf="data.partnerLocationCount == 'ALL'">{{ 'ALL_LOCATIONS' | translate }}</h4>
+                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != 'ALL'">
+                                {{data.partnerLocationCount}} {{ 'LOCATIONS' | translate }}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-xs-3">
+                        <div class="position-relative rounded-progress-position">
+                            <round-progress [current]="data.myTarget"
+                                            [radius]="radius"
+                                            [max]="max"
+                                            [duration]="3000"
+                                            [stroke]="4"
+                                            [responsive]="responsive"
+                                            [clockwise]="clockwise">
+                            </round-progress>
+                            <h6>{{data.myTarget}}%</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>
+                <p class="in-app-browser-anchor"
+                   onclick="onInnerHTMLTap(event)"
+                   *ngIf="data.targetDescription"
+                   [innerHTML]="data.targetDescription"></p>
+            </div>
+            <div class="expandable-footer-holder" *ngIf="visible" [@fadeInOut]>
+                <ul>
+                    <li [ngClass]="{'itemLiked': data.isFavorite === 'Y'}">
+                        <a (click)="updateOfferAsFavourite(data)">
+                            <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>
+                            <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>
+                        </a>
+                    </li>
+                    <li *ngIf="shouldHideSocialShare == false">
+                        <a (click)="openShareModal(targetShareRequestTag, '')">
+                            <ion-icon name="icon-share"></ion-icon>
+                        </a>
+                    </li>
+                    <li *ngIf="data.partnerCode">
+                        <a (click)="openLocation(data)">
+                            <ion-icon name="icon-navigation"></ion-icon>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!--Achieved target template-->
+        <div class="expandable-card-holder app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == 'A'">
+            <div class="expandable-img-holder -target-completed">
+                <div class="congratulations">
+                    <h3>{{ 'CONGRATULATIONS_TARGET_ACHIEVED' | translate }} </h3>
+                    <h2>
+                        <ion-icon name="icon-check"></ion-icon>
+                    </h2>
+                    <h6>
+                        <ion-icon name="calendar"></ion-icon>
+                        {{targetEndDateString}} <span></span>
+                        <ion-icon name="flag"></ion-icon>
+                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}
+                    </h6>
+                </div>
+            </div>
+            <div class="expandable-strip-holder">
+                <div class="row">
+                    <div class="strip-logo-content">
+                        <div class="expandable-logo">
+                            <img [src]="data.partnerLogoPath" alt="" />
+                            <h3>{{data.partnerName}}</h3>
+                            <h4 *ngIf="data.partnerLocationCount == 'ALL'">{{ 'ALL_LOCATIONS' | translate }}</h4>
+                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != 'ALL'">
+                                {{data.partnerLocationCount}} {{ 'LOCATIONS' | translate }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--Expired target template-->
+        <div class="expandable-card-holder app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == 'E'">
+            <div class="expandable-img-holder -card-default-background -target-expired -target-img-gery"
+                 [style.background-image]="'url(' + data.offerBannerPath + ')'">
+                <div class="congratulations">
+                    <h3>{{ 'EXPIRED' | translate }} </h3>
+                    <h2>
+                        <ion-icon name="close-circle"></ion-icon>
+                    </h2>
+                    <h6>
+                        <ion-icon name="calendar"></ion-icon>
+                        {{targetEndDateString}} <span></span>
+                        <ion-icon name="flag"></ion-icon>
+                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}
+                    </h6>
+                </div>
+            </div>
+            <div class="expandable-strip-holder">
+                <div class="row">
+                    <div class="strip-logo-content">
+                        <div class="expandable-logo">
+                            <img [src]="data.partnerLogoPath" alt="" />
+                            <h3>{{data.partnerName}}</h3>
+                            <h4 *ngIf="data.partnerLocationCount == 'ALL'">{{ 'ALL_LOCATIONS' | translate }}</h4>
+                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != 'ALL'">
+                                {{data.partnerLocationCount}} {{ 'LOCATIONS' | translate }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--Personal based targets -->
+
+    <div *ngIf="data.offerId == 0">
+
+        <!-- In progress targets -->
+        <div class="expandable-card-holder in-progress-targets app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == '' || data.targetStatus == 'I'">
+            <div class="expandable-img-holder" (click)="toggle()">
+                <div class="round-progress-holder">
+                    <div class="position-relative _round-progress">
+                        <round-progress
+                                [current]="data.myTarget"
+                                [radius]="radius"
+                                [max]="max"
+                                [duration]="3000"
+                                [stroke]="4"
+                                [responsive]="responsive"
+                                [clockwise]="clockwise">
+                        </round-progress>
+                        <h6>{{data.myTarget}}%</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="expandable-strip-holder" (click)="toggle()">
+                <div class="row">
+                    <div class="strip-logo-content">
+                        <div class="expandable-logo">
+                            <ion-icon name="icon-user"></ion-icon>
+                            <h3>{{data.targetName}}</h3>
+                            <h4>{{targetEndDateString}}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="expandable-footer-holder" *ngIf="visible && shouldHideSocialShare == false" [@fadeInOut]>
+                <ul>
+                    <li *ngIf="shouldHideSocialShare == false">
+                        <a (click)="openShareModal(targetShareRequestTag, '')">
+                            <ion-icon name="icon-share"></ion-icon>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!--Achieved target template-->
+        <div class="expandable-card-holder app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == 'A'">
+            <div class="expandable-img-holder -target-completed">
+                <div class="congratulations">
+                    <h3>{{ 'CONGRATULATIONS_TARGET_ACHIEVED' | translate }} </h3>
+                    <h2>
+                        <ion-icon name="icon-check"></ion-icon>
+                    </h2>
+                    <h6>
+                        <ion-icon name="calendar"></ion-icon>
+                        {{targetEndDateString}} <span></span>
+                        <ion-icon name="flag"></ion-icon>
+                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}
+                    </h6>
+                </div>
+            </div>
+            <div class="expandable-strip-holder" (click)="toggle()">
+                <div class="row">
+                    <div class="strip-logo-content">
+                        <div class="expandable-logo">
+                            <ion-icon name="icon-user"></ion-icon>
+                            <h3>{{data.targetName}}</h3>
+                            <h4>{{targetEndDateString}}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--Expired target template-->
+        <div class="expandable-card-holder app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'"
+             *ngIf="data.targetStatus == 'E'">
+            <div class="expandable-img-holder -target-expired">
+                <div class="congratulations">
+                    <h3>{{ 'EXPIRED' | translate }} </h3>
+                    <h2>
+                        <ion-icon name="close-circle"></ion-icon>
+                    </h2>
+                    <h6>
+                        <ion-icon name="calendar"></ion-icon>
+                        {{targetEndDateString}} <span></span>
+                        <ion-icon name="flag"></ion-icon>
+                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}
+                    </h6>
+                </div>
+            </div>
+            <div class="expandable-strip-holder" (click)="toggle()">
+                <div class="row">
+                    <div class="strip-logo-content">
+                        <div class="expandable-logo">
+                            <ion-icon name="icon-user"></ion-icon>
+                            <h3>{{data.targetName}}</h3>
+                            <h4>{{targetEndDateString}}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

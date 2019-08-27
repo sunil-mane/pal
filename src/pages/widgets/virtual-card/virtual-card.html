@@ -1,0 +1,37 @@
+<div class="flip-container" [ngClass]="{'flip':  isFrontVisible }" *ngIf="data">
+
+    <div class="spinner-holder-virtual-card" *ngIf="shouldDisplayIndicator == true">
+        <ion-spinner ></ion-spinner>
+    </div>
+
+    <div class="flipper" *ngIf="shouldDisplayCard == true">
+        <div class="card-holder-wallet">
+            <div class="front" (pan)="swipeEvent($event)">
+                <img [src]="cardFront" class="front-card-img"/>
+                <div class="front-card-details virtual-card-style-PAL">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h3>
+                                {{memberInfo.preferredCardName}}
+                            </h3>
+                        </div>
+
+                        <div class="col-xs-5" *ngIf="memberInfo.activeCardNo">
+                            <h3>
+                                {{memberInfo.activeCardNo}}
+                            </h3>
+                        </div>
+                        <div class="col-xs-7" *ngIf="cardExpiryDate">
+                            <h3 class="valid-thru">
+                                Valid Thru {{cardExpiryDate | date: 'MMM yyyy'}}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="back" *ngIf="cardBack" (pan)="swipeEvent($event)">
+                <img [src]="cardBack" class="front-card-img"/>
+            </div>
+        </div>
+    </div>
+</div>

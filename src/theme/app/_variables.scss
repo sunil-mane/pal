@@ -1,0 +1,68 @@
+
+$defaultThemeColor:#182534!default
+$defaultThemeColorSecondary: #00AEEF!default;
+$tabFooterActive: #00AEEF!default;
+$sideMenuBg: #131B26!default;
+$sideMenuTextColor: #95989A!default;
+$profile-header-color:#344356!default;
+$homeHeaderCardTextInfo: #fff14d!default;
+
+
+
+// Import main theme color schema
+//
+
+@import "../../../theme-config.scss";
+$defaultThemeColor: $themeColorPrimary;
+$defaultThemeColorSecondary: $themeColorSecondary;
+
+
+
+
+$text-color: #000;
+$text-color-dark-blue: $defaultThemeColor;
+$background-color: #fff;
+
+$homeHeaderCardBg: $defaultThemeColor;
+$homeHeaderCardTextLight: #bec1c6;
+$homeHeaderCardTextInfo: $home-header-card-text-info;
+$colorGold: #a69968;
+$ContentAreaBg: #eee;
+$text-light-gry: #95989A;
+$text-color-light-blue: #00AEEF;
+
+//button
+$buttonBlueLight: #00AEEF;
+
+//color
+$blueDark: #001871;
+$blueLight: #184CAD;
+
+//side menu182534
+$sideMenuBg: $side-menu-background;
+$sideMenuTextColor: $side-menu-text-color;
+
+//tab
+$tabFooterBg: $defaultThemeColor;
+$tabFooterActive: $footer-icon-color-active;
+
+//points
+$PointsGreen: #66C119;
+$PointsRed: #BF0D0D;
+
+//dark body color
+$dark-body-color: $defaultThemeColor ;
+
+//profile
+$profile-header-color:	$profile-header-background;
+
+//personal target expired color
+$personal-target-expired-color: #626262;
+
+//personal target color
+$personal-target-color: $text-color-dark-blue;
+
+//check box background
+$check-box-background: $PointsGreen;
+
+$no-image-background : #f1f1f1;

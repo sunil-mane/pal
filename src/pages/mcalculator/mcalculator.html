@@ -1,0 +1,170 @@
+<ion-header class="header-dark offer-popup-content">
+    <ion-navbar #navBar>
+
+        <ion-title>
+            <span>Miles Calculator</span>
+        </ion-title>
+
+    </ion-navbar>
+</ion-header>
+<ion-content padding>
+    <div *ngIf="shouldShowResults != true">
+
+        <!--<ion-slides class=" swiper-template-1 "  [slidesPerView]="3" [spaceBetween]="10">-->
+            <!--<div class="swiper-wrapper">-->
+                <!--<ion-slide class="swiper-slide" *ngFor="let i of industryTypes">-->
+
+                    <!--<div class="slider-holder "-->
+
+                         <!--[ngClass]="{'industry-all': i.code === INDUSTRY_TYPE_DEFAULT_CODE}"-->
+                         <!--[style.background-image]="'url(' + i.logoPath + ')'"-->
+                         <!--(click)="selectIndustryType(i)">-->
+
+                        <!--<svg class="checkmark"-->
+                             <!--xmlns="http://www.w3.org/2000/svg"-->
+                             <!--*ngIf="i.code === selectIndustryTypeCode"-->
+                             <!--viewBox="0 0 52 52">-->
+                            <!--<circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>-->
+                            <!--<path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>-->
+                        <!--</svg>-->
+
+                        <!--<div class="slider-content">-->
+                            <!--<span>{{i.description}}</span>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                <!--</ion-slide>-->
+            <!--</div>-->
+        <!--</ion-slides>-->
+
+        <div class="user-form">
+            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()">
+                <ion-list>
+                    <ion-segment name="tripType"
+                                 id="tripType"
+                                 [(ngModel)]="selectedTripType"
+                                 required>
+                        <ion-segment-button value="{{TRIP_TYPE_ONEWAY}}">
+                            One Way
+                        </ion-segment-button>
+                        <ion-segment-button value="{{TRIP_TYPE_RETURN}}">
+                            Return
+                        </ion-segment-button>
+                    </ion-segment>
+                    <div class="location-finder-input">
+                        <ng2-completer type="search"
+                                       placeholder="{{'From' | translate}}"
+                                       [textNoResults]="textNoResults"
+                                       [textSearching]="textSearching"
+                                       [(ngModel)]="fromText"
+                                       [datasource]="dataServiceFrom"
+                                       [minSearchLength]="3"
+                                       [pause]="1000"
+                                       [ngModelOptions]="{standalone: true}"
+                                       (selected)="itemSelected($event)">
+                        </ng2-completer>
+                    </div>
+                    <div class="location-finder-input">
+                        <ng2-completer type="search"
+                                       placeholder="{{'To' | translate}}"
+                                       [textNoResults]="textNoResults"
+                                       [textSearching]="textSearching"
+                                       [(ngModel)]="toText"
+                                       [datasource]="dataServiceTo"
+                                       [minSearchLength]="3"
+                                       [pause]="1000"
+                                       [ngModelOptions]="{standalone: true}"
+                                       (selected)="itemSelected($event)">
+                        </ng2-completer>
+                    </div>
+                    <ion-item>
+                        <ion-label class="required-field">Start Date</ion-label>
+                        <ion-datetime displayFormat="DD MMMM YYYY"
+                                      [min]="minDate"
+                                      [max]="maxDate"
+                                      [(ngModel)]="startDateText"
+                                      [cancelText]="cancelText"
+                                      [doneText]="selectText"
+                                      [monthNames]="months"
+                                      name="startDateText"
+                                      id="startDateText"
+                                      required>
+                        </ion-datetime>
+                    </ion-item>
+                    <ion-item *ngIf="selectedTripType == TRIP_TYPE_RETURN">
+                        <ion-label class="required-field">End Date</ion-label>
+                        <ion-datetime displayFormat="DD MMMM YYYY"
+                                      [min]="minDate"
+                                      [max]="maxDate"
+                                      [(ngModel)]="endDateText"
+                                      [cancelText]="cancelText"
+                                      [doneText]="selectText"
+                                      [monthNames]="months"
+                                      name="endDateText"
+                                      id="endDateText"
+                                      required>
+                        </ion-datetime>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Class</ion-label>
+                        <ion-select cancelText="{{'CANCEL' | translate}}"
+                                    okText="{{'SELECT' | translate}}"
+                                    [(ngModel)]="selectedClassObj"
+                                    name="classText"
+                                    id="classText"
+                                    required>
+                            <ion-option *ngFor="let item of classList"
+                                        [value]="item"
+                                        [selected]="selectedClassObj && (item == selectedClassObj)">
+                                {{item}}
+                            </ion-option>
+                        </ion-select>
+                    </ion-item>
+                </ion-list>
+                <div class="row">
+                    <div class="col-xs-12 button-container">
+                        <button ion-button full class="submit-btn" type="submit">
+                            <span>Calculate</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div *ngIf="shouldShowResults == true">
+        <table>
+            <tr>
+                <td>YOU WOULD EARN</td>
+                <td>MILES</td>
+            </tr>
+            <tr>
+                <td>Economy Deal (T,E)</td>
+                <td>805</td>
+            </tr>
+            <tr>
+                <td>Economy Saver (G,U,V)</td>
+                <td>1609</td>
+            </tr>
+            <tr>
+                <td>Economy Classic (L,Q,M,K)</td>
+                <td>2414</td>
+            </tr>
+            <tr>
+                <td>Economy Flex (H,B,Y)</td>
+                <td>3218</td>
+            </tr>
+        </table>
+        <div class="row">
+            <div class="col-xs-12 button-container">
+                <button ion-button full class="submit-btn" (click)="modifyTapped()">
+                    <span>{{ "Want to re-calculate?" | translate }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <ion-fab right bottom mini #fab *ngIf="shouldShowResults != true">
+        <button ion-fab color="light" (click)="doFilter(fab)">
+            <ion-icon name="color-filter"></ion-icon>
+        </button>
+    </ion-fab>
+</ion-content>

@@ -1,0 +1,14 @@
+<ion-content class="no-scroll app-background-image"
+             [style.background-image]="'url(' + backgroundImageURL +')'">
+
+
+    <button  class="button-transparent button-full-screen" (click)="dismiss()" >
+        <ion-icon name="close"></ion-icon>
+    </button>
+
+    <virtual-card-component *ngIf="shouldDisplayCard"
+                            [isFrontVisible]="isFrontVisible"
+                            (changeIsFrontVisible)="isFrontVisibleChanged($event)">
+    </virtual-card-component>
+
+</ion-content>

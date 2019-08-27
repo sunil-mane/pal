@@ -1,0 +1,41 @@
+<ion-content padding>
+    <h3>
+        More Options
+        <ion-icon name="close-circle" icon-right (click)="dismiss(null)"></ion-icon>
+    </h3>
+    <ion-list>
+        <ion-segment class="margin-top-2rem" name="milesType"
+                     id="milesType"
+                     [(ngModel)]="selectedMilesType"
+                     required>
+            <ion-segment-button value="{{MILES_TYPE_EARN}}">
+                Earn
+            </ion-segment-button>
+            <ion-segment-button value="{{MILES_TYPE_BURN}}">
+                Burn
+            </ion-segment-button>
+        </ion-segment>
+        <ion-item>
+            <ion-label>Promotion Code</ion-label>
+            <ion-input type="text"
+                       [(ngModel)]="promoText"
+                       name="promoText"
+                       id="promoText"
+                       spellcheck="false"
+                       autocapitalize="none"
+                       minlength="1"
+                       maxlength="20"
+                       placeholder="---------"
+                       pattern="">
+            </ion-input>
+        </ion-item>
+    </ion-list>
+    <div class="row">
+        <div class="col-xs-12 button-container">
+            <button #submitButton1 ion-button full class="submit-btn" (click)="saveFilters()">
+                <span>Done</span>
+            </button>
+        </div>
+    </div>
+
+</ion-content>

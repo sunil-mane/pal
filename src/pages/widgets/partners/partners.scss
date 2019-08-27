@@ -1,0 +1,34 @@
+partners-card-component {
+
+  .image-holder-logo {
+    position: relative;
+    background-size: 100% auto;
+    height: 100%;
+    width: 100%;
+    max-height: 70px;
+    max-width: 70px;
+    background-repeat: no-repeat;
+    background-position-x: inherit;
+    background-position: center center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    -webkit-flex-direction: column;
+    -webkit-justify-content: center;
+
+    img {
+      width: 100%;
+      //position: absolute;
+      flex-wrap: nowrap;
+      flex-basis: auto;
+      justify-content: center;
+      left: 0;
+    }
+  }
+
+  .col-xs-6 {
+    font-size: 1.3rem;
+  }
+}

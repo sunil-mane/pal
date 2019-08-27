@@ -1,0 +1,48 @@
+.button-clear-white-border {
+  border: 1px solid #fff;
+  background: transparent;
+}
+
+.button-clear-blue-border {
+  border: 1px solid $blueDark;
+  background: transparent;
+}
+
+button.button-blue {
+
+  background-color: $defaultThemeColor;
+  border: 1px solid $defaultThemeColor;
+}
+
+.button-rounded {
+  padding: .8rem 2.2rem;
+  border-radius: 20px;
+
+}
+
+.button-right {
+  text-align: right;
+  float: right;
+}
+
+button.icon-back,
+button.icon-back.activated {
+  background: inherit;
+  font-size: 3rem;
+  line-height: 1rem;
+  padding: 0 2rem;
+  height: auto;
+}
+
+.button-icon-right {
+  text-align: right;
+  float: right;
+}
+
+.button-icon-transparent {
+  background: transparent;
+}
+
+button.button-md-transparent{
+  box-shadow: none;
+}

@@ -1,0 +1,65 @@
+///*p {
+//  @include font-size(14px)
+//}
+//
+//Output
+//p {
+//  font-size: 14px; //Will be overridden if browser supports rem
+//  font-size: 0.8rem;
+//}
+//*/
+
+@function calculateRem($size) {
+  $remSize: $size / 16px;
+  @return $remSize * 1rem;
+}
+
+@mixin transitions($args) {
+  -webkit-transition: $args;
+  -moz-transition: $args;
+  -ms-transition: $args;
+  -o-transition: $args;
+  transition: $args;
+}
+
+@mixin vendor-prefix($name, $value) {
+  @each $vendor in ('-webkit-', '-moz-', '-ms-', '-o-', '') {
+    #{$vendor}#{$name}: #{$value};
+  }
+}
+
+//@mixin orientation-lock(){
+//  //its kind for hack to orientation lock
+//  @media (orientation: landscape) {
+//
+//    @content;
+//      -webkit-transform: rotate(-90deg);
+//      -moz-transform: rotate(-90deg);
+//      -o-transform: rotate(-90deg);
+//      -ms-transform: rotate(-90deg);
+//      transform: rotate(-90deg);
+//    transform-origin: left top;
+//
+//  }
+//}
+
+
+///**
+//this can be use as below
+//@include makeIcon(icon-share, '\e900')
+//
+// */
+
+@mixin makeIcon($arg, $val) {
+  .ion-ios-#{$arg}:before ,
+  .ion-ios-#{$arg}-circle:before ,
+  .ion-ios-#{$arg}-circle-outline:before ,
+  .ion-ios-#{$arg}-outline:before ,
+  .ion-md-#{$arg}:before ,
+  .ion-md-#{$arg}-circle:before ,
+  .ion-md-#{$arg}-circle-outline:before ,
+  .ion-md-#{$arg}-outline:before  {
+    content: $val;
+    font-size: 26px;
+  }
+}

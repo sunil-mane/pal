@@ -1,0 +1,48 @@
+login-component {
+
+	.headerCard{
+		background: $homeHeaderCardBg;
+		padding: 0.1rem 2rem;
+
+		h2{
+			font-weight: 400;
+			color: #fff;
+			font-size: 1.7rem;
+			margin-top: 3.5rem;
+			text-shadow: 1px 0.5px 1px #000;
+		}
+	}
+
+	.headerCard.login {
+		background-size: cover;
+		background-repeat: no-repeat;
+		background-position: right bottom;
+		width: 100%;
+		min-height: 250px;
+		position: relative;
+	}
+
+	.row {
+		z-index: 1;
+		position: relative;
+		text-align: center;
+		margin-right: 40%;
+
+		.login-button {
+			padding: 1rem 4rem;
+			color: #fff;
+			border-radius: 5rem;
+			font-size: 1.5rem;
+			margin-top: 3rem;
+			text-shadow: 1px 0.5px 1px #000;
+			box-shadow: 1px 0.5px 1px #000;
+		}
+
+		.register-button {
+			color: #fff;
+			font-size: 1rem;
+			margin-bottom: 3rem;
+			text-shadow: 1px 0.5px 1px #000;
+		}
+	}
+}

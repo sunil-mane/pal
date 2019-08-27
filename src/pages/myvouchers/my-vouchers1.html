@@ -1,0 +1,54 @@
+<ion-header class="header-dark  " no-border>
+    <ion-navbar>
+        <ion-title>{{ pageTitle | translate }}</ion-title>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content class="contain-area-full" padding no-bounce>
+        <!-- <form action=".">
+            <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"
+                (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"
+                [animated]="false" [value]="" name="search">
+            </ion-searchbar>
+        </form>
+
+        <div class="margin-bottom"></div> -->
+        <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">
+            <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>
+            <span>{{ searchNoVoucherText }}</span>
+        </div>
+        <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">
+            <div *ngFor="let voucher of myVouchers">
+                <div class="voucher">
+                    <div class="heading">
+                        <span class="desc">{{voucher.voucherDescription}}</span>
+                        <span class="free-space"></span>
+                        <span class="miles">-for {{ voucher.points }} miles</span>
+                    </div>
+                    <div class="margin-bottom"></div>
+                    <div style="font-size:11px;" *ngIf="voucher.expiryPeriod">
+                        Valid for {{voucher.expiryPeriod}} months.
+                    </div>
+                    <div>
+                         <span style="font-size:11px;">Can be used at any location</span>
+                    </div>
+                    
+                </div>
+                <div class="voucher-strip" >
+                    <div class="partner">
+                        <img [src]="voucher.partnerLogoPath" alt="" />
+                        <span>{{voucher.partnerDescription}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                <ion-infinite-scroll-content></ion-infinite-scroll-content>
+            </ion-infinite-scroll>
+        </div>
+
+    <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+</ion-content>

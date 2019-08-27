@@ -1,0 +1,74 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-device": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-globalization": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-statusbar": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "ionic-plugin-keyboard": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-appversion": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-ionic-webview": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-x-socialsharing": {
+      "ANDROID_SUPPORT_V4_VERSION": "24.1.1+",
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-network-information": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-safariviewcontroller": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-inappbrowser": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-local-notification": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-geolocation": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "com-mercator-cordova-fcm": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "com-mercator-cordova-googleanalytics": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "com-mercator-cordova-pushnotification": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    }
+  },
+  "dependent_plugins": {
+    "es6-promise-plugin": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    },
+    "cordova-plugin-badge": {
+      "PACKAGE_NAME": "com.pal.mabuhaymiles"
+    }
+  }
+}

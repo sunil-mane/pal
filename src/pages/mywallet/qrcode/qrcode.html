@@ -1,0 +1,23 @@
+<ion-header class="header-dark offer-popup-content " no-border>
+
+    <ion-navbar >
+
+        <ion-buttons start>
+            <button ion-button icon-only (click)="dismiss()">
+                <ion-icon name="close-circle"></ion-icon>
+            </button>
+        </ion-buttons>
+
+        <ion-title>{{ 'QR_CODE' | translate }}</ion-title>
+
+    </ion-navbar>
+
+</ion-header>
+
+<ion-content class="no-scroll qr-code padding">
+
+    <img *ngIf="cardData"
+         src="{{cardData}}"
+         alt="">
+
+</ion-content>

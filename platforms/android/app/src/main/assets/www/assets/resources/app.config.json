@@ -1,0 +1,347 @@
+{
+  "channelIdentifier": "MOB",
+  "version": "1.0.0",
+  "activeTenantDetails": {
+    "environmentType": "DEV",
+    "tenantCode": "XX",
+    "applicationName": "LoyaltyMobileApp"
+  },
+  "tenantList": [
+    {
+      "tenantCode": "XX",
+      "tenantName": "Mercator Solutions",
+      "googleAnalyticsTrackID": "UA-90409530-1",
+      "defaultLocationLatitude": "25.1279484",
+      "defaultLocationLongitude": "55.3862638",
+      "defaultAppId": "com.mercator.mengage",
+      "rateTheAppIOSURL": "https://itunes.apple.com/app/id367003839",
+      "rateTheAppAndroidURL": "https://play.google.com/store/apps/details?id=com.booking",
+      "bookingAppIOSURL": "https://itunes.apple.com/app/id367003839",
+      "bookingAppAndroidURL": "https://play.google.com/store/apps/details?id=com.booking",
+      "environmentList": [
+        {
+          "environmentType": "DEV",
+          "environmentDescription": "Development Environment",
+          "analyticsTrackEnabled": true,
+          "debugMode": true,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGDoVpfI0rWBrllsGzeq3DAE=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "mEngage",
+              "serverList": [
+                {
+                  "serverName": "Dev_Server",
+                  "serverURL": "https://uatcis.mercator.com/mercator.cris.mobileapi.cisd",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "TEST",
+          "environmentDescription": "Test Environment",
+          "analyticsTrackEnabled": true,
+          "debugMode": true,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGN7axfj9A2IYPULqbG96DHw=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "mEngage",
+              "serverList": [
+                {
+                  "serverName": "Test_Server",
+                  "serverURL": "https://uatcis.mercator.com/mercator.cris.mobileapi.cist",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tenantCode": "AM",
+      "tenantName": "Air Mexico",
+      "googleAnalyticsTrackID": "UA-42285521-2",
+      "defaultLocationLatitude": "19.4282609",
+      "defaultLocationLongitude": "-99.1626938",
+      "defaultAppId": "com.clubpremier.loyalty.iphone",
+      "rateTheAppIOSURL": "https://itunes.apple.com/app/id592240448",
+      "rateTheAppAndroidURL": "https://play.google.com/store/apps/details?id=com.clubpremier.loyalty.android",
+      "bookingAppIOSURL": "https://itunes.apple.com/app/id1180513011",
+      "bookingAppAndroidURL": "https://play.google.com/store/apps/details?id=com.aeromexico.app",
+      "environmentList": [
+        {
+          "environmentType": "DEV",
+          "environmentDescription": "Development Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": true,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGPCN2iKgk0/kOvnbC/oLHuI=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Club Premier",
+              "serverList": [
+                {
+                  "serverName": "DEV_Server",
+                  "serverURL": "https://uatffppg.mercator.com/Mercator.Mobile.Api.CISAMOD",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "TEST",
+          "environmentDescription": "Test Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "+oUByGRZVagfDV1XmtWxsagvdbNDJfAJdB0Uw8GocuU=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Club Premier",
+              "serverList": [
+                {
+                  "serverName": "Test_Server",
+                  "serverURL": "https://m3ngagetest.clubpremier.com:8443/Mercator.MobileApi.PRECRIS",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "MAINT",
+          "environmentDescription": "Maintenance Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGPCN2iKgk0/kOvnbC/oLHuI=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Club Premier",
+              "serverList": [
+                {
+                  "serverName": "Maintenance_Server",
+                  "serverURL": "https://uatffppg.mercator.com/Mercator.Mobile.Api.CISAMOD",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "PROD",
+          "environmentDescription": "Production Environment",
+          "analyticsTrackEnabled": true,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGOTvtkCPBGL1+YzqF/OUHK8=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Club Premier",
+              "serverList": [
+                {
+                  "serverName": "PROD_Server",
+                  "serverURL": "https://m3ngage.clubpremier.com:8443/Mercator.MobileApi.CISL",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tenantCode": "PR",
+      "tenantName": "Philippine Airlines",
+      "googleAnalyticsTrackID": "UA-99990656-1",
+      "defaultLocationLatitude": "14.5775420",
+      "defaultLocationLongitude": "120.9823840",
+      "defaultAppId": "com.pal.mabuhaymiles",
+      "rateTheAppIOSURL": "https://itunes.apple.com/app/id1241754095",
+      "rateTheAppAndroidURL": "https://play.google.com/store/apps/details?id=com.pal.mabuhaymiles",
+      "bookingAppIOSURL": "",
+      "bookingAppAndroidURL": "https://play.google.com/store/apps/details?id=com.philippineairlines",
+      "environmentList": [
+        {
+          "environmentType": "DEV",
+          "environmentDescription": "Development Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": true,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGDoVpfI0rWBrllsGzeq3DAE=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Mabuhay Miles",
+              "serverList": [
+                {
+                  "serverName": "DEV_Server",
+                  "serverURL": "https://uatcis.mercator.com/mercator.cris.mobileapi.cisd",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "TEST",
+          "environmentDescription": "Test Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGHqB0PENDcykILNMMOWsUW4=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Mabuhay Miles",
+              "serverList": [
+                {
+                  "serverName": "Test_Server",
+                  "serverURL": "https://uatcispal.mercator.com/mercator.cris.mobileapi.cisprot",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "MAINT",
+          "environmentDescription": "Maintenance Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGOgMh/LKVTebg76TWB7BU9o=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Mabuhay Miles",
+              "serverList": [
+                {
+                  "serverName": "Maintenance_Server",
+                  "serverURL": "http://uatcispal.mercator.com/Mercator.CRIS.mobileapi.CISPROS",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "PROD",
+          "environmentDescription": "Production Environment",
+          "analyticsTrackEnabled": true,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGOTvtkCPBGL1+YzqF/OUHK8=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Mabuhay Miles",
+              "serverList": [
+                {
+                  "serverName": "PROD_Server",
+                  "serverURL": "https://prdcispal.mercator.com/Mercator.CRIS.MOBILEAPI.CISL",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tenantCode": "PX",
+      "tenantName": "Air Niugini",
+      "googleAnalyticsTrackID": "UA-105987547-1",
+      "defaultLocationLatitude": "-9.4635710",
+      "defaultLocationLongitude": "147.1803080",
+      "defaultAppId": "com.px.mercator.mengage",
+      "rateTheAppIOSURL": "https://itunes.apple.com/app/id1310283575",
+      "rateTheAppAndroidURL": "https://play.google.com/store/apps/details?id=com.px.mercator.mengage",
+      "bookingAppIOSURL": "",
+      "bookingAppAndroidURL": "",
+      "environmentList": [
+        {
+          "environmentType": "DEV",
+          "environmentDescription": "Development Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": true,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGDoVpfI0rWBrllsGzeq3DAE=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Destinations",
+              "serverList": [
+                {
+                  "serverName": "Dev_Server",
+                  "serverURL": "https://uatcis.mercator.com/mercator.cris.mobileapi.cisd",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "TEST",
+          "environmentDescription": "Test Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGL8llYDbwh0VJVzTwOlCAMg=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Destinations",
+              "serverList": [
+                {
+                  "serverName": "Test_Server",
+                  "serverURL": "https://uatcispx.mercator.com/mercator.cris.mobileapi.cispxot",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "MAINT",
+          "environmentDescription": "Maintenance Environment",
+          "analyticsTrackEnabled": false,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGL8llYDbwh0VJVzTwOlCAMg=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Destinations",
+              "serverList": [
+                {
+                  "serverName": "Maintenance_Server",
+                  "serverURL": "https://uatcispx.mercator.com/mercator.cris.mobileapi.cispxot",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "environmentType": "PROD",
+          "environmentDescription": "Production Environment",
+          "analyticsTrackEnabled": true,
+          "debugMode": false,
+          "webApiKey": "vL+JqgaxRjD/lYKAN95rGCIn3uaS2Nt+b36coE5mp7Y=",
+          "applicationList": [
+            {
+              "applicationName": "LoyaltyMobileApp",
+              "applicationDescription": "Destinations",
+              "serverList": [
+                {
+                  "serverName": "PROD_Server",
+                  "serverURL": "https://prdcispx.mercator.com/mercator.cris.mobileapi.cispxl",
+                  "status": "Running"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+
+
+
+filter-popup-component{
+  .item-block{
+	padding-left: 0;
+	.item-inner{
+	  padding-right:  0;
+	}
+
+  }
+
+  .target-popup h3{
+	color: $defaultThemeColor;
+  }
+
+  h3{
+	border-bottom: 1px solid lighten($text-light-gry, 35%);
+	position: absolute;
+	width: 100%;
+	left: 0;
+	padding: 16px;
+	padding-bottom: .5rem;
+	margin-bottom: 0;
+	top: 0;
+
+	.icon{
+	  float: right;
+	  font-size: 3.5rem;
+	  padding: 0;
+	  line-height: 1rem;
+	  margin-top: -.5rem;
+	}
+
+  }
+
+  .list{
+	margin-top: 5rem;
+  }
+
+
+  h4{
+	font-weight: 400;
+	font-size: 1.2rem;
+	color: $text-light-gry;
+  }
+
+	.submit-btn {
+		background: $submitButtonColor;
+		border: 1px solid $submitButtonColor;
+	}
+
+	.submit-btn.button-ios.activated, .submit-btn.button-md.activated{
+		background: darken($submitButtonColor, 10%);
+		border: 1px solid darken($submitButtonColor, 10%);
+	}
+
+	.toggle-md .toggle-checked {
+		background-color: lighten($submitButtonColor, 65%);
+		.toggle-inner {
+			background-color: $submitButtonColor;
+		}
+	}
+
+	.toggle-ios .toggle-checked {
+		background-color: $submitButtonColor;
+	}
+
+  @media not all and (min-width: 600px) and (min-height: 200px) {
+
+	.smallModal {
+	  ion-modal ion-backdrop {
+		visibility: visible;
+	  }
+
+	  .active .modal-backdrop-bg {
+		opacity: .8;
+		transition: opacity 300ms ease-in-out;
+		background-color: #000;
+	  }
+
+	  .modal-wrapper {
+		z-index: 10;
+		height: 100%;
+		contain: strict;
+		position: absolute;
+		top: calc(50% - (400px / 2));
+		left: calc(50% - (300px / 2));
+		width: 300px;
+		height: 400px;
+	  }
+	}
+
+  }
+}
+
+

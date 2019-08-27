@@ -1,0 +1,16 @@
+<ion-header class="header-dark  " no-border>
+    <ion-navbar>
+        <ion-title>{{ pageTitle | translate }}</ion-title>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content padding no-bounce>
+    <span *ngFor="let data of allMyTargets">
+          <component-personal-target-list [data]="data"></component-personal-target-list>
+    </span>
+
+    <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+</ion-content>

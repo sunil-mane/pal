@@ -1,0 +1,37 @@
+page-settings {
+
+  .content-ios, .content-md {
+    background-color: lighten($homeHeaderCardBg, 10%);
+  }
+
+  .toggle-md .toggle-checked {
+    background-color: lighten($submitButtonColor, 65%);
+    .toggle-inner {
+      background-color: $submitButtonColor;
+    }
+  }
+
+  .toggle-ios .toggle-checked {
+    background-color: $submitButtonColor;
+  }
+
+  .item-select {
+    .label-ios, .label-md {
+      color: #fff;
+    }
+  }
+
+  .list-md + ion-list ion-list-header {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .list-ios:not([inset]) + .list-ios:not([inset]) ion-list-header {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .list-header-md, .list-header-ios {
+    margin-bottom: 0;
+  }
+}

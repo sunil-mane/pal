@@ -1,0 +1,45 @@
+
+
+<ion-header class="header-dark" [@fadeInOut]="toggle"  no-border>
+
+    <ion-navbar >
+        <ion-buttons start class="icon-color-white">
+            <button ion-button icon-only (click)="dismiss()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </button>
+        </ion-buttons>
+
+        <ion-title>{{'SEARCH_HERE' | translate }}</ion-title>
+    </ion-navbar>
+</ion-header>
+
+
+
+
+
+
+<ion-content padding [@fadeInOut]="toggle">
+    <div class="location-search">
+        <form action=".">
+        <div class="location-finder-input">
+            <ng2-completer type="search"
+                           [placeholder]="textPlaceholder"
+                           [textNoResults]="textNoResults"
+                           [textSearching]="textSearching"
+                           [(ngModel)]="searchStr"
+                           [datasource]="dataService"
+                           [minSearchLength]="3"
+                           [pause]="1000"
+                           [ngModelOptions]="{standalone: true}"
+                           (selected)="itemSelected($event)">
+            </ng2-completer>
+        </div>
+        </form>
+    </div>
+    <br/>
+    <ion-list>
+        <ion-item *ngFor="let item of locations" (click)="selectedLocation(item)">
+            {{item.formatted_address}}
+        </ion-item>
+    </ion-list>
+</ion-content>

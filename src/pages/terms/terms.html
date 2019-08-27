@@ -1,0 +1,22 @@
+<ion-header class="header-dark no-back-button-text">
+
+    <ion-navbar>
+        <ion-title>{{ pageTitle | translate }}</ion-title>
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()" *ngIf="shouldShowRefresh">
+                <span class="spin-animation">
+                    <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                </span>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+    <div class="" [innerHTML]="htmlData"
+         *ngIf="htmlData"
+         class="in-app-browser-anchor"
+         onclick="onInnerHTMLTap(event)">
+    </div>
+</ion-content>

@@ -1,0 +1,94 @@
+page-home {
+
+  ion-content {
+    pointer-events: auto !important;
+  }
+
+  .content-ios, .content-md {
+    background-color: #eee;
+  }
+
+  .bar-button-default-md {
+    color: #fff;
+  }
+
+  .header-md::after {
+    background: none;
+  }
+  .pattern {
+    height: 2rem;
+    display: block;
+
+  }
+
+  .location-finder {
+    position: relative;
+    background: #fff;
+    .location-finder-input {
+      background: #fff;
+      padding: 1.5rem 2rem 1.5rem 1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-right: 40px;
+      font-size: 1.2rem;
+
+      &.location-finder-dot {
+        padding: .8rem 2rem .5rem 1rem;
+      }
+    }
+    .location-finder-button {
+      position: absolute;
+      right: 0;
+      top: 0;
+      button {
+        padding: .95rem 1.5rem;
+        font-size: 2rem;
+        background: white;
+      }
+
+      .spinner-holder {
+        padding: .95rem 1.5rem;
+        background: white;
+        ion-spinner {
+          width: 21px;
+          height: 22px;
+        }
+
+      }
+
+    }
+  }
+
+  .header-container {
+
+    // padding: 16px;
+  }
+
+  .body-home-page {
+    margin-top: -44px;
+  }
+
+  h2.title {
+    margin-top: 1rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+.platform-android page-home .location-finder {
+
+  .location-finder-dot {
+    padding: 1rem 2rem .5rem 1rem;
+  }
+
+  .location-finder-button {
+    button {
+      padding: 1rem 1.5rem;
+      font-size: 1.8rem;
+    }
+    .spinner-holder {
+      padding: 1rem 1.5rem;
+    }
+  }
+
+}

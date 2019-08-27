@@ -1,0 +1,34 @@
+<ion-content padding class="target-popup">
+    <h3>{{ 'FILTERS' | translate }} <ion-icon name="close-circle" icon-right (click)="dismiss()"></ion-icon></h3>
+    <ion-list>
+
+        <h4>{{ 'OFFER_TYPE' | translate }}</h4>
+        <ion-item no-lines>
+            <ion-label> {{ 'EARN' | translate }}</ion-label>
+            <ion-toggle [(ngModel)]="isEarn" (ionChange)="earnValueChanged()"></ion-toggle>
+        </ion-item>
+
+        <ion-item no-lines>
+            <ion-label> {{ languageConstants.BURN | translate }}</ion-label>
+            <ion-toggle [(ngModel)]="isBurn" (ionChange)="burnValueChanged()"></ion-toggle>
+        </ion-item>
+
+
+        <h4>{{ 'PROMOTION' | translate }}</h4>
+        <ion-item no-lines>
+            <ion-label> {{ 'PROMOTIONS' | translate }}</ion-label>
+            <ion-toggle [(ngModel)]="isPromotion"></ion-toggle>
+        </ion-item>
+
+        <ion-item no-lines>
+            <ion-label> {{ 'RECOMMENDATIONS' | translate }}</ion-label>
+            <ion-toggle [(ngModel)]="isRecommended"></ion-toggle>
+        </ion-item>
+
+    </ion-list>
+
+
+    <button ion-button full class="submit-btn" (click)="saveFilters()">{{ 'GO' | translate }}</button>
+
+
+</ion-content>

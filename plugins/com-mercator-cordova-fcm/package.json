@@ -1,0 +1,17 @@
+{
+  "name": "com-mercator-cordova-fcm",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "com-mercator-cordova-fcm",
+    "platforms": [
+      "android"
+    ]
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova": ">=4.0.0"
+      }
+    }
+  }
+}

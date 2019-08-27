@@ -1,0 +1,18 @@
+{
+  "name": "com-mercator-cordova-pushnotification",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "com-mercator-cordova-pushnotification",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova": ">=3.6.3",
+        "cordova-ios": ">=4.1.0"
+      }
+    }
+  }
+}

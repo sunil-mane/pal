@@ -1,0 +1,370 @@
+
+component-personal-target-list {
+
+  .expandable-card-holder {
+    margin-bottom: 2rem;
+    background: $themeColorPrimary;
+
+    .expandable-img-holder {
+      position: relative;
+      background-size: cover !important;
+      background-position: center center;
+      width: 100%;
+      height: 190px;
+      max-width: 100%;
+      max-height: 190px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .special-offers {
+        overflow: hidden;
+        border-radius: 50%;
+        background-color: $themeColorPrimary;
+        padding: 0.4rem 0.6rem;
+        margin: 0.4rem 0 0 0.4rem;
+        top: 0;
+        left: 0;
+        ion-icon {
+          font-size: 1.5rem;
+        }
+      }
+
+    }
+
+    .expandable-strip-holder {
+      position: relative;
+
+      .strip-logo-content {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+
+        .expandable-logo {
+          position: relative;
+          padding: 0;
+          color: #fff;
+          margin: 0.6rem 1rem 1rem 1.2rem;
+
+          img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            float: left;
+            margin-right: 1rem;
+            border: 1px solid #fff;
+            background: #fff;
+          }
+          h3 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+            padding-top: 0.8rem;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          h4 {
+            font-weight: 400;
+            font-size: 1.1rem;
+            margin: 0;
+            padding-top: 0.2rem;
+            text-align: left;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .-icon-user {
+            ion-icon {
+              display: inline-block;
+              float: left;
+              padding: 0 1rem 3rem 0;
+            }
+            h3 {
+              padding: 0;
+            }
+          }
+          .card-logo {
+            padding: 0;
+          }
+        }
+      }
+
+      .rounded-progress-position {
+        margin: -0.4rem -0.8rem -0.4rem 0;
+
+        round-progress {
+          width: 40px !important;
+          height: 40px !important;
+        }
+      }
+    }
+
+  }
+
+
+  .expandable-content-holder {
+    background: #fff;
+    padding: 1rem;
+    p {
+      margin: 0;
+      font-weight: 400;
+      color: #95989A;
+    }
+  }
+
+  .expandable-logo {
+    position: absolute;
+    padding: 1rem;
+    color: #fff;
+    width: 100%;
+    img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      float: left;
+      margin-right: 1rem;
+      border: 1px solid #fff;
+      background: #fff;
+    }
+    ion-icon {
+      width: 40px;
+      height: 40px;
+      float: left;
+      margin-left: 0.5rem;
+      margin-top: 0.7rem;
+    }
+    h3 {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    h4 {
+      font-weight: 400;
+      font-size: 1.1rem;
+      margin: 0;
+      padding-top: .5rem;
+    }
+
+    .-icon-user {
+      ion-icon {
+        display: inline-block;
+        float: left;
+        padding: 0 1rem 3rem 0;
+      }
+      h3 {
+        padding: 0;
+      }
+
+    }
+    .card-logo {
+      padding: 0;
+    }
+
+  }
+
+  .expandable-title {
+
+    font-size: 1.1rem;
+    margin: 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 1rem;
+    color: #fff;
+    h3 {
+      font-weight: 400;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    h4 {
+      font-weight: 400;
+      font-size: 1rem;
+      margin: 0;
+      padding-top: .5rem;
+    }
+  }
+
+  .expandable-footer-holder {
+    background: #fff;
+    border-top: 1px solid #EEEEEE;
+
+    .icon:before {
+      font-size: 2.2rem;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+
+      li {
+        list-style: none;
+        -webkit-flex-grow: 1;
+        flex-grow: 1;
+
+        text-align: center;
+        max-width: 100px;
+        a {
+          padding: 1.5rem 1rem;
+          display: block;
+          font-size: 2.2rem;
+          text-decoration: none;
+          color: #001871;
+        }
+      }
+    }
+
+    &.expandable-footer-holder-3-items {
+      ul {
+        li {
+          width: 32.33%;
+        }
+      }
+
+    }
+
+  }
+
+  .congratulations {
+    position: relative;
+    font-weight: 400;
+    padding: 4rem 1rem 1rem 1rem;
+
+    h2 {
+      color: #2ef730;
+      margin: 0;
+      padding: 1rem 0;
+      text-align: center;
+    }
+    h3 {
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #fff;
+      margin-bottom: 1rem;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+    }
+    h6 {
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      span {
+        display: inline-block;
+        width: 2%;
+      }
+    }
+  }
+
+  .round-progress-holder {
+    position: absolute;
+    margin-left: -50px;
+    margin-top: -50px;
+    width: 100px;
+    height: 100px;
+    top: 25%;
+    left: 50%;
+
+    ._round-progress {
+      position: relative;
+      bottom: 20%;
+      width: 100%;
+
+      round-progress {
+        margin-left: -51%;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      h6 {
+        margin-top: 38%;
+        font-size: 2.5rem;
+        font-weight: 600;
+      }
+
+    }
+  }
+
+  .in-progress-targets {
+
+    .expandable-img-holder {
+      background: $defaultThemeColorSecondary;
+      &:before {
+        display: none;
+      }
+    }
+
+  }
+
+  .-card-default-background {
+    background-image: url("../assets/img/no_image.jpg");
+  }
+
+  .-target-completed {
+    background-image: url("../assets/img/target-completed.jpg") !important;
+    &:before {
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, .5);
+      position: absolute;
+      content: '';
+      left: 0;
+      top: 0;
+      z-index: 0;
+    }
+  }
+
+  .-target-expired {
+    background: $personal-target-expired-color;
+    &:before {
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, .5);
+      position: absolute;
+      content: '';
+      left: 0;
+      top: 0;
+      z-index: 0;
+    }
+
+    .congratulations {
+      h2 {
+        color: #000;
+      }
+    }
+  }
+
+  .-personal-target-solid-color {
+    background: $personal-target-color;
+  }
+
+  .-target-img-gery {
+    -webkit-filter: grayscale(1);
+    filter: grayscale(1);
+
+    .congratulations {
+      h2 {
+        color: #fff;
+      }
+    }
+  }
+
+  .-icon-user {
+    .icon:before {
+      font-size: 1.6rem;
+    }
+  }
+
+}

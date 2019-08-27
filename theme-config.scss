@@ -1,0 +1,22 @@
+//for basic theme settings
+$themeColorPrimary: #002552;
+$themeColorSecondary: #00AEEF;
+$text-light-gry:#95989A;
+
+//for tab color active state
+$footer-icon-color-active:#00AEEF;
+
+//for side menu color schema.
+$side-menu-background : darken($themeColorPrimary, 5%);
+$side-menu-text-color : #ffffff;
+
+//for profile header which is also present on user profile section.
+$profile-header-background : lighten($themeColorPrimary, 10%);
+$home-header-card-text-info : #fff;
+
+//Earn and Burn background color
+$earnRibbonColo: #66C119;
+$burnRibbonColo: #184CAD;
+
+//Login button background color
+$submitButtonColor: #C20000;

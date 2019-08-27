@@ -1,0 +1,71 @@
+<ion-content class=" login-modal-small no-scroll">
+
+    <div class="header-clear">
+        <h1>{{ 'LOGIN' | translate }} </h1>
+        <button class="button-right-close" icon-only (click)="dismiss(false)">
+            <ion-icon name="close-circle" icon-right></ion-icon>
+        </button>
+
+
+    </div>
+
+
+
+    <div class="login-box">
+        <form #registerForm="ngForm" novalidate>
+
+            <div class="container">
+
+                <div class="row">
+
+                    <div class="col-xs-12">
+
+                        <input type="number" pattern="[0-9]*" inputmode="numeric" placeholder="{{ 'ACCOUNT_NUMBER' | translate }}" name="username"
+                            [(ngModel)]="username" />
+                    </div>
+                    <div class="col-xs-12" style="position:relative;">
+                        <input type="{{type}}" placeholder="{{ 'Password' | translate }}" name="password" [(ngModel)]="password" id="password" />
+                        <ion-icon *ngIf="showPass" name="ios-eye-outline" (click)="showPassword()" style="position: absolute;
+                               top: 12px;
+                               right: 10px;font-size:20px;"></ion-icon>
+                        <ion-icon *ngIf="!showPass" name="ios-eye-off-outline" (click)="showPassword()" style="position: absolute;
+                               top: 10px;
+                               right: 10px;font-size:20px;"></ion-icon>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button ion-button class="submit-btn" full type="submit" (click)="doLogin()">
+                            {{ 'LOGIN' | translate }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="shouldShowFBLogin == true">
+                    <div class="col-xs-12">
+                        <button ion-button class="submit-btn" full (click)="doLoginWithFacebook()">
+                            {{ 'Login with Facebook' | translate }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 signup-col">
+                        <button ion-button block clear class="register-btn" (click)="forgotPassword()" *ngIf="forgotPasswordURL && forgotPasswordURL.trim().length > 0">
+                            {{ "Forgot Your Password?" | translate }}
+                        </button>
+                        <button ion-button block clear class="register-btn" (click)="registerNow()" *ngIf="registrationURL && registrationURL.trim().length > 0">
+                            {{ "No Password Yet? Register Now!" | translate }}
+                        </button>
+                        <button ion-button block clear class="register-btn" (click)="enrollUser()">
+                            {{ 'NOT_MEMBER_ENROLL_HERE' | translate }}
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</ion-content>

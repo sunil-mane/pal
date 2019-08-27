@@ -1,0 +1,207 @@
+<ion-header class="header-dark" no-border>
+
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>{{ 'DISCOVER' | translate }}</ion-title>
+        <ion-buttons end>
+            <button ion-button class="icon-white" (click)="refreshButtonTapped()">
+                <span class="spin-animation">
+                    <ion-icon name="md-sync" [ngClass]="{'spin-elem': isRefreshing}"></ion-icon>
+                </span>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+
+    <div class="inline-tabs">
+        <ion-segment [(ngModel)]="activeTab">
+            <ion-segment-button value="tab01" (click)="activeTabEvent(SEARCH_PARTNERS_TAB)">
+                {{ 'PARTNERS' | translate }}
+            </ion-segment-button>
+            <ion-segment-button value="tab03" (click)="activeTabEvent(SEARCH_LOCATIONS_TAB)">
+                {{ 'LOCATIONS' | translate }}
+            </ion-segment-button>
+            <ion-segment-button value="tab02" (click)="activeTabEvent(SEARCH_OFFERS_TAB)">
+                {{ 'OFFERS' | translate }}
+            </ion-segment-button>
+            <ion-segment-button value="tab04" (click)="activeTabEvent(SEARCH_VOUCHERS_TAB)">
+                {{ "VOUCHERS" | translate }}
+            </ion-segment-button>
+        </ion-segment>
+    </div>
+
+</ion-header>
+
+
+<ion-content class="contain-area-full app-background-image" [style.background-image]="'url(' + backgroundImageURL +')'">
+
+    <div [ngSwitch]="activeTab" padding>
+        <!--Tabs 01 start-->
+        <div class="tab01-holder " *ngSwitchCase="SEARCH_PARTNERS_TAB">
+
+            <ion-slides class=" swiper-template-1 " [slidesPerView]="3" [spaceBetween]="10">
+                <div class="swiper-wrapper">
+                    <ion-slide class="swiper-slide" *ngFor="let i of industryTypes">
+
+                        <div class="slider-holder " [ngClass]="{'industry-all': i.code === INDUSTRY_TYPE_DEFAULT_CODE}" [style.background-image]="'url(' + i.logoPath + ')'"
+                            (click)="industryTypesTapped(i)">
+
+                            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" *ngIf="i.code === selectIndustryTypeCode" viewBox="0 0 52 52">
+                                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                            </svg>
+
+                            <div class="slider-content">
+                                <span>{{i.description}}</span>
+                            </div>
+                        </div>
+
+                    </ion-slide>
+                </div>
+            </ion-slides>
+
+            <!--search -->
+            <form action=".">
+                <ion-searchbar [(ngModel)]="partnersSearchKey" [ngModelOptions]="{standalone: true}" (search)="searchWithKeyword(activeTab)"
+                    (ionCancel)="onCancel($event)" [showCancelButton]="shouldShowCancel" [placeholder]="searchByPartnerPlaceholder"
+                    [animated]="false" [value]="" name="search">
+                </ion-searchbar>
+            </form>
+
+            <div class="margin-bottom"></div>
+            <div class="search-result-status" *ngIf="!searchedPartners || (searchedPartners.length == 0)">
+                <ion-spinner name="ios-small" *ngIf="isLoadingPartners == true"></ion-spinner>
+                <span>{{searchNoPartnerText}}</span>
+            </div>
+            <div *ngIf="searchedPartners && (searchedPartners.length > 0)">
+                <span *ngFor="let i of searchedPartners">
+                    <partners-card-component [data]="i"></partners-card-component>
+                </span>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+
+        </div>
+        <!--Tabs 01 End-->
+
+
+        <!--Tabs 02 start-->
+        <div class="tab02-holder" *ngSwitchCase="SEARCH_OFFERS_TAB">
+
+            <form action=".">
+                <ion-searchbar [(ngModel)]="offersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"
+                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByOfferPlaceholder"
+                    [animated]="false" [value]="" name="search">
+                </ion-searchbar>
+            </form>
+
+            <div class="margin-bottom"></div>
+            <div class="search-result-status" *ngIf="!searchedOffers || (searchedOffers.length == 0)">
+                <ion-spinner name="ios-small" *ngIf="isLoadingOffers == true"></ion-spinner>
+                <span>{{searchNoOfferText}}</span>
+            </div>
+            <div *ngIf="searchedOffers && (searchedOffers.length > 0)">
+                <span *ngFor="let data of searchedOffers">
+                    <expandable-component [data]="data"></expandable-component>
+                </span>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+
+        </div>
+        <!--Tabs 02 End-->
+
+
+        <!--Tabs 03 start-->
+        <div class="tab03-holder" *ngSwitchCase="SEARCH_LOCATIONS_TAB">
+            <!--tab 03-->
+
+            <form action=".">
+                <ion-searchbar [(ngModel)]="locationsSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"
+                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByLocationPlaceholder"
+                    [animated]="false" [value]="" name="search">
+                </ion-searchbar>
+            </form>
+
+            <div class="margin-bottom"></div>
+            <div class="search-result-status" *ngIf="!searchedLocations || (searchedLocations.length == 0)">
+                <ion-spinner name="ios-small" *ngIf="isLoadingLocations == true"></ion-spinner>
+                <span>{{searchNoLocationText}}</span>
+            </div>
+            <div *ngIf="searchedLocations && (searchedLocations.length > 0)">
+                <div *ngFor="let data of searchedLocations">
+                    <expandable-location-component [data]="data"></expandable-location-component>
+                </div>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+        </div>
+        <!--Tabs 03 End-->
+
+        <!--Tabs 04 start-->
+        <div class="tab03-holder" *ngSwitchCase="SEARCH_VOUCHERS_TAB">
+            <!--tab 04-->
+
+            <form action=".">
+                <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"
+                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"
+                    [animated]="false" [value]="" name="search">
+                </ion-searchbar>
+            </form>
+
+            <div class="margin-bottom"></div>
+            <div class="search-result-status" *ngIf="!searchedVouchers || searchedVouchers.length == 0">
+                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>
+                <span>{{ searchNoVoucherText }}</span>
+            </div>
+            <div *ngIf="searchedVouchers && searchedVouchers.length > 0" class="voucher-search-result">
+                <div *ngFor="let voucher of searchedVouchers">
+                    <div class="voucher" (click)="redeemVoucher(voucher)">
+                        <div class="heading">
+                            <span class="desc">{{voucher.description}}</span>
+                            <span class="free-space"></span>
+                            <span class="miles">-for {{ voucher.points }} miles</span>
+                        </div>
+                        <div class="margin-bottom"></div>
+                        <div style="font-size:11px;" *ngIf="voucher.expiryPeriod">
+                            Valid for {{voucher.expiryPeriod}} months.
+                        </div>
+                        <div>
+                             <span style="font-size:11px;">Can be used at any location</span>
+                        </div>
+                        
+                    </div>
+                    <div class="voucher-strip" >
+                        <div class="partner">
+                            <img [src]="voucher.partnerLogoPath" alt="" />
+                            <span>{{voucher.partnerDescription}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                </ion-infinite-scroll>
+            </div>
+        </div>
+        <!--Tabs 04 End-->
+    </div>
+    <ion-fab *ngIf="shouldShowScrollTopButton || shouldShowOfferFilterButton" right bottom mini #fab>
+        <button ion-fab color="light">
+            <ion-icon name="more"></ion-icon>
+        </button>
+        <ion-fab-list side="left">
+            <button *ngIf="shouldShowScrollTopButton" ion-fab (click)="scrollToTop(fab)">
+                <ion-icon name="arrow-up"></ion-icon>
+            </button>
+            <button *ngIf="shouldShowOfferFilterButton" ion-fab (click)="doFilter(fab)">
+                <ion-icon name="color-filter"></ion-icon>
+            </button>
+        </ion-fab-list>
+    </ion-fab>
+
+</ion-content>

@@ -1,0 +1,13 @@
+page-partners{
+  .contain-area {
+	background-color: #eee;
+
+    .search-result-status {
+      position: relative;
+      text-align: center;
+      span {
+        color: $text-light-gry;
+      }
+    }
+  }
+}

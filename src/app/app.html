@@ -1,0 +1,39 @@
+<!-- logged in menu -->
+<ion-menu id="loggedInMenu" [content]="content"  (ionOpen)="menuOpened()" swipeEnabled="false">
+    <ion-content class="app-background-image"
+                 [style.background-image]="'url(' + backgroundImageURL +')'"
+                 no-bounce>
+        <div class="user-profile-side-menu gold-member" *ngIf="memberInfo">
+            <h1>
+                <ion-icon *ngIf="(shouldHideAvatar === false) && (!memberInfo.memberPicture || memberInfo.memberPicture.length == 0)"
+                          name="icon-user"></ion-icon>
+                <img *ngIf="memberInfo.memberPicture && memberInfo.memberPicture.length > 0"
+                     [src]="memberInfo.memberPicture" alt=""/>
+            </h1>
+            <h2>{{memberInfo.preferredCardName}}</h2>
+            <h3>{{memberInfo.tierDescr | translate }}</h3>
+            <button class="button-clear button-clear-white-border" menuClose (click)="gotoProfile()">{{ 'VIEW_PROFILE' | translate }}</button>
+        </div>
+
+        <div class="side-menu-list">
+            <!--<h2>{{ 'MENU' | translate }}</h2>-->
+            <ul>
+                <li menuClose *ngFor="let p of menuList" (click)="openPage(p)">
+                    {{ p.description | translate }}
+                </li>
+            </ul>
+        </div>
+    </ion-content>
+</ion-menu>
+
+
+<!-- main navigation -->
+
+<div class="offline-notification">
+    <h2>{{ 'OFFLINE_MODE' | translate }}</h2>
+    <button (click)="offlineMode()" color="transparent">
+        <ion-icon name="information-circle"></ion-icon>
+    </button>
+    <div *ngIf="lastSyncDate" class="last-sync">{{'LAST_SYNC_AT' | translate}} {{lastSyncDate}}</div>
+</div>
+<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>

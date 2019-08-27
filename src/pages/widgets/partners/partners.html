@@ -1,0 +1,29 @@
+<div class="card-item">
+    <div class="row main-row" (click)="viewDetails()">
+        <div class="col-xs-3 img-max-65">
+
+            <div class="image-holder-logo">
+                <img [src]="data.partnerLogoPath" alt=""
+                     *ngIf="data.partnerLogoPath && data.partnerLogoPath.length > 0">
+                <img src="../assets/img/no_image.jpg" alt=""
+                     *ngIf="!data.partnerLogoPath || data.partnerLogoPath.length == 0">
+            </div>
+
+        </div>
+        <div class="col-xs-9">
+            <div class="row small-icon">
+                <div class="col-xs-12">
+                    <h3>{{data.description}}</h3>
+                </div>
+                <div class="col-xs-6" *ngIf="data.offersCount != 0">
+                    <ion-icon name="icon-offers"></ion-icon>
+                    {{data.offersCount}} {{ data.offersCount == 1 ? ('OFFER' | translate) : ('OFFERS' | translate) }}
+                </div>
+                <div class="col-xs-6">
+                    <ion-icon name="icon-location"></ion-icon>
+                    {{data.partnerLocationCount}} {{ data.partnerLocationCount == 1 ? ('LOCATION' | translate) : ('LOCATIONS' | translate) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

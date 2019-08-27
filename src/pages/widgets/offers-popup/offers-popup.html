@@ -1,0 +1,39 @@
+
+
+<ion-header class="header-dark offer-popup-content ">
+    <ion-navbar>
+
+        <ion-buttons start>
+            <button ion-button icon-only (click)="dismiss()">
+                <ion-icon name="close-circle"></ion-icon>
+            </button>
+        </ion-buttons>
+
+        <ion-title>{{dataObj.title}}</ion-title>
+
+    </ion-navbar>
+
+</ion-header>
+
+
+
+
+<ion-content padding>
+
+    <img *ngIf="dataObj.img" [src]="dataObj.img" alt="">
+    <!--<h3>{{ 'ABOUT' | translate }} : </h3>-->
+
+    <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.description"></div>
+
+    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_H">
+        <br/>
+        <h5>{{ 'Terms n Conditions' | translate }} : </h5>
+        <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.terms"></div>
+    </div>
+    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_U">
+        <a (click)="openWebSite()">
+            {{ 'Terms n Conditions' | translate }}
+        </a>
+    </div>
+
+</ion-content>

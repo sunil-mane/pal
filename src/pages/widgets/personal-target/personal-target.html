@@ -1,0 +1,38 @@
+<div class="personal-targets-block">
+
+    <h3>{{ 'PERSONAL_GOALS' | translate }}</h3>
+    
+    <div class="personal-targets-holder">
+    <ul>
+        <li *ngFor="let i of personalTargetList">
+            <div class="round-bar-holder">
+                <div class="position-relative">
+                    <round-progress
+                            [current]="i.myTarget"
+                            [radius]="radius"
+                            [max]="max"
+                            [duration]="3000"
+                            [stroke]="4"
+                            [responsive]="responsive"
+                            [clockwise]="clockwise">
+                    </round-progress>
+                    <h6>{{i.myTarget}}%</h6>
+                </div>
+            </div>
+            <div class="target-text-holder">
+                <h4>{{i.title}}</h4>
+                <h5>{{i.targetEndDateString}} <span>{{i.points | number}} {{ languageConstants.POINTS | translate }}</span></h5>
+            </div>
+            <div class="ellipsis-holder">
+                <button ion-button icon-only color="transparent" (click)="delete(i)">
+                    <ion-icon name="icon-delete"></ion-icon>
+                </button>
+            </div>
+        </li>
+    </ul>
+    </div>
+</div>
+
+
+
+

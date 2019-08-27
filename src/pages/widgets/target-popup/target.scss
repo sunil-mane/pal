@@ -1,0 +1,37 @@
+
+
+@media not all and (min-width: 600px) and (min-height: 200px) {
+
+  .smallModal {
+	ion-modal ion-backdrop {
+	  visibility: visible;
+	}
+
+	.active .modal-backdrop-bg {
+	  opacity: .8;
+	  transition: opacity 300ms ease-in-out;
+	  background-color: #000;
+	}
+
+	.modal-wrapper {
+	  z-index: 10;
+	  height: 100%;
+	  contain: strict;
+	  position: absolute;
+	  top: calc(50% - (400px / 2));
+	  left: calc(50% - (300px / 2));
+	  width: 300px;
+	  height: 400px;
+	}
+  }
+
+	.submit-btn {
+		background: $submitButtonColor;
+		border: 1px solid $submitButtonColor;
+	}
+
+	.submit-btn.button-ios.activated, .submit-btn.button-md.activated{
+		background: darken($submitButtonColor, 10%);
+		border: 1px solid darken($submitButtonColor, 10%);
+	}
+}

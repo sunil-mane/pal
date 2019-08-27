@@ -1,0 +1,50 @@
+<div class="expandable-card-holder app-background-image"
+     [style.background-image]="'url(' + backgroundImageURL +')'">
+    <div class="expandable-img-holder" (click)="toggle()">
+        <img src="{{data.imagePath}}" alt="">
+    </div>
+    <div class="expandable-strip-holder" (click)="toggle()">
+        <div class="row">
+            <div class="strip-logo-content col-xs-12">
+                <div class="expandable-logo">
+                    <img [src]="data.partnerLogoPath" alt=""/>
+                    <h3>
+                        {{data.partnerName}}<span *ngIf="data.storeName"> - {{data.storeName}}</span>
+                    </h3>
+                    <h4>
+                        <span>{{data.numberOfOffers}}</span> {{ 'OFFERS' | translate }} &nbsp; &nbsp;
+                        <span>{{data.distance | number}}</span> {{ 'KM' | translate }} {{ 'APPROX' | translate }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>
+        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.addressDescription"></p>
+    </div>
+    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut]>
+        <ul>
+
+            <li [ngClass]="{'itemLiked': data.isFavorite == 'Y'}">
+                <a (click)="liked(data)">
+                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>
+                    <ion-spinner *ngIf="showSpinner"></ion-spinner>
+                </a>
+            </li>
+
+            <li [ngClass]="{'itemLiked': data.isCheckedIn}"
+                *ngIf="data.addressId && !shouldHideCheckin">
+                <a (click)="checkIn(data)">
+                    <ion-icon name="icon-check"></ion-icon>
+                </a>
+            </li>
+
+            <li *ngIf="data.latitude && data.longitude">
+                <a (click)="openLocation(data)">
+                    <ion-icon name="icon-navigation"></ion-icon>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+</div>

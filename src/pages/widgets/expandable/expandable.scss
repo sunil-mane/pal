@@ -1,0 +1,149 @@
+expandable-component {
+
+
+  .expandable-card-holder {
+    margin-bottom: 2rem;
+    background-color: $themeColorPrimary;
+
+    .expandable-img-holder {
+      background: url("../assets/img/no_image.jpg") center center;
+      position: relative;
+      background-size: cover !important;
+      height: 190px;
+      max-width: 100%;
+      max-height: 190px;
+
+      .row {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .special-offers {
+        overflow: hidden;
+        border-radius: 50%;
+        background-color: $themeColorPrimary;
+        padding: 0.4rem 0.6rem;
+        margin: 0.4rem 0 0 0.4rem;
+        top: 0;
+        left: 0;
+        ion-icon {
+          font-size: 1.5rem;
+        }
+      }
+    }
+
+    .expandable-strip-holder {
+      position: relative;
+
+      .strip-logo-content {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+
+        .expandable-logo {
+          position: relative;
+          padding: 0;
+          color: #fff;
+          margin: 0.6rem 1rem 1rem 1.2rem;
+
+          img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            float: left;
+            margin-right: 1rem;
+            border: 1px solid #fff;
+            background: #fff;
+          }
+          h3 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+            padding-top: 0.8rem;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          h4 {
+            font-weight: 400;
+            font-size: 1.1rem;
+            margin: 0;
+            padding-top: 0.2rem;
+            text-align: left;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .-icon-user {
+            ion-icon {
+              display: inline-block;
+              float: left;
+              padding: 0 1rem 3rem 0;
+            }
+            h3 {
+              padding: 0;
+            }
+          }
+          .card-logo {
+            padding: 0;
+          }
+        }
+      }
+
+      .rounded-progress-position {
+        margin: -0.4rem -0.8rem -0.4rem 0;
+      }
+    }
+
+    .expandable-content-holder {
+      background: #fff;
+      padding: 1rem;
+
+      p {
+        margin: 0;
+        font-weight: 400;
+        color: #95989A;
+      }
+    }
+
+    .slider-holder-footer {
+      background: #fff;
+
+      li {
+        list-style: none;
+        -webkit-flex-grow: 1;
+        flex-grow: 1;
+        text-align: center;
+        max-width: 100px;
+        a {
+          padding: 1.5rem 1rem;
+          display: block;
+          font-size: 2.2rem;
+          text-decoration: none;
+          color: #001871;
+        }
+
+        &.itemLiked a {
+
+          .icon:before {
+            color: red;
+          }
+        }
+      }
+    }
+
+    .icon-badge:before {
+      font-size: 1.80rem;
+    }
+
+  }
+
+}

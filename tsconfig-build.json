@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "noImplicitAny": false,
+    /**
+      creates type definitions for the compiled files d.ts
+    **/
+    "declaration": true,
+    /**
+      output directory for the compiled files
+    **/
+    "outDir": "./lib",
+    "stripInternal": true
+  },
+  /**
+    array of files to be compiled, in our case is our entry file
+  **/
+  "files": [
+    "index.ts"
+  ],
+  /**
+    compiler options for ngc (angular compiler)
+  **/
+  "angularCompilerOptions": {
+    /**
+      don't produce .ngfactory.ts or .css.shim.ts files,
+      they get published where the package will be consumed
+    **/
+    "skipTemplateCodegen": true
+  }
+}

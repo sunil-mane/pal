@@ -1,0 +1,21 @@
+<div class="headerCard login" [style.background-image]="'url(' + loginCardImageURL +')'">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>{{guestUserText}}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <button class="button-clear button-clear-white-border login-button" (click)="openModal()">
+                {{ 'LOGIN' | translate }}
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <button ion-button clear class="register-button" (click)="enrollUser()">
+                {{ 'NOT_MEMBER_ENROLL_HERE' | translate }}
+            </button>
+        </div>
+    </div>
+</div>

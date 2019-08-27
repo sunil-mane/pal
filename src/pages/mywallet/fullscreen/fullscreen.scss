@@ -1,0 +1,5 @@
+virtual-card-full-screen {
+  .content-ios, .content-md {
+    background-color: lighten($homeHeaderCardBg, 10%);
+  }
+}
