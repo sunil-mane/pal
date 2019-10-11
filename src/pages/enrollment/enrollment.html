@@ -60,6 +60,21 @@
         <div class="registration-form" *ngIf="pageState < 5">
             <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 1">
                 <ion-list>
+                        <ion-item>
+                                <ion-label floating>{{ 'Member ID' | translate }}</ion-label>
+                                <ion-input type="text"
+                                           [(ngModel)]="activeCardNo"
+                                           name="activeCardNo"
+                                           id="activeCardNo"
+                                           spellcheck="false"
+                                           autocapitalize="sentences"
+                                           minlength="2"
+                                           maxlength="20"
+                                           pattern=""
+                                           [disabled]="shouldDisablePersonalInfo"
+                                           required>
+                                </ion-input>
+                            </ion-item>
                     <ul>
                         <li>{{'Name should match travel documents such as Passport' | translate}}</li>
                     </ul>
@@ -429,6 +444,10 @@
             </form>
             <div *ngIf="pageState == 4">
                 <ion-list>
+                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && activeCardNo && activeCardNo.length > 0">
+                                <ion-label floating>{{'Member ID' | translate}}</ion-label>
+                                <ion-input value="{{ activeCardNo }}" disabled="true"></ion-input>
+                            </ion-item>
                     <ul *ngIf="((editingProfile != true) || formHasChanges)">
                         <li>{{'Name should match travel documents such as Passport' | translate}}</li>
                     </ul>

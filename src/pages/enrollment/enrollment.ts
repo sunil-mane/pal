@@ -43,6 +43,7 @@ export class EnrollmentPage {
     titleObj: ConfigInfo = null;
     lastName: string = '';
     firstName: string = '';
+    memberID: string = '';
     middleName: string = '';
     dobText: string = '';
     areaCode: string = '';
@@ -149,6 +150,8 @@ export class EnrollmentPage {
             let memberInfo: MemberInfo = this.sessionUtils.getMemberInfo();
             this.lastName = memberInfo.lastName;
             this.firstName = memberInfo.firstName;
+            this.memberID = memberInfo.memberID;
+            this.activeCardNo = memberInfo.activeCardNo;
             this.middleName = memberInfo.middleName;
             this.emailAddress = memberInfo.emailAddress;
             this.acceptTerms = (memberInfo.termsAccepted == 'Y');
@@ -967,6 +970,8 @@ export class EnrollmentPage {
                 profileInfo.emailAddress = this.emailAddress.trim();
                 profileInfo.nationality = this.countryAddressObj.code;
                 profileInfo.termsAccepted = (this.acceptTerms == true) ? 'Y' : 'N';
+                profileInfo.memberID = this.memberID.trim();
+                profileInfo.activeCardNo = this.activeCardNo;
 
                 if (this.selectedNameSuffix && this.selectedNameSuffix.code && this.selectedNameSuffix.descr) {
                     profileInfo.nameSuffix = this.selectedNameSuffix.code;

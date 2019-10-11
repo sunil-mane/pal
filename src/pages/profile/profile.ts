@@ -146,7 +146,6 @@ export class ProfilePage {
         let vouchers = this.partnerUtils.getMyVouchersContext();
         if (!vouchers || (vouchers.length == 0)) {
             this.partnerUtils.fetchMyVouchers('all',(result: any) => {
-                debugger
                 this.vouchersData = result.data;
                 if(this.vouchersData&&this.vouchersData.length==1){
                     this.vouchersData.push(this.vouchersData[0])
