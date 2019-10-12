@@ -1871,8 +1871,8 @@ ion-searchbar.searchbar {
 }
 
 .item-transparent {
-  border-color: transparent !important;
-  background-color: transparent !important;
+  border-color: rgba(0, 0, 0, 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
   color: white !important;
 }
 
@@ -7961,7 +7961,7 @@ textarea::-webkit-input-placeholder {
   padding-left: 2px;
 }
 
-textarea:-ms-input-placeholder {
+textarea::-moz-placeholder {
   padding-left: 2px;
 }
 
@@ -8129,7 +8129,7 @@ ion-input :focus {
 * {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
@@ -8460,7 +8460,7 @@ ion-badge:empty {
 
 .badge-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .badge-ios-transparent60 {
@@ -8511,7 +8511,7 @@ ion-badge:empty {
 
 .badge-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .badge-md-transparent60 {
@@ -8562,7 +8562,7 @@ ion-badge:empty {
 
 .badge-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .badge-wp-transparent60 {
@@ -9006,7 +9006,7 @@ button[disabled],
 
 .button-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-ios-transparent.activated {
@@ -9014,19 +9014,19 @@ button[disabled],
 }
 
 .button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-clear-ios-transparent {
   border-color: transparent;
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
@@ -9035,7 +9035,7 @@ button[disabled],
 }
 
 .button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .button-ios-transparent60 {
@@ -9581,11 +9581,11 @@ button[disabled],
 
 .button-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-md-transparent:hover:not(.disable-hover) {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-md-transparent.activated {
@@ -9617,7 +9617,7 @@ button[disabled],
 
 .button-clear-md-transparent {
   border-color: transparent;
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
@@ -9628,7 +9628,7 @@ button[disabled],
 }
 
 .button-clear-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .button-md-transparent60 {
@@ -10070,12 +10070,12 @@ button[disabled],
 
 .button-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-wp-transparent:hover:not(.disable-hover) {
   border-color: rgba(255, 255, 255, 0.08);
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .button-wp-transparent.activated {
@@ -10098,7 +10098,7 @@ button[disabled],
 }
 
 .button-clear-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
@@ -10107,7 +10107,7 @@ button[disabled],
 }
 
 .button-clear-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .button-wp-transparent60 {
@@ -10332,7 +10332,7 @@ ion-card-content {
 .card-ios-primary .card-header-ios-transparent,
 .card-ios-primary .card-title-ios-transparent,
 .card-ios-primary .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-primary .text-ios-transparent60,
@@ -10417,7 +10417,7 @@ ion-card-content {
 .card-ios-secondary .card-header-ios-transparent,
 .card-ios-secondary .card-title-ios-transparent,
 .card-ios-secondary .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-secondary .text-ios-transparent60,
@@ -10502,7 +10502,7 @@ ion-card-content {
 .card-ios-danger .card-header-ios-transparent,
 .card-ios-danger .card-title-ios-transparent,
 .card-ios-danger .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-danger .text-ios-transparent60,
@@ -10587,7 +10587,7 @@ ion-card-content {
 .card-ios-light .card-header-ios-transparent,
 .card-ios-light .card-title-ios-transparent,
 .card-ios-light .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-light .text-ios-transparent60,
@@ -10672,7 +10672,7 @@ ion-card-content {
 .card-ios-dark .card-header-ios-transparent,
 .card-ios-dark .card-title-ios-transparent,
 .card-ios-dark .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-dark .text-ios-transparent60,
@@ -10757,7 +10757,7 @@ ion-card-content {
 .card-ios-favorite .card-header-ios-transparent,
 .card-ios-favorite .card-title-ios-transparent,
 .card-ios-favorite .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-favorite .text-ios-transparent60,
@@ -10842,7 +10842,7 @@ ion-card-content {
 .card-ios-profileHeader .card-header-ios-transparent,
 .card-ios-profileHeader .card-title-ios-transparent,
 .card-ios-profileHeader .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-profileHeader .text-ios-transparent60,
@@ -10859,12 +10859,12 @@ ion-card-content {
 }
 
 .card-ios .text-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-transparent .card-header-ios,
@@ -10927,7 +10927,7 @@ ion-card-content {
 .card-ios-transparent .card-header-ios-transparent,
 .card-ios-transparent .card-title-ios-transparent,
 .card-ios-transparent .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-transparent .text-ios-transparent60,
@@ -10940,7 +10940,7 @@ ion-card-content {
 .card-header-ios-transparent,
 .card-title-ios-transparent,
 .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios .text-ios-transparent60 {
@@ -11012,7 +11012,7 @@ ion-card-content {
 .card-ios-transparent60 .card-header-ios-transparent,
 .card-ios-transparent60 .card-title-ios-transparent,
 .card-ios-transparent60 .card-content-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-ios-transparent60 .text-ios-transparent60,
@@ -11193,7 +11193,7 @@ ion-card-content {
 .card-md-primary .card-header-md-transparent,
 .card-md-primary .card-title-md-transparent,
 .card-md-primary .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-primary .text-md-transparent60,
@@ -11284,7 +11284,7 @@ ion-card-content {
 .card-md-secondary .card-header-md-transparent,
 .card-md-secondary .card-title-md-transparent,
 .card-md-secondary .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-secondary .text-md-transparent60,
@@ -11375,7 +11375,7 @@ ion-card-content {
 .card-md-danger .card-header-md-transparent,
 .card-md-danger .card-title-md-transparent,
 .card-md-danger .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-danger .text-md-transparent60,
@@ -11466,7 +11466,7 @@ ion-card-content {
 .card-md-light .card-header-md-transparent,
 .card-md-light .card-title-md-transparent,
 .card-md-light .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-light .text-md-transparent60,
@@ -11557,7 +11557,7 @@ ion-card-content {
 .card-md-dark .card-header-md-transparent,
 .card-md-dark .card-title-md-transparent,
 .card-md-dark .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-dark .text-md-transparent60,
@@ -11648,7 +11648,7 @@ ion-card-content {
 .card-md-favorite .card-header-md-transparent,
 .card-md-favorite .card-title-md-transparent,
 .card-md-favorite .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-favorite .text-md-transparent60,
@@ -11739,7 +11739,7 @@ ion-card-content {
 .card-md-profileHeader .card-header-md-transparent,
 .card-md-profileHeader .card-title-md-transparent,
 .card-md-profileHeader .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-profileHeader .text-md-transparent60,
@@ -11756,12 +11756,12 @@ ion-card-content {
 }
 
 .card-md .text-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .card-md-transparent .card-header-md,
@@ -11830,7 +11830,7 @@ ion-card-content {
 .card-md-transparent .card-header-md-transparent,
 .card-md-transparent .card-title-md-transparent,
 .card-md-transparent .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-transparent .text-md-transparent60,
@@ -11843,7 +11843,7 @@ ion-card-content {
 .card-header-md-transparent,
 .card-title-md-transparent,
 .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md .text-md-transparent60 {
@@ -11921,7 +11921,7 @@ ion-card-content {
 .card-md-transparent60 .card-header-md-transparent,
 .card-md-transparent60 .card-title-md-transparent,
 .card-md-transparent60 .card-content-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-md-transparent60 .text-md-transparent60,
@@ -12102,7 +12102,7 @@ ion-card-content {
 .card-wp-primary .card-header-wp-transparent,
 .card-wp-primary .card-title-wp-transparent,
 .card-wp-primary .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-primary .text-wp-transparent60,
@@ -12193,7 +12193,7 @@ ion-card-content {
 .card-wp-secondary .card-header-wp-transparent,
 .card-wp-secondary .card-title-wp-transparent,
 .card-wp-secondary .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-secondary .text-wp-transparent60,
@@ -12284,7 +12284,7 @@ ion-card-content {
 .card-wp-danger .card-header-wp-transparent,
 .card-wp-danger .card-title-wp-transparent,
 .card-wp-danger .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-danger .text-wp-transparent60,
@@ -12375,7 +12375,7 @@ ion-card-content {
 .card-wp-light .card-header-wp-transparent,
 .card-wp-light .card-title-wp-transparent,
 .card-wp-light .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-light .text-wp-transparent60,
@@ -12466,7 +12466,7 @@ ion-card-content {
 .card-wp-dark .card-header-wp-transparent,
 .card-wp-dark .card-title-wp-transparent,
 .card-wp-dark .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-dark .text-wp-transparent60,
@@ -12557,7 +12557,7 @@ ion-card-content {
 .card-wp-favorite .card-header-wp-transparent,
 .card-wp-favorite .card-title-wp-transparent,
 .card-wp-favorite .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-favorite .text-wp-transparent60,
@@ -12648,7 +12648,7 @@ ion-card-content {
 .card-wp-profileHeader .card-header-wp-transparent,
 .card-wp-profileHeader .card-title-wp-transparent,
 .card-wp-profileHeader .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-profileHeader .text-wp-transparent60,
@@ -12665,12 +12665,12 @@ ion-card-content {
 }
 
 .card-wp .text-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-transparent .card-header-wp,
@@ -12739,7 +12739,7 @@ ion-card-content {
 .card-wp-transparent .card-header-wp-transparent,
 .card-wp-transparent .card-title-wp-transparent,
 .card-wp-transparent .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-transparent .text-wp-transparent60,
@@ -12752,7 +12752,7 @@ ion-card-content {
 .card-header-wp-transparent,
 .card-title-wp-transparent,
 .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp .text-wp-transparent60 {
@@ -12830,7 +12830,7 @@ ion-card-content {
 .card-wp-transparent60 .card-header-wp-transparent,
 .card-wp-transparent60 .card-title-wp-transparent,
 .card-wp-transparent60 .card-content-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card-wp-transparent60 .text-wp-transparent60,
@@ -12962,8 +12962,8 @@ ion-card-content {
 }
 
 .checkbox-ios-transparent .checkbox-checked {
-  border-color: transparent;
-  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .checkbox-ios-transparent .checkbox-checked .checkbox-inner {
@@ -13105,8 +13105,8 @@ ion-card-content {
 }
 
 .checkbox-md-transparent .checkbox-checked {
-  border-color: transparent;
-  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .checkbox-md-transparent .checkbox-checked .checkbox-inner {
@@ -13242,8 +13242,8 @@ ion-card-content {
 }
 
 .checkbox-wp-transparent .checkbox-checked {
-  border-color: transparent;
-  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .checkbox-wp-transparent .checkbox-checked .checkbox-inner {
@@ -13370,7 +13370,7 @@ ion-chip ion-avatar img {
 .chip-ios-transparent,
 .chip-ios .icon-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .chip-ios-transparent60,
@@ -13443,7 +13443,7 @@ ion-chip ion-avatar img {
 .chip-md-transparent,
 .chip-md .icon-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .chip-md-transparent60,
@@ -13520,7 +13520,7 @@ ion-chip ion-avatar img {
 .chip-wp-transparent,
 .chip-wp .icon-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .chip-wp-transparent60,
@@ -14247,7 +14247,7 @@ ion-fab-list[side=right] {
 
 .fab-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .fab-ios-transparent.activated {
@@ -14390,7 +14390,7 @@ ion-fab-list[side=right] {
 
 .fab-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .fab-md-transparent.activated {
@@ -14501,7 +14501,7 @@ ion-fab-list[side=right] {
 
 .fab-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .fab-wp-transparent.activated {
@@ -18003,7 +18003,7 @@ ion-icon[small] {
 }
 
 .icon-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .icon-ios-transparent60 {
@@ -18039,7 +18039,7 @@ ion-icon[small] {
 }
 
 .icon-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .icon-md-transparent60 {
@@ -18075,7 +18075,7 @@ ion-icon[small] {
 }
 
 .icon-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .icon-wp-transparent60 {
@@ -19137,13 +19137,13 @@ ion-item-group .item-wrapper:last-child .item-ios .item-inner {
 }
 
 .item-ios .text-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .item-ios-transparent,
 .item-divider-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .item-ios-transparent p,
@@ -19459,13 +19459,13 @@ ion-item-group .item-md .item-wrapper:last-child .item-inner {
 }
 
 .item-md .text-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .item-md-transparent,
 .item-divider-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .item-md-transparent p,
@@ -19780,13 +19780,13 @@ ion-item-group .item-md .item-wrapper:last-child .item-inner {
 }
 
 .item-wp .text-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .item-wp-transparent,
 .item-divider-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .item-wp-transparent p,
@@ -19992,7 +19992,7 @@ ion-label[floating] {
 .item-input .label-ios-transparent,
 .item-select .label-ios-transparent,
 .item-datetime .label-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .label-ios-transparent60,
@@ -20108,7 +20108,7 @@ ion-label[floating] {
 .item-input .label-md-transparent,
 .item-select .label-md-transparent,
 .item-datetime .label-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .label-md-transparent60,
@@ -20215,7 +20215,7 @@ ion-label[floating] {
 .item-input .label-wp-transparent,
 .item-select .label-wp-transparent,
 .item-datetime .label-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .label-wp-transparent60,
@@ -20403,7 +20403,7 @@ ion-list[inset] {
 
 .list-header-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .list-header-ios-transparent60 {
@@ -20548,7 +20548,7 @@ ion-list[inset] {
 
 .list-header-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .list-header-md-transparent60 {
@@ -20701,7 +20701,7 @@ ion-list[inset] {
 
 .list-header-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .list-header-wp-transparent60 {
@@ -21087,7 +21087,7 @@ ion-modal {
 }
 
 .note-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .note-ios-transparent60 {
@@ -21127,7 +21127,7 @@ ion-modal {
 }
 
 .note-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .note-md-transparent60 {
@@ -21167,7 +21167,7 @@ ion-modal {
 }
 
 .note-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .note-wp-transparent60 {
@@ -21922,15 +21922,15 @@ ion-popover {
 }
 
 .item-radio-ios-transparent.item-radio-checked ion-label {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .radio-ios-transparent .radio-checked {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .radio-ios-transparent .radio-checked .radio-inner {
-  border-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
 }
 
 .item-radio-ios-transparent60.item-radio-checked ion-label {
@@ -22098,15 +22098,15 @@ ion-popover {
 }
 
 .item-radio-md-transparent.item-radio-checked ion-label {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .radio-md-transparent .radio-checked {
-  border-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
 }
 
 .radio-md-transparent .radio-inner {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .item-radio-md-transparent60.item-radio-checked ion-label {
@@ -22216,7 +22216,7 @@ ion-popover {
 }
 
 .radio-wp-transparent .radio-checked {
-  border-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
 }
 
 .radio-wp-transparent60 .radio-checked {
@@ -22431,7 +22431,7 @@ ion-range ion-icon {
 
 .range-ios-transparent .range-bar-active,
 .range-ios-transparent .range-tick-active {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .range-ios-transparent60 .range-bar-active,
@@ -22742,7 +22742,7 @@ ion-range ion-icon {
 .range-md-transparent .range-knob,
 .range-md-transparent .range-pin,
 .range-md-transparent .range-pin::before {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .range-md-transparent60 .range-md .range-knob-min.range-knob-min .range-knob {
@@ -22925,7 +22925,7 @@ ion-range ion-icon {
 .range-wp-transparent .range-tick-active,
 .range-wp-transparent .range-knob,
 .range-wp-transparent .range-pin {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .range-wp-transparent60 .range-bar-active,
@@ -23501,7 +23501,7 @@ ion-searchbar {
 }
 
 .searchbar-ios-transparent .searchbar-ios-cancel {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .searchbar-ios-transparent .searchbar-ios-cancel:hover:not(.disable-hover) {
@@ -23817,7 +23817,7 @@ ion-searchbar {
 }
 
 .searchbar-wp-transparent.searchbar-has-focus .searchbar-input-container {
-  border-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
 }
 
 .searchbar-wp-transparent60.searchbar-has-focus .searchbar-input-container {
@@ -24120,8 +24120,8 @@ ion-segment {
 }
 
 .segment-ios-transparent .segment-button {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
 }
 
 .segment-ios-transparent .segment-button:hover:not(.segment-activated) {
@@ -24134,7 +24134,7 @@ ion-segment {
 
 .segment-ios-transparent .segment-button.segment-activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .segment-ios-transparent .segment-button-disabled {
@@ -24142,7 +24142,7 @@ ion-segment {
 }
 
 .toolbar-ios-transparent .segment-ios .segment-button.segment-activated {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .segment-ios-transparent60 .segment-button {
@@ -24288,12 +24288,12 @@ ion-segment {
 }
 
 .segment-md-transparent .segment-button {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .segment-md-transparent .segment-button.activated, .segment-md-transparent .segment-button.segment-activated {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   opacity: 1;
 }
 
@@ -24415,12 +24415,12 @@ ion-segment {
 }
 
 .segment-wp-transparent .segment-button {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .segment-wp-transparent .segment-button.activated, .segment-wp-transparent .segment-button.segment-activated {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   opacity: 1;
 }
 
@@ -24918,23 +24918,23 @@ button.swiper-pagination-bullet {
 }
 
 .swiper-container-3d .swiper-slide-shadow-left {
-  background-image: -webkit-gradient(linear, right top, left top, from(rgba(0, 0, 0, 0.5)), to(transparent));
-  background-image: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+  background-image: -webkit-gradient(linear, right top, left top, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0)));
+  background-image: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
 .swiper-container-3d .swiper-slide-shadow-right {
-  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.5)), to(transparent));
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0)));
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
 .swiper-container-3d .swiper-slide-shadow-top {
-  background-image: -webkit-gradient(linear, left bottom, left top, from(rgba(0, 0, 0, 0.5)), to(transparent));
-  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  background-image: -webkit-gradient(linear, left bottom, left top, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0)));
+  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
 .swiper-container-3d .swiper-slide-shadow-bottom {
-  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(transparent));
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0)));
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
 /* Coverflow */
@@ -25488,13 +25488,13 @@ ion-spinner.spinner-paused svg {
 .spinner-ios-transparent.spinner-ios line,
 .spinner-ios-transparent.spinner-ios-small line,
 .spinner-ios-transparent.spinner-crescent circle {
-  stroke: transparent;
+  stroke: rgba(0, 0, 0, 0);
 }
 
 .spinner-ios-transparent.spinner-bubbles circle,
 .spinner-ios-transparent.spinner-circles circle,
 .spinner-ios-transparent.spinner-dots circle {
-  fill: transparent;
+  fill: rgba(0, 0, 0, 0);
 }
 
 .spinner-ios-transparent60.spinner-ios line,
@@ -25617,13 +25617,13 @@ ion-spinner.spinner-paused svg {
 .spinner-md-transparent.spinner-ios line,
 .spinner-md-transparent.spinner-ios-small line,
 .spinner-md-transparent.spinner-crescent circle {
-  stroke: transparent;
+  stroke: rgba(0, 0, 0, 0);
 }
 
 .spinner-md-transparent.spinner-bubbles circle,
 .spinner-md-transparent.spinner-circles circle,
 .spinner-md-transparent.spinner-dots circle {
-  fill: transparent;
+  fill: rgba(0, 0, 0, 0);
 }
 
 .spinner-md-transparent60.spinner-ios line,
@@ -25746,13 +25746,13 @@ ion-spinner.spinner-paused svg {
 .spinner-wp-transparent.spinner-ios line,
 .spinner-wp-transparent.spinner-ios-small line,
 .spinner-wp-transparent.spinner-crescent circle {
-  stroke: transparent;
+  stroke: rgba(0, 0, 0, 0);
 }
 
 .spinner-wp-transparent.spinner-bubbles circle,
 .spinner-wp-transparent.spinner-circles circle,
 .spinner-wp-transparent.spinner-dots circle {
-  fill: transparent;
+  fill: rgba(0, 0, 0, 0);
 }
 
 .spinner-wp-transparent60.spinner-ios line,
@@ -26222,8 +26222,8 @@ ion-split-pane {
 }
 
 .tabs-ios-transparent .tabbar {
-  border-color: transparent;
-  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .tabs-ios-transparent .tab-button,
@@ -26499,7 +26499,7 @@ ion-split-pane {
 }
 
 .tabs-md-transparent .tabbar {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .tabs-md-transparent .tab-button,
@@ -26727,7 +26727,7 @@ ion-split-pane {
 }
 
 .tabs-wp-transparent .tabbar {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .tabs-wp-transparent .tab-button,
@@ -27022,7 +27022,7 @@ ion-toast {
 }
 
 .toggle-ios-transparent .toggle-checked {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toggle-ios-transparent60 .toggle-checked {
@@ -27158,7 +27158,7 @@ ion-toast {
 }
 
 .toggle-md-transparent .toggle-checked .toggle-inner {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toggle-md-transparent60 .toggle-checked {
@@ -27299,8 +27299,8 @@ ion-toast {
 }
 
 .toggle-wp-transparent .toggle-checked {
-  border-color: transparent;
-  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toggle-wp-transparent .toggle-checked .toggle-inner {
@@ -28023,14 +28023,14 @@ ion-navbar.toolbar {
 .toolbar-ios-primary .bar-button-transparent-ios,
 .toolbar-ios-primary .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-primary .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-primary .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-primary .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-primary .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-primary .bar-button-transparent-ios.activated,
@@ -28040,19 +28040,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-primary .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-primary .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-primary .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-primary .bar-button-solid-ios-transparent.activated {
@@ -28433,14 +28433,14 @@ ion-navbar.toolbar {
 .toolbar-ios-secondary .bar-button-transparent-ios,
 .toolbar-ios-secondary .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-secondary .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-secondary .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-secondary .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-secondary .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-secondary .bar-button-transparent-ios.activated,
@@ -28450,19 +28450,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-secondary .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-secondary .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-secondary .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-secondary .bar-button-solid-ios-transparent.activated {
@@ -28843,14 +28843,14 @@ ion-navbar.toolbar {
 .toolbar-ios-danger .bar-button-transparent-ios,
 .toolbar-ios-danger .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-danger .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-danger .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-danger .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-danger .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-danger .bar-button-transparent-ios.activated,
@@ -28860,19 +28860,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-danger .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-danger .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-danger .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-danger .bar-button-solid-ios-transparent.activated {
@@ -29253,14 +29253,14 @@ ion-navbar.toolbar {
 .toolbar-ios-light .bar-button-transparent-ios,
 .toolbar-ios-light .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-light .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-light .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-light .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-light .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-light .bar-button-transparent-ios.activated,
@@ -29270,19 +29270,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-light .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-light .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-light .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-light .bar-button-solid-ios-transparent.activated {
@@ -29663,14 +29663,14 @@ ion-navbar.toolbar {
 .toolbar-ios-dark .bar-button-transparent-ios,
 .toolbar-ios-dark .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-dark .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-dark .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-dark .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-dark .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-dark .bar-button-transparent-ios.activated,
@@ -29680,19 +29680,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-dark .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-dark .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-dark .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-dark .bar-button-solid-ios-transparent.activated {
@@ -30073,14 +30073,14 @@ ion-navbar.toolbar {
 .toolbar-ios-favorite .bar-button-transparent-ios,
 .toolbar-ios-favorite .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-favorite .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-favorite .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-favorite .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-favorite .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-favorite .bar-button-transparent-ios.activated,
@@ -30090,19 +30090,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-favorite .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-favorite .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-favorite .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-favorite .bar-button-solid-ios-transparent.activated {
@@ -30483,14 +30483,14 @@ ion-navbar.toolbar {
 .toolbar-ios-profileHeader .bar-button-transparent-ios,
 .toolbar-ios-profileHeader .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-profileHeader .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-profileHeader .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-profileHeader .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-profileHeader .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-profileHeader .bar-button-transparent-ios.activated,
@@ -30500,19 +30500,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-profileHeader .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-profileHeader .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-profileHeader .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-profileHeader .bar-button-solid-ios-transparent.activated {
@@ -30601,7 +30601,7 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-transparent .toolbar-background-ios {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent .toolbar-title-ios,
@@ -30893,14 +30893,14 @@ ion-navbar.toolbar {
 .toolbar-ios-transparent .bar-button-transparent-ios,
 .toolbar-ios-transparent .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-transparent .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-transparent .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-transparent .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-transparent .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent .bar-button-transparent-ios.activated,
@@ -30910,19 +30910,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-transparent .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-transparent .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent .bar-button-solid-ios-transparent.activated {
@@ -30973,14 +30973,14 @@ ion-navbar.toolbar {
 .bar-button-transparent-ios,
 .bar-button-default.bar-button-ios-transparent,
 .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .bar-button-transparent-ios:hover:not(.disable-hover),
 .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-transparent-ios.activated,
@@ -30990,19 +30990,19 @@ ion-navbar.toolbar {
 }
 
 .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-solid-ios-transparent.activated {
@@ -31303,14 +31303,14 @@ ion-navbar.toolbar {
 .toolbar-ios-transparent60 .bar-button-transparent-ios,
 .toolbar-ios-transparent60 .bar-button-default.bar-button-ios-transparent,
 .toolbar-ios-transparent60 .bar-button-clear-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-transparent60 .bar-button-transparent-ios:hover:not(.disable-hover),
 .toolbar-ios-transparent60 .bar-button-default.bar-button-ios-transparent:hover:not(.disable-hover),
 .toolbar-ios-transparent60 .bar-button-clear-ios-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent60 .bar-button-transparent-ios.activated,
@@ -31320,19 +31320,19 @@ ion-navbar.toolbar {
 }
 
 .toolbar-ios-transparent60 .bar-button-outline-ios-transparent {
-  border-color: transparent;
-  color: transparent;
+  border-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-ios-transparent60 .bar-button-outline-ios-transparent.activated {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent60 .bar-button-solid-ios-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-ios-transparent60 .bar-button-solid-ios-transparent.activated {
@@ -31948,14 +31948,14 @@ ion-navbar.toolbar {
 .toolbar-md-primary .bar-button-transparent-md,
 .toolbar-md-primary .bar-button-clear-md-transparent,
 .toolbar-md-primary .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-primary .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-primary .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-primary .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-primary .bar-button-outline-md-transparent {
@@ -31974,7 +31974,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-primary .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-primary .bar-button-solid-md-transparent.activated {
@@ -32339,14 +32339,14 @@ ion-navbar.toolbar {
 .toolbar-md-secondary .bar-button-transparent-md,
 .toolbar-md-secondary .bar-button-clear-md-transparent,
 .toolbar-md-secondary .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-secondary .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-secondary .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-secondary .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-secondary .bar-button-outline-md-transparent {
@@ -32365,7 +32365,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-secondary .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-secondary .bar-button-solid-md-transparent.activated {
@@ -32730,14 +32730,14 @@ ion-navbar.toolbar {
 .toolbar-md-danger .bar-button-transparent-md,
 .toolbar-md-danger .bar-button-clear-md-transparent,
 .toolbar-md-danger .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-danger .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-danger .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-danger .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-danger .bar-button-outline-md-transparent {
@@ -32756,7 +32756,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-danger .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-danger .bar-button-solid-md-transparent.activated {
@@ -33121,14 +33121,14 @@ ion-navbar.toolbar {
 .toolbar-md-light .bar-button-transparent-md,
 .toolbar-md-light .bar-button-clear-md-transparent,
 .toolbar-md-light .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-light .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-light .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-light .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-light .bar-button-outline-md-transparent {
@@ -33147,7 +33147,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-light .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-light .bar-button-solid-md-transparent.activated {
@@ -33512,14 +33512,14 @@ ion-navbar.toolbar {
 .toolbar-md-dark .bar-button-transparent-md,
 .toolbar-md-dark .bar-button-clear-md-transparent,
 .toolbar-md-dark .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-dark .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-dark .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-dark .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-dark .bar-button-outline-md-transparent {
@@ -33538,7 +33538,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-dark .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-dark .bar-button-solid-md-transparent.activated {
@@ -33903,14 +33903,14 @@ ion-navbar.toolbar {
 .toolbar-md-favorite .bar-button-transparent-md,
 .toolbar-md-favorite .bar-button-clear-md-transparent,
 .toolbar-md-favorite .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-favorite .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-favorite .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-favorite .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-favorite .bar-button-outline-md-transparent {
@@ -33929,7 +33929,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-favorite .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-favorite .bar-button-solid-md-transparent.activated {
@@ -34294,14 +34294,14 @@ ion-navbar.toolbar {
 .toolbar-md-profileHeader .bar-button-transparent-md,
 .toolbar-md-profileHeader .bar-button-clear-md-transparent,
 .toolbar-md-profileHeader .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-profileHeader .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-profileHeader .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-profileHeader .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-profileHeader .bar-button-outline-md-transparent {
@@ -34320,7 +34320,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-profileHeader .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-profileHeader .bar-button-solid-md-transparent.activated {
@@ -34403,7 +34403,7 @@ ion-navbar.toolbar {
 }
 
 .toolbar-md-transparent .toolbar-background-md {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-transparent .bar-button-clear-md,
@@ -34685,14 +34685,14 @@ ion-navbar.toolbar {
 .toolbar-md-transparent .bar-button-transparent-md,
 .toolbar-md-transparent .bar-button-clear-md-transparent,
 .toolbar-md-transparent .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-transparent .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-transparent .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-transparent .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-transparent .bar-button-outline-md-transparent {
@@ -34711,7 +34711,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-transparent .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-transparent .bar-button-solid-md-transparent.activated {
@@ -34759,14 +34759,14 @@ ion-navbar.toolbar {
 .bar-button-transparent-md,
 .bar-button-clear-md-transparent,
 .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .bar-button-transparent-md:hover:not(.disable-hover),
 .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-outline-md-transparent {
@@ -34785,7 +34785,7 @@ ion-navbar.toolbar {
 
 .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-solid-md-transparent.activated {
@@ -35076,14 +35076,14 @@ ion-navbar.toolbar {
 .toolbar-md-transparent60 .bar-button-transparent-md,
 .toolbar-md-transparent60 .bar-button-clear-md-transparent,
 .toolbar-md-transparent60 .bar-button-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-md-transparent60 .bar-button-transparent-md:hover:not(.disable-hover),
 .toolbar-md-transparent60 .bar-button-clear-md-transparent:hover:not(.disable-hover),
 .toolbar-md-transparent60 .bar-button-md-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-transparent60 .bar-button-outline-md-transparent {
@@ -35102,7 +35102,7 @@ ion-navbar.toolbar {
 
 .toolbar-md-transparent60 .bar-button-solid-md-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-md-transparent60 .bar-button-solid-md-transparent.activated {
@@ -35653,14 +35653,14 @@ ion-navbar.toolbar {
 .toolbar-wp-primary .bar-button-transparent-wp,
 .toolbar-wp-primary .bar-button-clear-wp-transparent,
 .toolbar-wp-primary .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-primary .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-primary .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-primary .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-primary .bar-button-outline-wp-transparent {
@@ -35676,7 +35676,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-primary .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-primary .bar-button-solid-wp-transparent.activated {
@@ -36008,14 +36008,14 @@ ion-navbar.toolbar {
 .toolbar-wp-secondary .bar-button-transparent-wp,
 .toolbar-wp-secondary .bar-button-clear-wp-transparent,
 .toolbar-wp-secondary .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-secondary .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-secondary .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-secondary .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-secondary .bar-button-outline-wp-transparent {
@@ -36031,7 +36031,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-secondary .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-secondary .bar-button-solid-wp-transparent.activated {
@@ -36363,14 +36363,14 @@ ion-navbar.toolbar {
 .toolbar-wp-danger .bar-button-transparent-wp,
 .toolbar-wp-danger .bar-button-clear-wp-transparent,
 .toolbar-wp-danger .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-danger .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-danger .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-danger .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-danger .bar-button-outline-wp-transparent {
@@ -36386,7 +36386,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-danger .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-danger .bar-button-solid-wp-transparent.activated {
@@ -36718,14 +36718,14 @@ ion-navbar.toolbar {
 .toolbar-wp-light .bar-button-transparent-wp,
 .toolbar-wp-light .bar-button-clear-wp-transparent,
 .toolbar-wp-light .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-light .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-light .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-light .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-light .bar-button-outline-wp-transparent {
@@ -36741,7 +36741,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-light .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-light .bar-button-solid-wp-transparent.activated {
@@ -37073,14 +37073,14 @@ ion-navbar.toolbar {
 .toolbar-wp-dark .bar-button-transparent-wp,
 .toolbar-wp-dark .bar-button-clear-wp-transparent,
 .toolbar-wp-dark .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-dark .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-dark .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-dark .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-dark .bar-button-outline-wp-transparent {
@@ -37096,7 +37096,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-dark .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-dark .bar-button-solid-wp-transparent.activated {
@@ -37428,14 +37428,14 @@ ion-navbar.toolbar {
 .toolbar-wp-favorite .bar-button-transparent-wp,
 .toolbar-wp-favorite .bar-button-clear-wp-transparent,
 .toolbar-wp-favorite .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-favorite .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-favorite .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-favorite .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-favorite .bar-button-outline-wp-transparent {
@@ -37451,7 +37451,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-favorite .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-favorite .bar-button-solid-wp-transparent.activated {
@@ -37783,14 +37783,14 @@ ion-navbar.toolbar {
 .toolbar-wp-profileHeader .bar-button-transparent-wp,
 .toolbar-wp-profileHeader .bar-button-clear-wp-transparent,
 .toolbar-wp-profileHeader .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-profileHeader .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-profileHeader .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-profileHeader .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-profileHeader .bar-button-outline-wp-transparent {
@@ -37806,7 +37806,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-profileHeader .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-profileHeader .bar-button-solid-wp-transparent.activated {
@@ -37883,7 +37883,7 @@ ion-navbar.toolbar {
 }
 
 .toolbar-wp-transparent .toolbar-background-wp {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-transparent .bar-button-clear-wp,
@@ -38138,14 +38138,14 @@ ion-navbar.toolbar {
 .toolbar-wp-transparent .bar-button-transparent-wp,
 .toolbar-wp-transparent .bar-button-clear-wp-transparent,
 .toolbar-wp-transparent .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-transparent .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-transparent .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-transparent .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-transparent .bar-button-outline-wp-transparent {
@@ -38161,7 +38161,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-transparent .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-transparent .bar-button-solid-wp-transparent.activated {
@@ -38206,14 +38206,14 @@ ion-navbar.toolbar {
 .bar-button-transparent-wp,
 .bar-button-clear-wp-transparent,
 .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .bar-button-transparent-wp:hover:not(.disable-hover),
 .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-outline-wp-transparent {
@@ -38229,7 +38229,7 @@ ion-navbar.toolbar {
 
 .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .bar-button-solid-wp-transparent.activated {
@@ -38493,14 +38493,14 @@ ion-navbar.toolbar {
 .toolbar-wp-transparent60 .bar-button-transparent-wp,
 .toolbar-wp-transparent60 .bar-button-clear-wp-transparent,
 .toolbar-wp-transparent60 .bar-button-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
   background-color: transparent;
 }
 
 .toolbar-wp-transparent60 .bar-button-transparent-wp:hover:not(.disable-hover),
 .toolbar-wp-transparent60 .bar-button-clear-wp-transparent:hover:not(.disable-hover),
 .toolbar-wp-transparent60 .bar-button-wp-transparent:hover:not(.disable-hover) {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-transparent60 .bar-button-outline-wp-transparent {
@@ -38516,7 +38516,7 @@ ion-navbar.toolbar {
 
 .toolbar-wp-transparent60 .bar-button-solid-wp-transparent {
   color: #fff;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .toolbar-wp-transparent60 .bar-button-solid-wp-transparent.activated {
@@ -38625,7 +38625,7 @@ ion-navbar.toolbar {
 }
 
 .text-ios-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .text-ios-transparent60 {
@@ -38661,7 +38661,7 @@ ion-navbar.toolbar {
 }
 
 .text-md-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .text-md-transparent60 {
@@ -38697,7 +38697,7 @@ ion-navbar.toolbar {
 }
 
 .text-wp-transparent {
-  color: transparent;
+  color: rgba(0, 0, 0, 0);
 }
 
 .text-wp-transparent60 {
@@ -42382,7 +42382,7 @@ h6 {
 }
 
 .-target-expired:before {
-  background: transparent;
+  background: rgba(0, 0, 0, 0);
 }
 
 .-target-expired .congratulations h2 {

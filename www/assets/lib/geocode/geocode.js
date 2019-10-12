@@ -1,6 +1,6 @@
 Geocode = (function () {
      function locationForAddress(address, callback) {
-        var serviceURL = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&address=" + address;
+        var serviceURL = "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&address=" + address;
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function () {
             if (xmlHttp.readyState == 4) {
@@ -13,7 +13,7 @@ Geocode = (function () {
     }
     
     function addressForLocation(lat, lng, callback) {
-        var serviceURL = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=" + lat + "," + lng;
+        var serviceURL = "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&key=AIzaSyDRHN9ruTUk6JkVr_2EPZWGKeX_LJLQYuA&latlng=" + lat + "," + lng;
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function () {
             if (xmlHttp.readyState == 4) {

@@ -1,4 +1,4 @@
-#Mon Aug 26 19:25:00 GST 2019
-base.0=C\:\\Users\\204866\\Documents\\Mobile\\Code_to_sunil\\app_PAL\\platforms\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
+#Sun Oct 13 01:10:18 IST 2019
+base.0=C\:\\Users\\Sunil Mane\\Documents\\Project\\pal\\platforms\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
 renamed.0=classes.dex
-file.0=C\:\\Users\\204866\\Documents\\Mobile\\Code_to_sunil\\app_PAL\\platforms\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0\\classes.dex
+file.0=C\:\\Users\\Sunil Mane\\Documents\\Project\\pal\\platforms\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0\\classes.dex

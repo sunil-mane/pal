@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="C:\Users\204866\Documents\Mobile\Code_to_sunil\app_PAL\platforms\android\app\src\main\shaders"/></dataSet><dataSet config="debug"><source path="C:\Users\204866\Documents\Mobile\Code_to_sunil\app_PAL\platforms\android\app\src\debug\shaders"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="C:\Users\Sunil Mane\Documents\Project\pal\platforms\android\app\src\main\shaders"/></dataSet><dataSet config="debug"><source path="C:\Users\Sunil Mane\Documents\Project\pal\platforms\android\app\src\debug\shaders"/></dataSet></merger>
