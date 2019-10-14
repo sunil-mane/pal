@@ -8,6 +8,7 @@ export class SessionUtils {
 
     private contextKey: string  = "SESSION_ROOT_CONTEXT";
     private tutorialKey: string  = "TUTORIAL_CONTEXT";
+    private voucherKey: string = "VOUCHERS_TAB_FLAG";
     constructor(private storageService: StorageService) {
 
     }
@@ -55,5 +56,20 @@ export class SessionUtils {
     }
     getTutorialFlag(){
         return this.storageService.getObject(this.tutorialKey);
+    }
+
+    getVoucherFlag() {
+        let rootContext = this.getRootContext();
+        let configs = {};
+        rootContext.configs.forEach(
+            config => {
+                configs[config.code] = config.value
+            }
+        );
+        if(configs[this.voucherKey] && configs[this.voucherKey] == 'Y'){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

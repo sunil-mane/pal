@@ -6,8 +6,8 @@ webpackJsonp([0],{
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SessionUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_commons_storage_service__ = __webpack_require__(505);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_session_dto__ = __webpack_require__(506);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_commons_storage_service__ = __webpack_require__(504);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_session_dto__ = __webpack_require__(505);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_account_dto__ = __webpack_require__(52);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -27,6 +27,7 @@ var SessionUtils = (function () {
         this.storageService = storageService;
         this.contextKey = "SESSION_ROOT_CONTEXT";
         this.tutorialKey = "TUTORIAL_CONTEXT";
+        this.voucherKey = "VOUCHERS_TAB_FLAG";
     }
     SessionUtils.prototype.getRootContext = function () {
         var contextObj = this.storageService.getObject(this.contextKey);
@@ -67,6 +68,19 @@ var SessionUtils = (function () {
     SessionUtils.prototype.getTutorialFlag = function () {
         return this.storageService.getObject(this.tutorialKey);
     };
+    SessionUtils.prototype.getVoucherFlag = function () {
+        var rootContext = this.getRootContext();
+        var configs = {};
+        rootContext.configs.forEach(function (config) {
+            configs[config.code] = config.value;
+        });
+        if (configs[this.voucherKey] && configs[this.voucherKey] == 'Y') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
     return SessionUtils;
 }());
 SessionUtils = __decorate([
@@ -75,6 +89,296 @@ SessionUtils = __decorate([
 ], SessionUtils);
 
 //# sourceMappingURL=session.utils.js.map
+
+/***/ }),
+
+/***/ 107:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return WalletUtils; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__session_utils__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_file_service__ = __webpack_require__(143);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_data_access_service__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_service_constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_ng2_translate__ = __webpack_require__(14);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+/**
+ * Created by sandip on 1/5/17.
+ */
+
+
+
+
+
+
+
+
+
+
+
+var WalletUtils = (function () {
+    function WalletUtils(events, translate, sessionUtils, fileService, dataAccessService, appConstants, serviceConstants) {
+        this.events = events;
+        this.translate = translate;
+        this.sessionUtils = sessionUtils;
+        this.fileService = fileService;
+        this.dataAccessService = dataAccessService;
+        this.appConstants = appConstants;
+        this.serviceConstants = serviceConstants;
+    }
+    WalletUtils.prototype.getWalletContext = function () {
+        var rootContext = this.sessionUtils.getRootContext();
+        var contextObj = rootContext.virtualCards;
+        if (!contextObj) {
+            contextObj = new Array();
+        }
+        return contextObj;
+    };
+    WalletUtils.prototype.saveWalletContext = function (contextObj) {
+        console.log("Wallet  : " + JSON.stringify(contextObj));
+        var rootContext = this.sessionUtils.getRootContext();
+        rootContext.virtualCards = contextObj;
+        this.sessionUtils.saveRootContext(rootContext);
+    };
+    WalletUtils.prototype.cleaWalletContext = function () {
+        var contextObj = new Array();
+        this.saveWalletContext(contextObj);
+    };
+    WalletUtils.prototype.getQRCodeContext = function () {
+        var rootContext = this.sessionUtils.getRootContext();
+        var contextObj = rootContext.qrCodes;
+        if (!contextObj) {
+            contextObj = new Array();
+        }
+        return contextObj;
+    };
+    WalletUtils.prototype.saveQRCodeContext = function (contextObj) {
+        var rootContext = this.sessionUtils.getRootContext();
+        rootContext.qrCodes = contextObj;
+        this.sessionUtils.saveRootContext(rootContext);
+    };
+    WalletUtils.prototype.cleaQRCodeContext = function () {
+        var contextObj = new Array();
+        this.saveQRCodeContext(contextObj);
+    };
+    WalletUtils.prototype.fetchWalletData = function (successCallback, errorCallback) {
+        var _this = this;
+        if (this.sessionUtils.isUserLoggedIn()) {
+            var memberInfo = this.sessionUtils.getMemberInfo();
+            var requestData = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["n" /* VirtualCardInfo */]();
+            requestData.cardNumber = memberInfo.activeCardNo;
+            requestData.tierCode = memberInfo.tier;
+            var serviceContext = new __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_WALLET, this.serviceConstants.WALLET_SERVICE_NAME_VIRTUAL_CARD, requestData);
+            this.dataAccessService.call(serviceContext)
+                .subscribe(function (result) {
+                var shouldPublishEvent = false;
+                var response = result.json();
+                if (!response) {
+                    response = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["o" /* VirtualCardResponse */]();
+                    response.data = [];
+                }
+                else if (response.data && response.data.length > 0) {
+                    var oldData = _this.getWalletContext();
+                    if (oldData && oldData.length > 0) {
+                        var oldCardInfo = oldData[0];
+                        var cardInfo = response.data[0];
+                        shouldPublishEvent = ((_this.frontCardImageURL(oldCardInfo) != _this.frontCardImageURL(cardInfo)) ||
+                            (oldCardInfo.cardBackUrl != cardInfo.cardBackUrl));
+                    }
+                    else {
+                        shouldPublishEvent = true;
+                    }
+                }
+                if (shouldPublishEvent === true) {
+                    _this.saveWalletContext(response.data);
+                    _this.events.publish(_this.appConstants.EVENT_WALLET_INFO_CHANGED);
+                }
+                if (successCallback) {
+                    successCallback(response);
+                }
+            }, function (error) {
+                var errorInfo = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                if (error) {
+                    errorInfo = error.json();
+                    errorInfo.code = error.status;
+                }
+                if (errorCallback) {
+                    errorCallback(errorInfo);
+                }
+                if (errorInfo.code == 401) {
+                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+                }
+            });
+        }
+        else {
+            if (errorCallback) {
+                var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                error.message = this.translate.instant('YOU_ARE_NOT_LOGGED_IN');
+                errorCallback(error);
+            }
+        }
+    };
+    WalletUtils.prototype.fetchQRCodeData = function (successCallback, errorCallback) {
+        var _this = this;
+        if (this.sessionUtils.isUserLoggedIn()) {
+            var memberInfo = this.sessionUtils.getMemberInfo();
+            var requestData = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["j" /* QRCodeInfo */]();
+            requestData.memberUid = memberInfo.memUID;
+            requestData.cardNumber = memberInfo.activeCardNo;
+            var serviceContext = new __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_WALLET, this.serviceConstants.WALLET_SERVICE_NAME_QR_CODE, requestData);
+            this.dataAccessService.call(serviceContext)
+                .subscribe(function (result) {
+                var response = result.json();
+                if (!response) {
+                    response = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["k" /* QRCodeResponse */]();
+                    response.data = [];
+                }
+                _this.saveQRCode(response.data, function (isSaved) {
+                    if (isSaved) {
+                        if (successCallback) {
+                            successCallback(response);
+                        }
+                    }
+                    else {
+                        if (errorCallback) {
+                            var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                            error.message = _this.translate.instant('INVALID_QR_CODE');
+                            errorCallback(error);
+                        }
+                    }
+                });
+            }, function (error) {
+                var errorInfo = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                if (error) {
+                    errorInfo = error.json();
+                    errorInfo.code = error.status;
+                }
+                if (errorCallback) {
+                    errorCallback(errorInfo);
+                }
+                if (errorInfo.code == 401) {
+                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+                }
+            });
+        }
+        else {
+            if (errorCallback) {
+                var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                error.message = this.translate.instant('YOU_ARE_NOT_LOGGED_IN');
+                errorCallback(error);
+            }
+        }
+    };
+    WalletUtils.prototype.saveQRCode = function (qrCodeData, callback) {
+        var _this = this;
+        if (qrCodeData && (qrCodeData.length > 0)) {
+            var qrCodeAsByte = qrCodeData[0].qrCodeAsByte;
+            if (qrCodeAsByte && (qrCodeAsByte.length > 0)) {
+                var base64String = 'data:image/jpg;base64,' + qrCodeAsByte;
+                var base64Blob = this.base64toBlob(base64String);
+                if (base64Blob) {
+                    this.fileService.writeFile(base64Blob, this.appConstants.WALLET_QR_CODE_IMAGE, false, function (result) {
+                        if (result != true) {
+                            _this.saveQRCodeContext(qrCodeData);
+                        }
+                        callback(true);
+                    });
+                }
+                else {
+                    this.saveQRCodeContext(qrCodeData);
+                    callback(true);
+                }
+            }
+            else {
+                callback(false);
+            }
+        }
+        else {
+            callback(false);
+        }
+    };
+    WalletUtils.prototype.base64toBlob = function (imageData) {
+        var byteString = '';
+        var dataURIArray = imageData.split(',');
+        if (dataURIArray[0].indexOf('base64') >= 0) {
+            byteString = atob(dataURIArray[1]);
+        }
+        else {
+            byteString = decodeURI(dataURIArray[1]);
+        }
+        var mimeString = dataURIArray[0].split(':')[1].split(';')[0];
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        var fileAfter = new Blob([ia], { type: mimeString });
+        return fileAfter;
+    };
+    WalletUtils.prototype.frontCardImageURL = function (cardInfo) {
+        var cardFrontUrl = cardInfo.cardFrontUrl;
+        if (cardFrontUrl) {
+            if (cardInfo.isUsable == 'Y') {
+                var extension = cardFrontUrl.split('.').pop();
+                if (extension && extension.length > 0) {
+                    var searchString = '.' + extension;
+                    var replaceString = this.appConstants.WALLET_CARD_FRONT_MASTER_IMAGE_NAME + '.' + extension;
+                    cardFrontUrl = cardFrontUrl.replace(searchString, replaceString);
+                }
+            }
+            var memberInfo = this.sessionUtils.getMemberInfo();
+            if (memberInfo.tier === 'MIN') {
+                var suffix = (memberInfo.gender === 'F') ? '-F' : '-M';
+                var extension = cardFrontUrl.split('.').pop();
+                if (extension && extension.length > 0) {
+                    var searchString = '.' + extension;
+                    var replaceString = suffix + '.' + extension;
+                    cardFrontUrl = cardFrontUrl.replace(searchString, replaceString);
+                }
+            }
+        }
+        return cardFrontUrl;
+    };
+    WalletUtils.prototype.removeWalletImages = function () {
+        var _this = this;
+        this.fileService.removeFile(this.appConstants.WALLET_CARD_FRONT_IMAGE, false, function (result1) {
+            _this.fileService.removeFile(_this.appConstants.WALLET_CARD_BACK_IMAGE, false, function (result2) {
+                _this.fileService.removeFile(_this.appConstants.WALLET_QR_CODE_IMAGE, false, null);
+            });
+        });
+    };
+    WalletUtils.prototype.hasVirtualCardData = function () {
+        var virtualCards = this.getWalletContext();
+        return (virtualCards && (virtualCards.length > 0));
+    };
+    return WalletUtils;
+}());
+WalletUtils = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
+        __WEBPACK_IMPORTED_MODULE_10_ng2_translate__["c" /* TranslateService */],
+        __WEBPACK_IMPORTED_MODULE_4__session_utils__["a" /* SessionUtils */],
+        __WEBPACK_IMPORTED_MODULE_5__services_commons_file_service__["a" /* FileService */],
+        __WEBPACK_IMPORTED_MODULE_6__services_commons_data_access_service__["a" /* DataAccessService */],
+        __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__["a" /* AppConstants */],
+        __WEBPACK_IMPORTED_MODULE_8__constants_service_constants__["a" /* ServiceConstants */]])
+], WalletUtils);
+
+//# sourceMappingURL=wallet.utils.js.map
 
 /***/ }),
 
@@ -235,6 +539,132 @@ var GeocodeAddressComponent = (function () {
 
 /***/ }),
 
+/***/ 108:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UserAddressUtils; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__session_utils__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__client_utils__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__ = __webpack_require__(1078);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+/**
+ * Created by sandip on 1/15/17.
+ */
+
+
+
+
+var UserAddressUtils = (function () {
+    function UserAddressUtils(sessionUtils, clientUtils) {
+        this.sessionUtils = sessionUtils;
+        this.clientUtils = clientUtils;
+        this.MAX_NUM_OF_RECORDS = 11;
+    }
+    UserAddressUtils.prototype.getUserAddressContext = function () {
+        var rootContext = this.sessionUtils.getRootContext();
+        var contextObj = rootContext.geocodes;
+        if (!contextObj) {
+            contextObj = new Array();
+        }
+        return contextObj;
+    };
+    UserAddressUtils.prototype.saveUserAddressContext = function (contextObj) {
+        var rootContext = this.sessionUtils.getRootContext();
+        rootContext.geocodes = contextObj;
+        this.sessionUtils.saveRootContext(rootContext);
+    };
+    UserAddressUtils.prototype.clearUserAddressContext = function () {
+        var contextObj = new Array();
+        this.saveUserAddressContext(contextObj);
+    };
+    UserAddressUtils.prototype.fetchAddressForLocation = function (latitude, longitude, successCallback, errorCallback) {
+        var _this = this;
+        Geocode.getAddressForLocation(latitude, longitude, function (result) {
+            if (_this.clientUtils.isNullOrEmpty(result)) {
+                if (errorCallback) {
+                    errorCallback(null);
+                }
+            }
+            else {
+                var response = JSON.parse(result);
+                if (!response) {
+                    response = new __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__["a" /* GeocodeResponse */]();
+                    response.results = [];
+                }
+                if (response.results && (response.results.length > 0)) {
+                    var geocodeInfo = response.results[0];
+                    _this.storeGeocodeInfo(geocodeInfo);
+                    if (successCallback) {
+                        successCallback(geocodeInfo);
+                    }
+                }
+                else if (errorCallback) {
+                    errorCallback(null);
+                }
+            }
+        });
+    };
+    UserAddressUtils.prototype.fetchLocationsForAddress = function (searchText, successCallback, errorCallback) {
+        var _this = this;
+        Geocode.getLocationForAddress(searchText, function (result) {
+            if (_this.clientUtils.isNullOrEmpty(result)) {
+                if (errorCallback) {
+                    errorCallback(null);
+                }
+            }
+            else {
+                var response = JSON.parse(result);
+                if (!response) {
+                    response = new __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__["a" /* GeocodeResponse */]();
+                    response.results = [];
+                }
+                if (response.results && (response.results.length > 0)) {
+                    var geocodeInfo = response.results[0];
+                    _this.storeGeocodeInfo(geocodeInfo);
+                    if (successCallback) {
+                        successCallback(geocodeInfo);
+                    }
+                }
+                else if (errorCallback) {
+                    errorCallback(null);
+                }
+            }
+        });
+    };
+    UserAddressUtils.prototype.storeGeocodeInfo = function (geocodeInfo) {
+        var geocodes = this.getUserAddressContext();
+        var tempArray = [];
+        tempArray.push(geocodeInfo);
+        for (var index = 0; index < geocodes.length; index++) {
+            if ((geocodeInfo.formatted_address != geocodes[index].formatted_address) &&
+                (index < (this.MAX_NUM_OF_RECORDS - 1))) {
+                tempArray.push(geocodes[index]);
+            }
+        }
+        this.saveUserAddressContext(tempArray);
+    };
+    return UserAddressUtils;
+}());
+UserAddressUtils = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__session_utils__["a" /* SessionUtils */],
+        __WEBPACK_IMPORTED_MODULE_2__client_utils__["a" /* ClientUtils */]])
+], UserAddressUtils);
+
+//# sourceMappingURL=user-address.utils.js.map
+
+/***/ }),
+
 /***/ 1081:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -293,10 +723,10 @@ var LocationNotificationInfo = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return mEngageApp; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(98);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_tabs_tabs__ = __webpack_require__(312);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_tabs_tabs__ = __webpack_require__(311);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_profile_profile__ = __webpack_require__(660);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pages_terms_terms__ = __webpack_require__(314);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pages_terms_terms__ = __webpack_require__(313);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pages_settings_settings__ = __webpack_require__(663);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_widgets_offline_popup_offline_popup__ = __webpack_require__(664);
@@ -304,7 +734,7 @@ var LocationNotificationInfo = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__utils_commons_user_utils__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__utils_commons_user_utils__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__utils_commons_menu_utils__ = __webpack_require__(201);
@@ -316,14 +746,14 @@ var LocationNotificationInfo = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__utils_commons_partner_utils__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__utils_commons_transaction_utils__ = __webpack_require__(203);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__utils_commons_wallet_utils__ = __webpack_require__(109);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__utils_commons_wallet_utils__ = __webpack_require__(107);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__services_commons_http_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__utils_commons_configuration_utils__ = __webpack_require__(526);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__utils_commons_globalization_utils__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__services_commons_service_loading__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pages_enrollment_enrollment__ = __webpack_require__(313);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__utils_commons_configuration_utils__ = __webpack_require__(525);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__utils_commons_globalization_utils__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__services_commons_service_loading__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pages_enrollment_enrollment__ = __webpack_require__(312);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__pages_tutorial_tutorial__ = __webpack_require__(665);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__pages_forceUpdate_forceUpdate__ = __webpack_require__(666);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -823,7 +1253,7 @@ __decorate([
 ], mEngageApp.prototype, "nav", void 0);
 mEngageApp = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'app-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\app\app.html"*/'<!-- logged in menu -->\n\n<ion-menu id="loggedInMenu" [content]="content"  (ionOpen)="menuOpened()" swipeEnabled="false">\n\n    <ion-content class="app-background-image"\n\n                 [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n                 no-bounce>\n\n        <div class="user-profile-side-menu gold-member" *ngIf="memberInfo">\n\n            <h1>\n\n                <ion-icon *ngIf="(shouldHideAvatar === false) && (!memberInfo.memberPicture || memberInfo.memberPicture.length == 0)"\n\n                          name="icon-user"></ion-icon>\n\n                <img *ngIf="memberInfo.memberPicture && memberInfo.memberPicture.length > 0"\n\n                     [src]="memberInfo.memberPicture" alt=""/>\n\n            </h1>\n\n            <h2>{{memberInfo.preferredCardName}}</h2>\n\n            <h3>{{memberInfo.tierDescr | translate }}</h3>\n\n            <button class="button-clear button-clear-white-border" menuClose (click)="gotoProfile()">{{ \'VIEW_PROFILE\' | translate }}</button>\n\n        </div>\n\n\n\n        <div class="side-menu-list">\n\n            <!--<h2>{{ \'MENU\' | translate }}</h2>-->\n\n            <ul>\n\n                <li menuClose *ngFor="let p of menuList" (click)="openPage(p)">\n\n                    {{ p.description | translate }}\n\n                </li>\n\n            </ul>\n\n        </div>\n\n    </ion-content>\n\n</ion-menu>\n\n\n\n\n\n<!-- main navigation -->\n\n\n\n<div class="offline-notification">\n\n    <h2>{{ \'OFFLINE_MODE\' | translate }}</h2>\n\n    <button (click)="offlineMode()" color="transparent">\n\n        <ion-icon name="information-circle"></ion-icon>\n\n    </button>\n\n    <div *ngIf="lastSyncDate" class="last-sync">{{\'LAST_SYNC_AT\' | translate}} {{lastSyncDate}}</div>\n\n</div>\n\n<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\app\app.html"*/
+        selector: 'app-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\app\app.html"*/'<!-- logged in menu -->\n\n<ion-menu id="loggedInMenu" [content]="content"  (ionOpen)="menuOpened()" swipeEnabled="false">\n\n    <ion-content class="app-background-image"\n\n                 [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n                 no-bounce>\n\n        <div class="user-profile-side-menu gold-member" *ngIf="memberInfo">\n\n            <h1>\n\n                <ion-icon *ngIf="(shouldHideAvatar === false) && (!memberInfo.memberPicture || memberInfo.memberPicture.length == 0)"\n\n                          name="icon-user"></ion-icon>\n\n                <img *ngIf="memberInfo.memberPicture && memberInfo.memberPicture.length > 0"\n\n                     [src]="memberInfo.memberPicture" alt=""/>\n\n            </h1>\n\n            <h2>{{memberInfo.preferredCardName}}</h2>\n\n            <h3>{{memberInfo.tierDescr | translate }}</h3>\n\n            <button class="button-clear button-clear-white-border" menuClose (click)="gotoProfile()">{{ \'VIEW_PROFILE\' | translate }}</button>\n\n        </div>\n\n\n\n        <div class="side-menu-list">\n\n            <!--<h2>{{ \'MENU\' | translate }}</h2>-->\n\n            <ul>\n\n                <li menuClose *ngFor="let p of menuList" (click)="openPage(p)">\n\n                    {{ p.description | translate }}\n\n                </li>\n\n            </ul>\n\n        </div>\n\n    </ion-content>\n\n</ion-menu>\n\n\n\n\n\n<!-- main navigation -->\n\n\n\n<div class="offline-notification">\n\n    <h2>{{ \'OFFLINE_MODE\' | translate }}</h2>\n\n    <button (click)="offlineMode()" color="transparent">\n\n        <ion-icon name="information-circle"></ion-icon>\n\n    </button>\n\n    <div *ngIf="lastSyncDate" class="last-sync">{{\'LAST_SYNC_AT\' | translate}} {{lastSyncDate}}</div>\n\n</div>\n\n<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\app\app.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["k" /* MenuController */],
@@ -913,7 +1343,7 @@ var NameSuffixLov = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__offers_offers__ = __webpack_require__(667);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__login_login__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__offers_popup_offers_popup__ = __webpack_require__(668);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__partners_list_partner_list__ = __webpack_require__(147);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_offer_utils__ = __webpack_require__(53);
@@ -924,14 +1354,14 @@ var NameSuffixLov = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__utils_commons_google_analytics_utils__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__mytargets_my_targets__ = __webpack_require__(669);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__dto_slider_dto__ = __webpack_require__(204);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__target_popup_target__ = __webpack_require__(315);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__target_popup_target__ = __webpack_require__(314);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__constants_language_constants__ = __webpack_require__(65);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1527,7 +1957,7 @@ __decorate([
 ], Swiper.prototype, "Template1", void 0);
 Swiper = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'component-swiper',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\swiper\swiper.html"*/'<ion-slides class="Swipertemplate1 custom" #Template1 *ngIf="showTemplate == 1" (ionSlideDidChange)="slideDidChange(this.data)">\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n            tappable>\n\n\n\n            <div class="row slider-holder-img">\n\n                <img src="{{i.img}}" alt="">\n\n                <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{\'badge-earn\': i.earnBurn == \'E\'}">\n\n                    <div class="ribbonz"> {{ (i.earnBurn == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n                </span>\n\n                <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                    <ion-icon name="star"></ion-icon>\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="col-xs-12">\n\n                    <div class="row">\n\n                        <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                            <div class="card-logo">\n\n                                <img [src]="i.logo" alt="" />\n\n                                <h3>{{i.name}}\n\n                                    <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                </h3>\n\n                                <h4>{{i.title}}</h4>\n\n                            </div>\n\n                        </div>\n\n                        <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                            <div class="rounded-progress-position">\n\n                                <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                    <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                        [clockwise]="clockwise">\n\n                                    </round-progress>\n\n                                    <h6>{{i.myTarget}}%</h6>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class=" swiper-big-holder custom" *ngIf="showTemplate == 2" #Template2 (ionSlideDidChange)="slideDidChange(this.data)">\n\n    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index">\n\n        <div class="swiper-wrapper swiper-wrapper-big">\n\n            <div class="swiper-slide-big-holder">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{\'badge-earn\': i.earnBurn == \'E\'}">\n\n                            <div class="ribbonz"> {{ (i.earnBurn == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n                        </span>\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4 *ngIf="i.location">\n\n                                            {{i.location}}\n\n                                        </h4>\n\n                                        <h4 *ngIf="!i.location">\n\n                                            <span *ngIf="i.offersCount && i.offersCount > 0">\n\n                                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;\n\n                                            </span>\n\n                                            <span *ngIf="i.distance && i.distance > 0">\n\n                                                {{i.distance | number}} {{i.distanceDenom}}\n\n                                            </span>\n\n                                        </h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.isSlidActive && i.myTarget != null">\n\n                                    <div class="rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n\n\n                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="i.description"></p>\n\n\n\n                    <div class="moreInfo" (click)="moreInfo(i)">{{ \'MORE_INFO\' | translate }}</div>\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li [ngClass]="{\'itemLiked\': i.isFavourite}">\n\n                            <a (click)="liked(i)">\n\n                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n\n\n                        <li *ngIf="i.offerId && (i.earnBurn != \'E\')" [ngClass]="{\'itemLiked\': i.isTarget}">\n\n                            <a (click)="setAsTarget(i,id)">\n\n                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n\n\n                        <li *ngIf="!i.targetId && !i.offerId && i.addressId && !shouldHideCheckin" [ngClass]="{\'itemLiked\': i.isCheckedIn}">\n\n                            <a (click)="checkIn(i)">\n\n                                <ion-icon name="icon-check"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">\n\n                            <a (click)="openLocation(i)">\n\n                                <ion-icon name="icon-navigation"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class=" Swipertemplate3 custom" *ngIf="showTemplate == 3" #Template3>\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n            tappable>\n\n\n\n            <div class="row slider-holder-img">\n\n                <img src="{{i.img}}" alt="">\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img [src]="i.logo" alt="" />\n\n                        <h3>{{i.name}}\n\n                            <span *ngIf="i.storeName"> - {{i.storeName}}</span>\n\n                        </h3>\n\n                        <h4>\n\n                            <span *ngIf="i.offersCount && i.offersCount > 0">\n\n                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;\n\n                            </span>\n\n                            <span *ngIf="i.distance && i.distance > 0">\n\n                                {{i.distance | number}} {{i.distanceDenom}}\n\n                            </span>\n\n                        </h4>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </ion-slide>\n\n</ion-slides>\n\n<!--My vouchers --start-->\n\n<ion-slides class=" Swipertemplate6 custom" *ngIf="showTemplate == 6" #Template6>\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL + \')\'" tappable>\n\n            <div class="row slider-holder-img">\n\n                <div class="voucher slider-holder-color">\n\n                    <div class="heading" style="    display: flex;\n\n                    align-items: center;\n\n                    justify-content: space-between;\n\n                    width: 100%;">\n\n                        <span class="desc">{{i.voucherDescription}}</span>\n\n                        <span class="free-space"></span>\n\n                        <span class="miles" style="font-size:12px">-for points miles</span>\n\n                    </div>\n\n                    <div class="margin-bottom"></div>\n\n                    <div style="font-size:12px;">\n\n                        Valid for 0 months.\n\n                    </div>\n\n                    <div>\n\n                        <span style="font-size:12px;">Can be used at any location</span>\n\n                    </div>\n\n\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img [src]="i.logo" alt="" />\n\n                        <h3>\n\n                            <span> Starbucks</span>\n\n                        </h3>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n    <!-- <ion-slide class="swiper-slide">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL + \')\'" tappable>\n\n            <div class="row slider-holder-img">\n\n                <div class="voucher slider-holder-color">\n\n                    <div class="heading">\n\n                        <span class="desc">Desc</span>\n\n                        <span class="free-space"></span>\n\n                        <span class="miles">-for points miles</span>\n\n                    </div>\n\n                    <div class="margin-bottom"></div>\n\n                    <div style="font-size:11px;">\n\n                        Valid for 0 months.\n\n                    </div>\n\n                    <div>\n\n                        <span style="font-size:11px;">Can be used at any location</span>\n\n                    </div>\n\n\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img src="" alt="" />\n\n                        <h3>\n\n                            name\n\n                            <span> - star bucks</span>\n\n                        </h3>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide> -->\n\n</ion-slides>\n\n<!--My vouchers --end-->\n\n\n\n<ion-slides class="  swiper-big-holder custom" *ngIf="showTemplate == 4" #usefulSwiperTemplate4>\n\n\n\n\n\n    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">\n\n\n\n        <div class="swiper-wrapper swiper-wrapper-big">\n\n\n\n            <!--Target In Progress-->\n\n            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'">\n\n\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3">\n\n                                    <div class="position-relative rounded-progress-position" *ngIf="i.myTarget != null">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" *ngIf="i.description" [innerHTML]="i.description"></p>\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li [ngClass]="{\'itemLiked\': i.isFavourite}">\n\n                            <a (click)="liked(i)">\n\n                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                        <li [ngClass]="{\'itemLiked\': i.isTarget}">\n\n                            <a (click)="setAsTarget(i, id)">\n\n                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">\n\n                            <a (click)="openLocation(i)">\n\n                                <ion-icon name="icon-navigation"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--Target Achieve-->\n\n            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == \'A\'">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                                    <div class="position-relative rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n                    <div class="user-target-card-holder">\n\n                        <div class="congratulations -template-4">\n\n                            <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                            <h2>\n\n                                <ion-icon name="icon-check"></ion-icon>\n\n                            </h2>\n\n                            <h6>\n\n                                <ion-icon name="calendar"></ion-icon>\n\n                                {{i.targetEndDateString}}\n\n                                <span></span>\n\n                                <ion-icon name="flag"></ion-icon>\n\n                                {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                            </h6>\n\n                        </div>\n\n                    </div>\n\n\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--Target Expired-->\n\n            <div class="swiper-slide-big-holder -target-expired-image" *ngIf="i.targetStatus == \'E\'">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n\n\n                    <div class="user-target-card-holder">\n\n                        <div class="congratulations -template-4">\n\n                            <h3>{{ \'EXPIRED\' | translate }}</h3>\n\n                            <h2>\n\n                                <ion-icon name="close-circle"></ion-icon>\n\n                            </h2>\n\n                            <h6>\n\n                                <ion-icon name="calendar"></ion-icon>\n\n                                {{i.targetEndDateString}}\n\n                                <span></span>\n\n                                <ion-icon name="flag"></ion-icon>\n\n                                {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                            </h6>\n\n                        </div>\n\n                    </div>\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n        </div>\n\n\n\n    </ion-slide>\n\n    <div class="swiper-slide swiper-slide-big my-targets" *ngIf="personalTargetData && (personalTargetData.length > 0)">\n\n\n\n        <component-personal-target [personalTargetData]="personalTargetData"></component-personal-target>\n\n    </div>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class="swiper-container custom c" *ngIf="showTemplate == 5" #usefulSwiperTemplate5>\n\n    <div class="swiper-wrapper">\n\n\n\n\n\n        <div class="add-new-target-profile" *ngIf="!data || data.length == 0" (click)="setTarget()" tappable>\n\n\n\n            <h3>\n\n                <ion-icon name="ios-add-circle-outline"></ion-icon>\n\n                <span>{{\'CREATE_PERSONAL_GOAL\' | translate }}</span>\n\n            </h3>\n\n\n\n        </div>\n\n\n\n        <ion-slide class="swiper-slide" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">\n\n\n\n\n\n            <!--OFFER BASED -->\n\n            <div *ngIf="i.offerId != 0">\n\n                <!--<div *ngIf="i.offerId != 0">-->\n\n\n\n                <!--Target In Progress-->\n\n                <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n                    *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'" tappable>\n\n\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                                    <div class="position-relative rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Achieved-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'A\'">\n\n                    <div class="row slider-holder-img -target-completed">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                                <h2>\n\n                                    <ion-icon name="icon-check"></ion-icon>\n\n                                </h2>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Expired-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'E\'">\n\n\n\n                    <div class="row slider-holder-img -target-expired-image" [style.background-image]="\'url(\' + i.img + \')\'">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>Expired</h3>\n\n                                <h2>\n\n                                    <ion-icon name="close-circle"></ion-icon>\n\n                                </h2>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--NOT OFFER BASED -->\n\n            <div *ngIf="i.offerId == 0">\n\n\n\n                <!--Target In Progress-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'">\n\n                    <div class="row slider-holder-img personal-targets-item">\n\n                        <div class="round-progress-holder">\n\n                            <div class="_round-progress">\n\n                                <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                    [clockwise]="clockwise">\n\n                                </round-progress>\n\n                                <h6>{{i.myTarget}}%</h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n\n\n                <!--Target Achieved-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'A\'">\n\n                    <div class="row slider-holder-img -target-completed">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                                <h2>\n\n                                    <ion-icon name="icon-check"></ion-icon>\n\n                                </h2>\n\n                                <h3>{{i.name}}</h3>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Expired-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'E\'">\n\n                    <div class="row slider-holder-img -target-expired">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'EXPIRED\' | translate }}</h3>\n\n                                <h2>\n\n                                    <ion-icon name="close-circle"></ion-icon>\n\n                                </h2>\n\n                                <h3>{{i.name}}</h3>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n\n\n        </ion-slide>\n\n    </div>\n\n</ion-slides>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\swiper\swiper.html"*/,
+        selector: 'component-swiper',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\swiper\swiper.html"*/'<ion-slides class="Swipertemplate1 custom" #Template1 *ngIf="showTemplate == 1" (ionSlideDidChange)="slideDidChange(this.data)">\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n            tappable>\n\n\n\n            <div class="row slider-holder-img">\n\n                <img src="{{i.img}}" alt="">\n\n                <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{\'badge-earn\': i.earnBurn == \'E\'}">\n\n                    <div class="ribbonz"> {{ (i.earnBurn == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n                </span>\n\n                <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                    <ion-icon name="star"></ion-icon>\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="col-xs-12">\n\n                    <div class="row">\n\n                        <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                            <div class="card-logo">\n\n                                <img [src]="i.logo" alt="" />\n\n                                <h3>{{i.name}}\n\n                                    <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                </h3>\n\n                                <h4>{{i.title}}</h4>\n\n                            </div>\n\n                        </div>\n\n                        <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                            <div class="rounded-progress-position">\n\n                                <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                    <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                        [clockwise]="clockwise">\n\n                                    </round-progress>\n\n                                    <h6>{{i.myTarget}}%</h6>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class=" swiper-big-holder custom" *ngIf="showTemplate == 2" #Template2 (ionSlideDidChange)="slideDidChange(this.data)">\n\n    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index">\n\n        <div class="swiper-wrapper swiper-wrapper-big">\n\n            <div class="swiper-slide-big-holder">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <span class="badge-holder" *ngIf="i.earnBurn" [ngClass]="{\'badge-earn\': i.earnBurn == \'E\'}">\n\n                            <div class="ribbonz"> {{ (i.earnBurn == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n                        </span>\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4 *ngIf="i.location">\n\n                                            {{i.location}}\n\n                                        </h4>\n\n                                        <h4 *ngIf="!i.location">\n\n                                            <span *ngIf="i.offersCount && i.offersCount > 0">\n\n                                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;\n\n                                            </span>\n\n                                            <span *ngIf="i.distance && i.distance > 0">\n\n                                                {{i.distance | number}} {{i.distanceDenom}}\n\n                                            </span>\n\n                                        </h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.isSlidActive && i.myTarget != null">\n\n                                    <div class="rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n\n\n                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="i.description"></p>\n\n\n\n                    <div class="moreInfo" (click)="moreInfo(i)">{{ \'MORE_INFO\' | translate }}</div>\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li [ngClass]="{\'itemLiked\': i.isFavourite}">\n\n                            <a (click)="liked(i)">\n\n                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n\n\n                        <li *ngIf="i.offerId && (i.earnBurn != \'E\')" [ngClass]="{\'itemLiked\': i.isTarget}">\n\n                            <a (click)="setAsTarget(i,id)">\n\n                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n\n\n                        <li *ngIf="!i.targetId && !i.offerId && i.addressId && !shouldHideCheckin" [ngClass]="{\'itemLiked\': i.isCheckedIn}">\n\n                            <a (click)="checkIn(i)">\n\n                                <ion-icon name="icon-check"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">\n\n                            <a (click)="openLocation(i)">\n\n                                <ion-icon name="icon-navigation"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class=" Swipertemplate3 custom" *ngIf="showTemplate == 3" #Template3>\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n            tappable>\n\n\n\n            <div class="row slider-holder-img">\n\n                <img src="{{i.img}}" alt="">\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img [src]="i.logo" alt="" />\n\n                        <h3>{{i.name}}\n\n                            <span *ngIf="i.storeName"> - {{i.storeName}}</span>\n\n                        </h3>\n\n                        <h4>\n\n                            <span *ngIf="i.offersCount && i.offersCount > 0">\n\n                                {{i.offersCount}} {{i.offers}}&nbsp;&nbsp;\n\n                            </span>\n\n                            <span *ngIf="i.distance && i.distance > 0">\n\n                                {{i.distance | number}} {{i.distanceDenom}}\n\n                            </span>\n\n                        </h4>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </ion-slide>\n\n</ion-slides>\n\n<!--My vouchers --start-->\n\n<ion-slides class=" Swipertemplate6 custom" *ngIf="showTemplate == 6" #Template6>\n\n    <ion-slide class="swiper-slide" *ngFor="let i of data; let index = index">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL + \')\'" tappable>\n\n            <div class="row slider-holder-img">\n\n                <div class="voucher slider-holder-color">\n\n                    <div class="heading" style="    display: flex;\n\n                    align-items: center;\n\n                    justify-content: space-between;\n\n                    width: 100%;">\n\n                        <span class="desc">{{i.voucherDescription}}</span>\n\n                        <span class="free-space"></span>\n\n                        <span class="miles" style="font-size:12px">-for points miles</span>\n\n                    </div>\n\n                    <div class="margin-bottom"></div>\n\n                    <div style="font-size:12px;">\n\n                        Valid for 0 months.\n\n                    </div>\n\n                    <div>\n\n                        <span style="font-size:12px;">Can be used at any location</span>\n\n                    </div>\n\n\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img [src]="i.logo" alt="" />\n\n                        <h3>\n\n                            <span> Starbucks</span>\n\n                        </h3>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide>\n\n    <!-- <ion-slide class="swiper-slide">\n\n        <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL + \')\'" tappable>\n\n            <div class="row slider-holder-img">\n\n                <div class="voucher slider-holder-color">\n\n                    <div class="heading">\n\n                        <span class="desc">Desc</span>\n\n                        <span class="free-space"></span>\n\n                        <span class="miles">-for points miles</span>\n\n                    </div>\n\n                    <div class="margin-bottom"></div>\n\n                    <div style="font-size:11px;">\n\n                        Valid for 0 months.\n\n                    </div>\n\n                    <div>\n\n                        <span style="font-size:11px;">Can be used at any location</span>\n\n                    </div>\n\n\n\n                </div>\n\n            </div>\n\n            <div class="row slider-holder-content">\n\n                <div class="strip-logo-content col-xs-12">\n\n                    <div class="card-logo">\n\n                        <img src="" alt="" />\n\n                        <h3>\n\n                            name\n\n                            <span> - star bucks</span>\n\n                        </h3>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </ion-slide> -->\n\n</ion-slides>\n\n<!--My vouchers --end-->\n\n\n\n<ion-slides class="  swiper-big-holder custom" *ngIf="showTemplate == 4" #usefulSwiperTemplate4>\n\n\n\n\n\n    <ion-slide class="swiper-wrapper swiper-wrapper-big" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">\n\n\n\n        <div class="swiper-wrapper swiper-wrapper-big">\n\n\n\n            <!--Target In Progress-->\n\n            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'">\n\n\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3">\n\n                                    <div class="position-relative rounded-progress-position" *ngIf="i.myTarget != null">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n                    <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" *ngIf="i.description" [innerHTML]="i.description"></p>\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li [ngClass]="{\'itemLiked\': i.isFavourite}">\n\n                            <a (click)="liked(i)">\n\n                                <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                        <li [ngClass]="{\'itemLiked\': i.isTarget}">\n\n                            <a (click)="setAsTarget(i, id)">\n\n                                <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                                <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                            </a>\n\n                        </li>\n\n                        <li *ngIf="i.partnerCode || (i.latitude && i.longitude)">\n\n                            <a (click)="openLocation(i)">\n\n                                <ion-icon name="icon-navigation"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--Target Achieve-->\n\n            <div class="swiper-slide-big-holder" *ngIf="i.targetStatus == \'A\'">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                                    <div class="position-relative rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n                    <div class="user-target-card-holder">\n\n                        <div class="congratulations -template-4">\n\n                            <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                            <h2>\n\n                                <ion-icon name="icon-check"></ion-icon>\n\n                            </h2>\n\n                            <h6>\n\n                                <ion-icon name="calendar"></ion-icon>\n\n                                {{i.targetEndDateString}}\n\n                                <span></span>\n\n                                <ion-icon name="flag"></ion-icon>\n\n                                {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                            </h6>\n\n                        </div>\n\n                    </div>\n\n\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--Target Expired-->\n\n            <div class="swiper-slide-big-holder -target-expired-image" *ngIf="i.targetStatus == \'E\'">\n\n                <div class="slider-holder-top-clear app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" tappable>\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}</h3>\n\n                                        <h4>{{i.location}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="slider-holder-middle">\n\n                    <h2>{{i.title}} </h2>\n\n\n\n                    <div class="user-target-card-holder">\n\n                        <div class="congratulations -template-4">\n\n                            <h3>{{ \'EXPIRED\' | translate }}</h3>\n\n                            <h2>\n\n                                <ion-icon name="close-circle"></ion-icon>\n\n                            </h2>\n\n                            <h6>\n\n                                <ion-icon name="calendar"></ion-icon>\n\n                                {{i.targetEndDateString}}\n\n                                <span></span>\n\n                                <ion-icon name="flag"></ion-icon>\n\n                                {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                            </h6>\n\n                        </div>\n\n                    </div>\n\n\n\n                </div>\n\n\n\n                <div class="slider-holder-footer">\n\n                    <ul>\n\n                        <li *ngIf="shouldHideSocialShare == false">\n\n                            <a (click)="openShareModal(targetShareRequestTag)">\n\n                                <ion-icon name="icon-share"></ion-icon>\n\n                            </a>\n\n                        </li>\n\n                    </ul>\n\n                </div>\n\n            </div>\n\n\n\n        </div>\n\n\n\n    </ion-slide>\n\n    <div class="swiper-slide swiper-slide-big my-targets" *ngIf="personalTargetData && (personalTargetData.length > 0)">\n\n\n\n        <component-personal-target [personalTargetData]="personalTargetData"></component-personal-target>\n\n    </div>\n\n</ion-slides>\n\n\n\n\n\n<ion-slides class="swiper-container custom c" *ngIf="showTemplate == 5" #usefulSwiperTemplate5>\n\n    <div class="swiper-wrapper">\n\n\n\n\n\n        <div class="add-new-target-profile" *ngIf="!data || data.length == 0" (click)="setTarget()" tappable>\n\n\n\n            <h3>\n\n                <ion-icon name="ios-add-circle-outline"></ion-icon>\n\n                <span>{{\'CREATE_PERSONAL_GOAL\' | translate }}</span>\n\n            </h3>\n\n\n\n        </div>\n\n\n\n        <ion-slide class="swiper-slide" *ngFor="let i of data ; let id = index" [@visibilityChanged]="i.showHide">\n\n\n\n\n\n            <!--OFFER BASED -->\n\n            <div *ngIf="i.offerId != 0">\n\n                <!--<div *ngIf="i.offerId != 0">-->\n\n\n\n                <!--Target In Progress-->\n\n                <div class="slider-holder app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, index)"\n\n                    *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'" tappable>\n\n\n\n                    <div class="row slider-holder-img">\n\n                        <img src="{{i.img}}" alt="">\n\n                        <div class="special-offers" *ngIf="i.special === \'Y\'">\n\n                            <ion-icon name="star"></ion-icon>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': i.myTarget != null}">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                                <div class="col-xs-3" *ngIf="i.myTarget != null">\n\n                                    <div class="position-relative rounded-progress-position">\n\n                                        <div class="" [@visibilityChanged]="i.isSlidActive">\n\n                                            <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                                [clockwise]="clockwise">\n\n                                            </round-progress>\n\n                                            <h6>{{i.myTarget}}%</h6>\n\n                                        </div>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Achieved-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'A\'">\n\n                    <div class="row slider-holder-img -target-completed">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                                <h2>\n\n                                    <ion-icon name="icon-check"></ion-icon>\n\n                                </h2>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Expired-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'E\'">\n\n\n\n                    <div class="row slider-holder-img -target-expired-image" [style.background-image]="\'url(\' + i.img + \')\'">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>Expired</h3>\n\n                                <h2>\n\n                                    <ion-icon name="close-circle"></ion-icon>\n\n                                </h2>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo">\n\n                                        <img [src]="i.logo" alt="" />\n\n                                        <h3>{{i.name}}\n\n                                            <span *ngIf="i.location"> - {{i.location}}</span>\n\n                                        </h3>\n\n                                        <h4>{{i.title}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n\n\n\n\n            <!--NOT OFFER BASED -->\n\n            <div *ngIf="i.offerId == 0">\n\n\n\n                <!--Target In Progress-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'\' || i.targetStatus == \'I\'">\n\n                    <div class="row slider-holder-img personal-targets-item">\n\n                        <div class="round-progress-holder">\n\n                            <div class="_round-progress">\n\n                                <round-progress [current]="i.myTarget" [radius]="radius" [max]="max" [duration]="3000" [stroke]="4" [responsive]="responsive"\n\n                                    [clockwise]="clockwise">\n\n                                </round-progress>\n\n                                <h6>{{i.myTarget}}%</h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n\n\n                <!--Target Achieved-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'A\'">\n\n                    <div class="row slider-holder-img -target-completed">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }}</h3>\n\n\n\n                                <h2>\n\n                                    <ion-icon name="icon-check"></ion-icon>\n\n                                </h2>\n\n                                <h3>{{i.name}}</h3>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n\n\n                <!--Target Expired-->\n\n                <div class="slider-holder-target app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'" (click)="goToPage(data, id)"\n\n                    tappable *ngIf="i.targetStatus == \'E\'">\n\n                    <div class="row slider-holder-img -target-expired">\n\n                        <div class="user-target-card-holder">\n\n                            <div class="congratulations">\n\n                                <h3>{{ \'EXPIRED\' | translate }}</h3>\n\n                                <h2>\n\n                                    <ion-icon name="close-circle"></ion-icon>\n\n                                </h2>\n\n                                <h3>{{i.name}}</h3>\n\n                                <h6>\n\n                                    <ion-icon name="calendar"></ion-icon>\n\n                                    {{i.targetEndDateString}}\n\n                                    <span></span>\n\n                                    <ion-icon name="flag"></ion-icon>\n\n                                    {{i.points}} {{ languageConstants.POINTS | translate }}\n\n                                </h6>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <div class="row slider-holder-content">\n\n                        <div class="col-xs-12">\n\n                            <div class="row">\n\n                                <div class="strip-logo-content">\n\n                                    <div class="card-logo -icon-user">\n\n                                        <ion-icon name="icon-user"></ion-icon>\n\n                                        <h3>{{i.title}}</h3>\n\n                                        <h4>{{i.targetEndDateString}}</h4>\n\n                                    </div>\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n\n\n        </ion-slide>\n\n    </div>\n\n</ion-slides>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\swiper\swiper.html"*/,
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('visibilityChanged', [
                 Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_35" /* state */])('true', Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_36" /* style */])({ opacity: 1, transform: 'scale(1.0)' })),
@@ -1569,13 +1999,13 @@ Swiper = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoginCardComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(43);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1649,7 +2079,7 @@ __decorate([
 ], LoginCardComponent.prototype, "data", void 0);
 LoginCardComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'login-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\logincard\login.html"*/'<div class="headerCard login" [style.background-image]="\'url(\' + loginCardImageURL +\')\'">\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <h2>{{guestUserText}}</h2>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button class="button-clear button-clear-white-border login-button" (click)="openModal()">\n\n                {{ \'LOGIN\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button ion-button clear class="register-button" (click)="enrollUser()">\n\n                {{ \'NOT_MEMBER_ENROLL_HERE\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\logincard\login.html"*/
+        selector: 'login-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\logincard\login.html"*/'<div class="headerCard login" [style.background-image]="\'url(\' + loginCardImageURL +\')\'">\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <h2>{{guestUserText}}</h2>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button class="button-clear button-clear-white-border login-button" (click)="openModal()">\n\n                {{ \'LOGIN\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button ion-button clear class="register-button" (click)="enrollUser()">\n\n                {{ \'NOT_MEMBER_ENROLL_HERE\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\logincard\login.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* ModalController */],
@@ -1677,7 +2107,7 @@ LoginCardComponent = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__dto_partners_dto__ = __webpack_require__(110);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__dto_partners_dto__ = __webpack_require__(109);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1727,7 +2157,7 @@ __decorate([
 ], PartnersCardComponent.prototype, "data", void 0);
 PartnersCardComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'partners-card-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\partners\partners.html"*/'<div class="card-item">\n\n    <div class="row main-row" (click)="viewDetails()">\n\n        <div class="col-xs-3 img-max-65">\n\n\n\n            <div class="image-holder-logo">\n\n                <img [src]="data.partnerLogoPath" alt=""\n\n                     *ngIf="data.partnerLogoPath && data.partnerLogoPath.length > 0">\n\n                <img src="../assets/img/no_image.jpg" alt=""\n\n                     *ngIf="!data.partnerLogoPath || data.partnerLogoPath.length == 0">\n\n            </div>\n\n\n\n        </div>\n\n        <div class="col-xs-9">\n\n            <div class="row small-icon">\n\n                <div class="col-xs-12">\n\n                    <h3>{{data.description}}</h3>\n\n                </div>\n\n                <div class="col-xs-6" *ngIf="data.offersCount != 0">\n\n                    <ion-icon name="icon-offers"></ion-icon>\n\n                    {{data.offersCount}} {{ data.offersCount == 1 ? (\'OFFER\' | translate) : (\'OFFERS\' | translate) }}\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <ion-icon name="icon-location"></ion-icon>\n\n                    {{data.partnerLocationCount}} {{ data.partnerLocationCount == 1 ? (\'LOCATION\' | translate) : (\'LOCATIONS\' | translate) }}\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</div>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\partners\partners.html"*/
+        selector: 'partners-card-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\partners\partners.html"*/'<div class="card-item">\n\n    <div class="row main-row" (click)="viewDetails()">\n\n        <div class="col-xs-3 img-max-65">\n\n\n\n            <div class="image-holder-logo">\n\n                <img [src]="data.partnerLogoPath" alt=""\n\n                     *ngIf="data.partnerLogoPath && data.partnerLogoPath.length > 0">\n\n                <img src="../assets/img/no_image.jpg" alt=""\n\n                     *ngIf="!data.partnerLogoPath || data.partnerLogoPath.length == 0">\n\n            </div>\n\n\n\n        </div>\n\n        <div class="col-xs-9">\n\n            <div class="row small-icon">\n\n                <div class="col-xs-12">\n\n                    <h3>{{data.description}}</h3>\n\n                </div>\n\n                <div class="col-xs-6" *ngIf="data.offersCount != 0">\n\n                    <ion-icon name="icon-offers"></ion-icon>\n\n                    {{data.offersCount}} {{ data.offersCount == 1 ? (\'OFFER\' | translate) : (\'OFFERS\' | translate) }}\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <ion-icon name="icon-location"></ion-icon>\n\n                    {{data.partnerLocationCount}} {{ data.partnerLocationCount == 1 ? (\'LOCATION\' | translate) : (\'LOCATIONS\' | translate) }}\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</div>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\partners\partners.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_3__utils_commons_session_utils__["a" /* SessionUtils */],
@@ -1746,7 +2176,7 @@ PartnersCardComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoggedInCardComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants_language_constants__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__ = __webpack_require__(19);
@@ -1833,7 +2263,7 @@ __decorate([
 ], LoggedInCardComponent.prototype, "data", void 0);
 LoggedInCardComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'loggedin-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\loggedin\loggedin.html"*/'<div class="headerCard app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="row">\n\n        <div class="col-xs-7">\n\n            <h4>{{ languageConstants.POINTS | translate }}</h4>\n\n            <h3 *ngIf="shouldShowInfo === true">{{data.availableBalanceMiles | number}}</h3>\n\n            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>\n\n        </div>\n\n        <div class="col-xs-5" *ngIf="data.tierDescr">\n\n            <h4>{{ languageConstants.LEVEL | translate }}</h4>\n\n            <h3 *ngIf="shouldShowInfo === true">{{data.tierDescr | translate }}</h3>\n\n            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <h6 *ngIf="shouldShowInfo === true">\n\n                <span *ngIf="expiryMessage">\n\n                {{ expiryMessage }}\n\n                </span>\n\n            </h6>\n\n            <h6 *ngIf="shouldShowInfo === false">&nbsp;</h6>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\loggedin\loggedin.html"*/
+        selector: 'loggedin-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\loggedin\loggedin.html"*/'<div class="headerCard app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="row">\n\n        <div class="col-xs-7">\n\n            <h4>{{ languageConstants.POINTS | translate }}</h4>\n\n            <h3 *ngIf="shouldShowInfo === true">{{data.availableBalanceMiles | number}}</h3>\n\n            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>\n\n        </div>\n\n        <div class="col-xs-5" *ngIf="data.tierDescr">\n\n            <h4>{{ languageConstants.LEVEL | translate }}</h4>\n\n            <h3 *ngIf="shouldShowInfo === true">{{data.tierDescr | translate }}</h3>\n\n            <h3 *ngIf="shouldShowInfo === false">&nbsp;</h3>\n\n        </div>\n\n    </div>\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <h6 *ngIf="shouldShowInfo === true">\n\n                <span *ngIf="expiryMessage">\n\n                {{ expiryMessage }}\n\n                </span>\n\n            </h6>\n\n            <h6 *ngIf="shouldShowInfo === false">&nbsp;</h6>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\loggedin\loggedin.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_3__constants_language_constants__["a" /* LanguageConstants */],
@@ -1856,7 +2286,7 @@ LoggedInCardComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ExpandableComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_target_utils__ = __webpack_require__(64);
@@ -1867,7 +2297,7 @@ LoggedInCardComponent = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__partners_list_partner_list__ = __webpack_require__(147);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__dto_offers_dto__ = __webpack_require__(202);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__constants_language_constants__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__constants_app_constants__ = __webpack_require__(7);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -2064,7 +2494,7 @@ __decorate([
 ], ExpandableComponent.prototype, "data", void 0);
 ExpandableComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'expandable-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\expandable\expandable.html"*/'<div class="expandable-card-holder app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="expandable-img-holder" (click)="toggle()">\n\n        <div class="row">\n\n            <img src="{{data.offerBannerPath}}" alt="">\n\n           <span class="badge-holder"\n\n                 *ngIf="data.earnBurnFlag"\n\n                 [ngClass]="{\'badge-earn\': data.earnBurnFlag == \'E\'}">\n\n                    <div class="ribbonz"> {{ (data.earnBurnFlag == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n            </span>\n\n        </div>\n\n\n\n        <div class="special-offers"  *ngIf="data.special === \'Y\'">\n\n            <ion-icon name="star"></ion-icon>\n\n        </div>\n\n    </div>\n\n    <div class="expandable-strip-holder" (click)="toggle()">\n\n\n\n        <div class="row">\n\n            <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': (data.isTarget === \'Y\') && (myTarget != null)}">\n\n                <div class="expandable-logo">\n\n                    <img [src]="data.partnerLogoPath" alt="" />\n\n                    <h3>{{data.partnerName}}\n\n                        <span *ngIf="data.partnerLoationCount == \'ALL\'">\n\n                            - {{ \'ALL_LOCATIONS\' | translate }}\n\n                        </span>\n\n                        <span *ngIf="data.partnerLoationCount && data.partnerLoationCount != \'ALL\' && data.partnerLoationCount != \'0\'">\n\n                            - {{data.partnerLoationCount}} {{ \'LOCATIONS\' | translate }}\n\n                        </span>\n\n                    </h3>\n\n                    <h4>{{data.offerName}}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="col-xs-3" *ngIf="(data.isTarget === \'Y\') && (myTarget != null)">\n\n                <div class="position-relative rounded-progress-position">\n\n                    <round-progress [current]="myTarget"\n\n                                    [radius]="radius"\n\n                                    [max]="max"\n\n                                    [duration]="3000"\n\n                                    [stroke]="4"\n\n                                    [responsive]="responsive"\n\n                                    [clockwise]="clockwise">\n\n                    </round-progress>\n\n                    <h6>{{myTarget}}%</h6>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.description"></p>\n\n    </div>\n\n    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut] >\n\n        <ul>\n\n            <li [ngClass]="{\'itemLiked\': data.isFavorite === \'Y\'}">\n\n                <a (click)="updateOfferAsFavourite(data)">\n\n                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinner"></ion-spinner>\n\n                </a>\n\n            </li>\n\n\n\n            <li *ngIf="data.earnBurnFlag != \'E\'"\n\n                [ngClass]="{\'itemLiked\': (data.isTarget === \'Y\')}">\n\n                <a (click)="updateOfferAsTarget(data)">\n\n                    <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                </a>\n\n            </li>\n\n            <li *ngIf="data.partnerCode">\n\n                <a (click)="openLocation(data)">\n\n                    <ion-icon name="icon-navigation"></ion-icon>\n\n                </a>\n\n            </li>\n\n        </ul>\n\n\n\n    </div>\n\n</div>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\expandable\expandable.html"*/,
+        selector: 'expandable-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\expandable\expandable.html"*/'<div class="expandable-card-holder app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="expandable-img-holder" (click)="toggle()">\n\n        <div class="row">\n\n            <img src="{{data.offerBannerPath}}" alt="">\n\n           <span class="badge-holder"\n\n                 *ngIf="data.earnBurnFlag"\n\n                 [ngClass]="{\'badge-earn\': data.earnBurnFlag == \'E\'}">\n\n                    <div class="ribbonz"> {{ (data.earnBurnFlag == \'E\' ? \'EARN\' : languageConstants.BURN) | translate }}</div>\n\n            </span>\n\n        </div>\n\n\n\n        <div class="special-offers"  *ngIf="data.special === \'Y\'">\n\n            <ion-icon name="star"></ion-icon>\n\n        </div>\n\n    </div>\n\n    <div class="expandable-strip-holder" (click)="toggle()">\n\n\n\n        <div class="row">\n\n            <div class="strip-logo-content" [ngClass]="{\'col-xs-9\': (data.isTarget === \'Y\') && (myTarget != null)}">\n\n                <div class="expandable-logo">\n\n                    <img [src]="data.partnerLogoPath" alt="" />\n\n                    <h3>{{data.partnerName}}\n\n                        <span *ngIf="data.partnerLoationCount == \'ALL\'">\n\n                            - {{ \'ALL_LOCATIONS\' | translate }}\n\n                        </span>\n\n                        <span *ngIf="data.partnerLoationCount && data.partnerLoationCount != \'ALL\' && data.partnerLoationCount != \'0\'">\n\n                            - {{data.partnerLoationCount}} {{ \'LOCATIONS\' | translate }}\n\n                        </span>\n\n                    </h3>\n\n                    <h4>{{data.offerName}}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="col-xs-3" *ngIf="(data.isTarget === \'Y\') && (myTarget != null)">\n\n                <div class="position-relative rounded-progress-position">\n\n                    <round-progress [current]="myTarget"\n\n                                    [radius]="radius"\n\n                                    [max]="max"\n\n                                    [duration]="3000"\n\n                                    [stroke]="4"\n\n                                    [responsive]="responsive"\n\n                                    [clockwise]="clockwise">\n\n                    </round-progress>\n\n                    <h6>{{myTarget}}%</h6>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.description"></p>\n\n    </div>\n\n    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut] >\n\n        <ul>\n\n            <li [ngClass]="{\'itemLiked\': data.isFavorite === \'Y\'}">\n\n                <a (click)="updateOfferAsFavourite(data)">\n\n                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinner"></ion-spinner>\n\n                </a>\n\n            </li>\n\n\n\n            <li *ngIf="data.earnBurnFlag != \'E\'"\n\n                [ngClass]="{\'itemLiked\': (data.isTarget === \'Y\')}">\n\n                <a (click)="updateOfferAsTarget(data)">\n\n                    <ion-icon name="icon-flag" *ngIf="!showSpinnerTarget"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinnerTarget"></ion-spinner>\n\n                </a>\n\n            </li>\n\n            <li *ngIf="data.partnerCode">\n\n                <a (click)="openLocation(data)">\n\n                    <ion-icon name="icon-navigation"></ion-icon>\n\n                </a>\n\n            </li>\n\n        </ul>\n\n\n\n    </div>\n\n</div>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\expandable\expandable.html"*/,
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('fadeInOut', [
                 Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_37" /* transition */])('void => *', [
@@ -2101,289 +2531,126 @@ ExpandableComponent = __decorate([
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return WalletUtils; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_file_service__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_data_access_service__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_ng2_translate__ = __webpack_require__(11);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/**
- * Created by sandip on 1/5/17.
- */
-
-
-
-
-
-
-
-
-
-
-
-var WalletUtils = (function () {
-    function WalletUtils(events, translate, sessionUtils, fileService, dataAccessService, appConstants, serviceConstants) {
-        this.events = events;
-        this.translate = translate;
-        this.sessionUtils = sessionUtils;
-        this.fileService = fileService;
-        this.dataAccessService = dataAccessService;
-        this.appConstants = appConstants;
-        this.serviceConstants = serviceConstants;
+/* unused harmony export PartnerRequest */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return PartnerResponse; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return PartnerInfo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return PartnerLocationsRequest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return PartnerLocationsResponse; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return PartnerLocationInfo; });
+/* unused harmony export IndustryTypesRequest */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return IndustryTypeResponse; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return IndustryTypeInfo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CheckinInfo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return CheckinRequest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return VouchersInfo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return MyVoucherRequest; });
+/* unused harmony export VouchersResponse */
+/* unused harmony export MyVouchersResponse */
+/* unused harmony export MyVoucherDto */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return redeemVoucherRequest; });
+var PartnerRequest = (function () {
+    function PartnerRequest() {
     }
-    WalletUtils.prototype.getWalletContext = function () {
-        var rootContext = this.sessionUtils.getRootContext();
-        var contextObj = rootContext.virtualCards;
-        if (!contextObj) {
-            contextObj = new Array();
-        }
-        return contextObj;
-    };
-    WalletUtils.prototype.saveWalletContext = function (contextObj) {
-        console.log("Wallet  : " + JSON.stringify(contextObj));
-        var rootContext = this.sessionUtils.getRootContext();
-        rootContext.virtualCards = contextObj;
-        this.sessionUtils.saveRootContext(rootContext);
-    };
-    WalletUtils.prototype.cleaWalletContext = function () {
-        var contextObj = new Array();
-        this.saveWalletContext(contextObj);
-    };
-    WalletUtils.prototype.getQRCodeContext = function () {
-        var rootContext = this.sessionUtils.getRootContext();
-        var contextObj = rootContext.qrCodes;
-        if (!contextObj) {
-            contextObj = new Array();
-        }
-        return contextObj;
-    };
-    WalletUtils.prototype.saveQRCodeContext = function (contextObj) {
-        var rootContext = this.sessionUtils.getRootContext();
-        rootContext.qrCodes = contextObj;
-        this.sessionUtils.saveRootContext(rootContext);
-    };
-    WalletUtils.prototype.cleaQRCodeContext = function () {
-        var contextObj = new Array();
-        this.saveQRCodeContext(contextObj);
-    };
-    WalletUtils.prototype.fetchWalletData = function (successCallback, errorCallback) {
-        var _this = this;
-        if (this.sessionUtils.isUserLoggedIn()) {
-            var memberInfo = this.sessionUtils.getMemberInfo();
-            var requestData = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["n" /* VirtualCardInfo */]();
-            requestData.cardNumber = memberInfo.activeCardNo;
-            requestData.tierCode = memberInfo.tier;
-            var serviceContext = new __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_WALLET, this.serviceConstants.WALLET_SERVICE_NAME_VIRTUAL_CARD, requestData);
-            this.dataAccessService.call(serviceContext)
-                .subscribe(function (result) {
-                var shouldPublishEvent = false;
-                var response = result.json();
-                if (!response) {
-                    response = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["o" /* VirtualCardResponse */]();
-                    response.data = [];
-                }
-                else if (response.data && response.data.length > 0) {
-                    var oldData = _this.getWalletContext();
-                    if (oldData && oldData.length > 0) {
-                        var oldCardInfo = oldData[0];
-                        var cardInfo = response.data[0];
-                        shouldPublishEvent = ((_this.frontCardImageURL(oldCardInfo) != _this.frontCardImageURL(cardInfo)) ||
-                            (oldCardInfo.cardBackUrl != cardInfo.cardBackUrl));
-                    }
-                    else {
-                        shouldPublishEvent = true;
-                    }
-                }
-                if (shouldPublishEvent === true) {
-                    _this.saveWalletContext(response.data);
-                    _this.events.publish(_this.appConstants.EVENT_WALLET_INFO_CHANGED);
-                }
-                if (successCallback) {
-                    successCallback(response);
-                }
-            }, function (error) {
-                var errorInfo = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                if (error) {
-                    errorInfo = error.json();
-                    errorInfo.code = error.status;
-                }
-                if (errorCallback) {
-                    errorCallback(errorInfo);
-                }
-                if (errorInfo.code == 401) {
-                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-                }
-            });
-        }
-        else {
-            if (errorCallback) {
-                var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                error.message = this.translate.instant('YOU_ARE_NOT_LOGGED_IN');
-                errorCallback(error);
-            }
-        }
-    };
-    WalletUtils.prototype.fetchQRCodeData = function (successCallback, errorCallback) {
-        var _this = this;
-        if (this.sessionUtils.isUserLoggedIn()) {
-            var memberInfo = this.sessionUtils.getMemberInfo();
-            var requestData = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["j" /* QRCodeInfo */]();
-            requestData.memberUid = memberInfo.memUID;
-            requestData.cardNumber = memberInfo.activeCardNo;
-            var serviceContext = new __WEBPACK_IMPORTED_MODULE_7__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_WALLET, this.serviceConstants.WALLET_SERVICE_NAME_QR_CODE, requestData);
-            this.dataAccessService.call(serviceContext)
-                .subscribe(function (result) {
-                var response = result.json();
-                if (!response) {
-                    response = new __WEBPACK_IMPORTED_MODULE_2__dto_account_dto__["k" /* QRCodeResponse */]();
-                    response.data = [];
-                }
-                _this.saveQRCode(response.data, function (isSaved) {
-                    if (isSaved) {
-                        if (successCallback) {
-                            successCallback(response);
-                        }
-                    }
-                    else {
-                        if (errorCallback) {
-                            var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                            error.message = _this.translate.instant('INVALID_QR_CODE');
-                            errorCallback(error);
-                        }
-                    }
-                });
-            }, function (error) {
-                var errorInfo = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                if (error) {
-                    errorInfo = error.json();
-                    errorInfo.code = error.status;
-                }
-                if (errorCallback) {
-                    errorCallback(errorInfo);
-                }
-                if (errorInfo.code == 401) {
-                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-                }
-            });
-        }
-        else {
-            if (errorCallback) {
-                var error = new __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                error.message = this.translate.instant('YOU_ARE_NOT_LOGGED_IN');
-                errorCallback(error);
-            }
-        }
-    };
-    WalletUtils.prototype.saveQRCode = function (qrCodeData, callback) {
-        var _this = this;
-        if (qrCodeData && (qrCodeData.length > 0)) {
-            var qrCodeAsByte = qrCodeData[0].qrCodeAsByte;
-            if (qrCodeAsByte && (qrCodeAsByte.length > 0)) {
-                var base64String = 'data:image/jpg;base64,' + qrCodeAsByte;
-                var base64Blob = this.base64toBlob(base64String);
-                if (base64Blob) {
-                    this.fileService.writeFile(base64Blob, this.appConstants.WALLET_QR_CODE_IMAGE, false, function (result) {
-                        if (result != true) {
-                            _this.saveQRCodeContext(qrCodeData);
-                        }
-                        callback(true);
-                    });
-                }
-                else {
-                    this.saveQRCodeContext(qrCodeData);
-                    callback(true);
-                }
-            }
-            else {
-                callback(false);
-            }
-        }
-        else {
-            callback(false);
-        }
-    };
-    WalletUtils.prototype.base64toBlob = function (imageData) {
-        var byteString = '';
-        var dataURIArray = imageData.split(',');
-        if (dataURIArray[0].indexOf('base64') >= 0) {
-            byteString = atob(dataURIArray[1]);
-        }
-        else {
-            byteString = decodeURI(dataURIArray[1]);
-        }
-        var mimeString = dataURIArray[0].split(':')[1].split(';')[0];
-        var ia = new Uint8Array(byteString.length);
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        var fileAfter = new Blob([ia], { type: mimeString });
-        return fileAfter;
-    };
-    WalletUtils.prototype.frontCardImageURL = function (cardInfo) {
-        var cardFrontUrl = cardInfo.cardFrontUrl;
-        if (cardFrontUrl) {
-            if (cardInfo.isUsable == 'Y') {
-                var extension = cardFrontUrl.split('.').pop();
-                if (extension && extension.length > 0) {
-                    var searchString = '.' + extension;
-                    var replaceString = this.appConstants.WALLET_CARD_FRONT_MASTER_IMAGE_NAME + '.' + extension;
-                    cardFrontUrl = cardFrontUrl.replace(searchString, replaceString);
-                }
-            }
-            var memberInfo = this.sessionUtils.getMemberInfo();
-            if (memberInfo.tier === 'MIN') {
-                var suffix = (memberInfo.gender === 'F') ? '-F' : '-M';
-                var extension = cardFrontUrl.split('.').pop();
-                if (extension && extension.length > 0) {
-                    var searchString = '.' + extension;
-                    var replaceString = suffix + '.' + extension;
-                    cardFrontUrl = cardFrontUrl.replace(searchString, replaceString);
-                }
-            }
-        }
-        return cardFrontUrl;
-    };
-    WalletUtils.prototype.removeWalletImages = function () {
-        var _this = this;
-        this.fileService.removeFile(this.appConstants.WALLET_CARD_FRONT_IMAGE, false, function (result1) {
-            _this.fileService.removeFile(_this.appConstants.WALLET_CARD_BACK_IMAGE, false, function (result2) {
-                _this.fileService.removeFile(_this.appConstants.WALLET_QR_CODE_IMAGE, false, null);
-            });
-        });
-    };
-    WalletUtils.prototype.hasVirtualCardData = function () {
-        var virtualCards = this.getWalletContext();
-        return (virtualCards && (virtualCards.length > 0));
-    };
-    return WalletUtils;
+    return PartnerRequest;
 }());
-WalletUtils = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
-        __WEBPACK_IMPORTED_MODULE_10_ng2_translate__["c" /* TranslateService */],
-        __WEBPACK_IMPORTED_MODULE_4__session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_5__services_commons_file_service__["a" /* FileService */],
-        __WEBPACK_IMPORTED_MODULE_6__services_commons_data_access_service__["a" /* DataAccessService */],
-        __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_8__constants_service_constants__["a" /* ServiceConstants */]])
-], WalletUtils);
 
-//# sourceMappingURL=wallet.utils.js.map
+var PartnerResponse = (function () {
+    function PartnerResponse() {
+    }
+    return PartnerResponse;
+}());
+
+var PartnerInfo = (function () {
+    function PartnerInfo() {
+    }
+    return PartnerInfo;
+}());
+
+var PartnerLocationsRequest = (function () {
+    function PartnerLocationsRequest() {
+    }
+    return PartnerLocationsRequest;
+}());
+
+var PartnerLocationsResponse = (function () {
+    function PartnerLocationsResponse() {
+    }
+    return PartnerLocationsResponse;
+}());
+
+var PartnerLocationInfo = (function () {
+    function PartnerLocationInfo() {
+    }
+    return PartnerLocationInfo;
+}());
+
+var IndustryTypesRequest = (function () {
+    function IndustryTypesRequest() {
+    }
+    return IndustryTypesRequest;
+}());
+
+var IndustryTypeResponse = (function () {
+    function IndustryTypeResponse() {
+    }
+    return IndustryTypeResponse;
+}());
+
+var IndustryTypeInfo = (function () {
+    function IndustryTypeInfo() {
+    }
+    return IndustryTypeInfo;
+}());
+
+var CheckinInfo = (function () {
+    function CheckinInfo() {
+    }
+    return CheckinInfo;
+}());
+
+var CheckinRequest = (function () {
+    function CheckinRequest() {
+    }
+    return CheckinRequest;
+}());
+
+var VouchersInfo = (function () {
+    function VouchersInfo() {
+    }
+    return VouchersInfo;
+}());
+
+var MyVoucherRequest = (function () {
+    function MyVoucherRequest() {
+    }
+    return MyVoucherRequest;
+}());
+
+var VouchersResponse = (function () {
+    function VouchersResponse() {
+    }
+    return VouchersResponse;
+}());
+
+var MyVouchersResponse = (function () {
+    function MyVouchersResponse() {
+    }
+    return MyVouchersResponse;
+}());
+
+var MyVoucherDto = (function () {
+    function MyVoucherDto() {
+    }
+    return MyVoucherDto;
+}());
+
+var redeemVoucherRequest = (function () {
+    function redeemVoucherRequest() {
+    }
+    return redeemVoucherRequest;
+}());
+
+//# sourceMappingURL=partners.dto.js.map
 
 /***/ }),
 
@@ -2394,11 +2661,11 @@ WalletUtils = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ExpandableLocationComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__login_login__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_social_sharing_utils__ = __webpack_require__(145);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
@@ -2406,7 +2673,7 @@ WalletUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_commons_service_loading__ = __webpack_require__(31);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -2594,7 +2861,7 @@ __decorate([
 ], ExpandableLocationComponent.prototype, "data", void 0);
 ExpandableLocationComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'expandable-location-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\expandable-location\expandable-location.html"*/'<div class="expandable-card-holder app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="expandable-img-holder" (click)="toggle()">\n\n        <img src="{{data.imagePath}}" alt="">\n\n    </div>\n\n    <div class="expandable-strip-holder" (click)="toggle()">\n\n        <div class="row">\n\n            <div class="strip-logo-content col-xs-12">\n\n                <div class="expandable-logo">\n\n                    <img [src]="data.partnerLogoPath" alt=""/>\n\n                    <h3>\n\n                        {{data.partnerName}}<span *ngIf="data.storeName"> - {{data.storeName}}</span>\n\n                    </h3>\n\n                    <h4>\n\n                        <span>{{data.numberOfOffers}}</span> {{ \'OFFERS\' | translate }} &nbsp; &nbsp;\n\n                        <span>{{data.distance | number}}</span> {{ \'KM\' | translate }} {{ \'APPROX\' | translate }}\n\n                    </h4>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.addressDescription"></p>\n\n    </div>\n\n    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut]>\n\n        <ul>\n\n\n\n            <li [ngClass]="{\'itemLiked\': data.isFavorite == \'Y\'}">\n\n                <a (click)="liked(data)">\n\n                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinner"></ion-spinner>\n\n                </a>\n\n            </li>\n\n\n\n            <li [ngClass]="{\'itemLiked\': data.isCheckedIn}"\n\n                *ngIf="data.addressId && !shouldHideCheckin">\n\n                <a (click)="checkIn(data)">\n\n                    <ion-icon name="icon-check"></ion-icon>\n\n                </a>\n\n            </li>\n\n\n\n            <li *ngIf="data.latitude && data.longitude">\n\n                <a (click)="openLocation(data)">\n\n                    <ion-icon name="icon-navigation"></ion-icon>\n\n                </a>\n\n            </li>\n\n        </ul>\n\n\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\expandable-location\expandable-location.html"*/,
+        selector: 'expandable-location-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\expandable-location\expandable-location.html"*/'<div class="expandable-card-holder app-background-image"\n\n     [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n    <div class="expandable-img-holder" (click)="toggle()">\n\n        <img src="{{data.imagePath}}" alt="">\n\n    </div>\n\n    <div class="expandable-strip-holder" (click)="toggle()">\n\n        <div class="row">\n\n            <div class="strip-logo-content col-xs-12">\n\n                <div class="expandable-logo">\n\n                    <img [src]="data.partnerLogoPath" alt=""/>\n\n                    <h3>\n\n                        {{data.partnerName}}<span *ngIf="data.storeName"> - {{data.storeName}}</span>\n\n                    </h3>\n\n                    <h4>\n\n                        <span>{{data.numberOfOffers}}</span> {{ \'OFFERS\' | translate }} &nbsp; &nbsp;\n\n                        <span>{{data.distance | number}}</span> {{ \'KM\' | translate }} {{ \'APPROX\' | translate }}\n\n                    </h4>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n    <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n        <p class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="data.addressDescription"></p>\n\n    </div>\n\n    <div class="slider-holder-footer" *ngIf="visible" [@fadeInOut]>\n\n        <ul>\n\n\n\n            <li [ngClass]="{\'itemLiked\': data.isFavorite == \'Y\'}">\n\n                <a (click)="liked(data)">\n\n                    <ion-icon name="icon-heart" *ngIf="!showSpinner"></ion-icon>\n\n                    <ion-spinner *ngIf="showSpinner"></ion-spinner>\n\n                </a>\n\n            </li>\n\n\n\n            <li [ngClass]="{\'itemLiked\': data.isCheckedIn}"\n\n                *ngIf="data.addressId && !shouldHideCheckin">\n\n                <a (click)="checkIn(data)">\n\n                    <ion-icon name="icon-check"></ion-icon>\n\n                </a>\n\n            </li>\n\n\n\n            <li *ngIf="data.latitude && data.longitude">\n\n                <a (click)="openLocation(data)">\n\n                    <ion-icon name="icon-navigation"></ion-icon>\n\n                </a>\n\n            </li>\n\n        </ul>\n\n\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\expandable-location\expandable-location.html"*/,
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('fadeInOut', [
                 Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_37" /* transition */])('void => *', [
@@ -2637,7 +2904,7 @@ ExpandableLocationComponent = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_commons_file_service__ = __webpack_require__(143);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_wallet_utils__ = __webpack_require__(109);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_wallet_utils__ = __webpack_require__(107);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_client_utils__ = __webpack_require__(9);
@@ -2849,7 +3116,7 @@ __decorate([
 ], VirtualCardComponent.prototype, "changeIsFrontVisible", void 0);
 VirtualCardComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'virtual-card-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\virtual-card\virtual-card.html"*/'<div class="flip-container" [ngClass]="{\'flip\':  isFrontVisible }" *ngIf="data">\n\n\n\n    <div class="spinner-holder-virtual-card" *ngIf="shouldDisplayIndicator == true">\n\n        <ion-spinner ></ion-spinner>\n\n    </div>\n\n\n\n    <div class="flipper" *ngIf="shouldDisplayCard == true">\n\n        <div class="card-holder-wallet">\n\n            <div class="front" (pan)="swipeEvent($event)">\n\n                <img [src]="cardFront" class="front-card-img"/>\n\n                <div class="front-card-details virtual-card-style-PAL">\n\n                    <div class="row">\n\n                        <div class="col-xs-12">\n\n                            <h3>\n\n                                {{memberInfo.preferredCardName}}\n\n                            </h3>\n\n                        </div>\n\n\n\n                        <div class="col-xs-5" *ngIf="memberInfo.activeCardNo">\n\n                            <h3>\n\n                                {{memberInfo.activeCardNo}}\n\n                            </h3>\n\n                        </div>\n\n                        <div class="col-xs-7" *ngIf="cardExpiryDate">\n\n                            <h3 class="valid-thru">\n\n                                Valid Thru {{cardExpiryDate | date: \'MMM yyyy\'}}\n\n                            </h3>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="back" *ngIf="cardBack" (pan)="swipeEvent($event)">\n\n                <img [src]="cardBack" class="front-card-img"/>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\virtual-card\virtual-card.html"*/
+        selector: 'virtual-card-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\virtual-card\virtual-card.html"*/'<div class="flip-container" [ngClass]="{\'flip\':  isFrontVisible }" *ngIf="data">\n\n\n\n    <div class="spinner-holder-virtual-card" *ngIf="shouldDisplayIndicator == true">\n\n        <ion-spinner ></ion-spinner>\n\n    </div>\n\n\n\n    <div class="flipper" *ngIf="shouldDisplayCard == true">\n\n        <div class="card-holder-wallet">\n\n            <div class="front" (pan)="swipeEvent($event)">\n\n                <img [src]="cardFront" class="front-card-img"/>\n\n                <div class="front-card-details virtual-card-style-PAL">\n\n                    <div class="row">\n\n                        <div class="col-xs-12">\n\n                            <h3>\n\n                                {{memberInfo.preferredCardName}}\n\n                            </h3>\n\n                        </div>\n\n\n\n                        <div class="col-xs-5" *ngIf="memberInfo.activeCardNo">\n\n                            <h3>\n\n                                {{memberInfo.activeCardNo}}\n\n                            </h3>\n\n                        </div>\n\n                        <div class="col-xs-7" *ngIf="cardExpiryDate">\n\n                            <h3 class="valid-thru">\n\n                                Valid Thru {{cardExpiryDate | date: \'MMM yyyy\'}}\n\n                            </h3>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="back" *ngIf="cardBack" (pan)="swipeEvent($event)">\n\n                <img [src]="cardBack" class="front-card-img"/>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</div>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\virtual-card\virtual-card.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -2874,10 +3141,10 @@ VirtualCardComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PersonalTargetComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_target_utils__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_language_constants__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__ = __webpack_require__(7);
@@ -2962,7 +3229,7 @@ __decorate([
     __metadata("design:type", Array)
 ], PersonalTargetComponent.prototype, "personalTargetData", void 0);
 PersonalTargetComponent = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\personal-target\personal-target.html"*/'<div class="personal-targets-block">\n\n\n\n    <h3>{{ \'PERSONAL_GOALS\' | translate }}</h3>\n\n    \n\n    <div class="personal-targets-holder">\n\n    <ul>\n\n        <li *ngFor="let i of personalTargetList">\n\n            <div class="round-bar-holder">\n\n                <div class="position-relative">\n\n                    <round-progress\n\n                            [current]="i.myTarget"\n\n                            [radius]="radius"\n\n                            [max]="max"\n\n                            [duration]="3000"\n\n                            [stroke]="4"\n\n                            [responsive]="responsive"\n\n                            [clockwise]="clockwise">\n\n                    </round-progress>\n\n                    <h6>{{i.myTarget}}%</h6>\n\n                </div>\n\n            </div>\n\n            <div class="target-text-holder">\n\n                <h4>{{i.title}}</h4>\n\n                <h5>{{i.targetEndDateString}} <span>{{i.points | number}} {{ languageConstants.POINTS | translate }}</span></h5>\n\n            </div>\n\n            <div class="ellipsis-holder">\n\n                <button ion-button icon-only color="transparent" (click)="delete(i)">\n\n                    <ion-icon name="icon-delete"></ion-icon>\n\n                </button>\n\n            </div>\n\n        </li>\n\n    </ul>\n\n    </div>\n\n</div>\n\n\n\n\n\n\n\n\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\personal-target\personal-target.html"*/,
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\personal-target\personal-target.html"*/'<div class="personal-targets-block">\n\n\n\n    <h3>{{ \'PERSONAL_GOALS\' | translate }}</h3>\n\n    \n\n    <div class="personal-targets-holder">\n\n    <ul>\n\n        <li *ngFor="let i of personalTargetList">\n\n            <div class="round-bar-holder">\n\n                <div class="position-relative">\n\n                    <round-progress\n\n                            [current]="i.myTarget"\n\n                            [radius]="radius"\n\n                            [max]="max"\n\n                            [duration]="3000"\n\n                            [stroke]="4"\n\n                            [responsive]="responsive"\n\n                            [clockwise]="clockwise">\n\n                    </round-progress>\n\n                    <h6>{{i.myTarget}}%</h6>\n\n                </div>\n\n            </div>\n\n            <div class="target-text-holder">\n\n                <h4>{{i.title}}</h4>\n\n                <h5>{{i.targetEndDateString}} <span>{{i.points | number}} {{ languageConstants.POINTS | translate }}</span></h5>\n\n            </div>\n\n            <div class="ellipsis-holder">\n\n                <button ion-button icon-only color="transparent" (click)="delete(i)">\n\n                    <ion-icon name="icon-delete"></ion-icon>\n\n                </button>\n\n            </div>\n\n        </li>\n\n    </ul>\n\n    </div>\n\n</div>\n\n\n\n\n\n\n\n\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\personal-target\personal-target.html"*/,
         selector: 'component-personal-target',
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
@@ -2988,13 +3255,13 @@ PersonalTargetComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PersonalTargetListComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_social_sharing_utils__ = __webpack_require__(145);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_partner_utils__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_client_utils__ = __webpack_require__(9);
@@ -3193,7 +3460,7 @@ __decorate([
     __metadata("design:type", __WEBPACK_IMPORTED_MODULE_16__dto_goal_dto__["a" /* GoalInfo */])
 ], PersonalTargetListComponent.prototype, "data", void 0);
 PersonalTargetListComponent = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\personal-target-list\personal-target-list.html"*/'<div>\n\n\n\n\n\n    <!--Offer based targets -->\n\n\n\n    <div *ngIf="data.offerId != 0">\n\n\n\n        <!-- In progress targets -->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'\' || data.targetStatus == \'I\'">\n\n            <div class="expandable-img-holder -card-default-background" (click)="toggle()">\n\n                <img src="{{data.offerBannerPath}}" alt="">\n\n                <div class="special-offers"  *ngIf="data.special === \'Y\'">\n\n                    <ion-icon name="star"></ion-icon>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content col-xs-9">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                    <div class="col-xs-3">\n\n                        <div class="position-relative rounded-progress-position">\n\n                            <round-progress [current]="data.myTarget"\n\n                                            [radius]="radius"\n\n                                            [max]="max"\n\n                                            [duration]="3000"\n\n                                            [stroke]="4"\n\n                                            [responsive]="responsive"\n\n                                            [clockwise]="clockwise">\n\n                            </round-progress>\n\n                            <h6>{{data.myTarget}}%</h6>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n                <p class="in-app-browser-anchor"\n\n                   onclick="onInnerHTMLTap(event)"\n\n                   *ngIf="data.targetDescription"\n\n                   [innerHTML]="data.targetDescription"></p>\n\n            </div>\n\n            <div class="expandable-footer-holder" *ngIf="visible" [@fadeInOut]>\n\n                <ul>\n\n                    <li [ngClass]="{\'itemLiked\': data.isFavorite === \'Y\'}">\n\n                        <a (click)="updateOfferAsFavourite(data)">\n\n                            <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                            <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                        </a>\n\n                    </li>\n\n                    <li *ngIf="shouldHideSocialShare == false">\n\n                        <a (click)="openShareModal(targetShareRequestTag, \'\')">\n\n                            <ion-icon name="icon-share"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                    <li *ngIf="data.partnerCode">\n\n                        <a (click)="openLocation(data)">\n\n                            <ion-icon name="icon-navigation"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                </ul>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Achieved target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'A\'">\n\n            <div class="expandable-img-holder -target-completed">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Expired target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'E\'">\n\n            <div class="expandable-img-holder -card-default-background -target-expired -target-img-gery"\n\n                 [style.background-image]="\'url(\' + data.offerBannerPath + \')\'">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'EXPIRED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="close-circle"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n    <!--Personal based targets -->\n\n\n\n    <div *ngIf="data.offerId == 0">\n\n\n\n        <!-- In progress targets -->\n\n        <div class="expandable-card-holder in-progress-targets app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'\' || data.targetStatus == \'I\'">\n\n            <div class="expandable-img-holder" (click)="toggle()">\n\n                <div class="round-progress-holder">\n\n                    <div class="position-relative _round-progress">\n\n                        <round-progress\n\n                                [current]="data.myTarget"\n\n                                [radius]="radius"\n\n                                [max]="max"\n\n                                [duration]="3000"\n\n                                [stroke]="4"\n\n                                [responsive]="responsive"\n\n                                [clockwise]="clockwise">\n\n                        </round-progress>\n\n                        <h6>{{data.myTarget}}%</h6>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-footer-holder" *ngIf="visible && shouldHideSocialShare == false" [@fadeInOut]>\n\n                <ul>\n\n                    <li *ngIf="shouldHideSocialShare == false">\n\n                        <a (click)="openShareModal(targetShareRequestTag, \'\')">\n\n                            <ion-icon name="icon-share"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                </ul>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Achieved target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'A\'">\n\n            <div class="expandable-img-holder -target-completed">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Expired target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'E\'">\n\n            <div class="expandable-img-holder -target-expired">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'EXPIRED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="close-circle"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n</div>\n\n\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\personal-target-list\personal-target-list.html"*/,
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\personal-target-list\personal-target-list.html"*/'<div>\n\n\n\n\n\n    <!--Offer based targets -->\n\n\n\n    <div *ngIf="data.offerId != 0">\n\n\n\n        <!-- In progress targets -->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'\' || data.targetStatus == \'I\'">\n\n            <div class="expandable-img-holder -card-default-background" (click)="toggle()">\n\n                <img src="{{data.offerBannerPath}}" alt="">\n\n                <div class="special-offers"  *ngIf="data.special === \'Y\'">\n\n                    <ion-icon name="star"></ion-icon>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content col-xs-9">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                    <div class="col-xs-3">\n\n                        <div class="position-relative rounded-progress-position">\n\n                            <round-progress [current]="data.myTarget"\n\n                                            [radius]="radius"\n\n                                            [max]="max"\n\n                                            [duration]="3000"\n\n                                            [stroke]="4"\n\n                                            [responsive]="responsive"\n\n                                            [clockwise]="clockwise">\n\n                            </round-progress>\n\n                            <h6>{{data.myTarget}}%</h6>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-content-holder" *ngIf="visible" [@fadeInOut]>\n\n                <p class="in-app-browser-anchor"\n\n                   onclick="onInnerHTMLTap(event)"\n\n                   *ngIf="data.targetDescription"\n\n                   [innerHTML]="data.targetDescription"></p>\n\n            </div>\n\n            <div class="expandable-footer-holder" *ngIf="visible" [@fadeInOut]>\n\n                <ul>\n\n                    <li [ngClass]="{\'itemLiked\': data.isFavorite === \'Y\'}">\n\n                        <a (click)="updateOfferAsFavourite(data)">\n\n                            <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                            <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                        </a>\n\n                    </li>\n\n                    <li *ngIf="shouldHideSocialShare == false">\n\n                        <a (click)="openShareModal(targetShareRequestTag, \'\')">\n\n                            <ion-icon name="icon-share"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                    <li *ngIf="data.partnerCode">\n\n                        <a (click)="openLocation(data)">\n\n                            <ion-icon name="icon-navigation"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                </ul>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Achieved target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'A\'">\n\n            <div class="expandable-img-holder -target-completed">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Expired target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'E\'">\n\n            <div class="expandable-img-holder -card-default-background -target-expired -target-img-gery"\n\n                 [style.background-image]="\'url(\' + data.offerBannerPath + \')\'">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'EXPIRED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="close-circle"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <img [src]="data.partnerLogoPath" alt="" />\n\n                            <h3>{{data.partnerName}}</h3>\n\n                            <h4 *ngIf="data.partnerLocationCount == \'ALL\'">{{ \'ALL_LOCATIONS\' | translate }}</h4>\n\n                            <h4 *ngIf="data.partnerLocationCount && data.partnerLocationCount != \'ALL\'">\n\n                                {{data.partnerLocationCount}} {{ \'LOCATIONS\' | translate }}\n\n                            </h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n    <!--Personal based targets -->\n\n\n\n    <div *ngIf="data.offerId == 0">\n\n\n\n        <!-- In progress targets -->\n\n        <div class="expandable-card-holder in-progress-targets app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'\' || data.targetStatus == \'I\'">\n\n            <div class="expandable-img-holder" (click)="toggle()">\n\n                <div class="round-progress-holder">\n\n                    <div class="position-relative _round-progress">\n\n                        <round-progress\n\n                                [current]="data.myTarget"\n\n                                [radius]="radius"\n\n                                [max]="max"\n\n                                [duration]="3000"\n\n                                [stroke]="4"\n\n                                [responsive]="responsive"\n\n                                [clockwise]="clockwise">\n\n                        </round-progress>\n\n                        <h6>{{data.myTarget}}%</h6>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-footer-holder" *ngIf="visible && shouldHideSocialShare == false" [@fadeInOut]>\n\n                <ul>\n\n                    <li *ngIf="shouldHideSocialShare == false">\n\n                        <a (click)="openShareModal(targetShareRequestTag, \'\')">\n\n                            <ion-icon name="icon-share"></ion-icon>\n\n                        </a>\n\n                    </li>\n\n                </ul>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Achieved target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'A\'">\n\n            <div class="expandable-img-holder -target-completed">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'CONGRATULATIONS_TARGET_ACHIEVED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <!--Expired target template-->\n\n        <div class="expandable-card-holder app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             *ngIf="data.targetStatus == \'E\'">\n\n            <div class="expandable-img-holder -target-expired">\n\n                <div class="congratulations">\n\n                    <h3>{{ \'EXPIRED\' | translate }} </h3>\n\n                    <h2>\n\n                        <ion-icon name="close-circle"></ion-icon>\n\n                    </h2>\n\n                    <h6>\n\n                        <ion-icon name="calendar"></ion-icon>\n\n                        {{targetEndDateString}} <span></span>\n\n                        <ion-icon name="flag"></ion-icon>\n\n                        {{data.targetPoints}} {{ languageConstants.POINTS | translate }}\n\n                    </h6>\n\n                </div>\n\n            </div>\n\n            <div class="expandable-strip-holder" (click)="toggle()">\n\n                <div class="row">\n\n                    <div class="strip-logo-content">\n\n                        <div class="expandable-logo">\n\n                            <ion-icon name="icon-user"></ion-icon>\n\n                            <h3>{{data.targetName}}</h3>\n\n                            <h4>{{targetEndDateString}}</h4>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n</div>\n\n\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\personal-target-list\personal-target-list.html"*/,
         selector: 'component-personal-target-list',
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('fadeInOut', [
@@ -3236,14 +3503,14 @@ PersonalTargetListComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PartnersDetailHeaderComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_partner_utils__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_social_sharing_utils__ = __webpack_require__(145);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__constants_app_constants__ = __webpack_require__(7);
@@ -3417,7 +3684,7 @@ var PartnersDetailHeaderComponent = (function () {
 }());
 PartnersDetailHeaderComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'partners-detail-header-component',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\partners-detail-header-card\partners-detail-header.html"*/'<div class="partners" *ngIf="partnerLocationInfo">\n\n    <div class="headerCard partners" [style.background-image]="\'url(\' + partnerLocationInfo.img + \')\'" >\n\n\n\n        <h2> <img [src]="partnerLocationInfo.logo" alt=""/></h2>\n\n\n\n        <div class="row">\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerLocationInfo.offersCount }} <span>{{ partnerLocationInfo.offersCount == 1 ? (\'OFFER\' | translate) : (\'OFFERS\' | translate) }}</span></h5>\n\n            </div>\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerLocationInfo.distance | number}} <span>{{ \'KM\' | translate }} {{ \'APPROX\' | translate }}</span></h5>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <div class="footer"  >\n\n            <ul>\n\n                <li (click)="liked(partnerLocationInfo)"\n\n                    [ngClass]="{\'itemLiked\': partnerLocationInfo.isFavourite}">\n\n                    <a>\n\n                        <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                        <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                    </a>\n\n                </li>\n\n                <li (click)="checkIn(partnerLocationInfo)"\n\n                    [ngClass]="{\'itemLiked\': partnerLocationInfo.isCheckedIn}"\n\n                    *ngIf="partnerLocationInfo.addressId && !shouldHideCheckin">\n\n                    <a>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </a>\n\n                </li>\n\n                <li (click)="openMap(partnerLocationInfo)"\n\n                    *ngIf="partnerLocationInfo.latitude && partnerLocationInfo.longitude">\n\n                    <a>\n\n                        <ion-icon name="icon-navigation"></ion-icon>\n\n                    </a>\n\n                </li>\n\n            </ul>\n\n\n\n        </div>\n\n\n\n        <div class="overlay-black"></div>\n\n    </div>\n\n\n\n</div>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\partners-detail-header-card\partners-detail-header.html"*/
+        selector: 'partners-detail-header-component',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\partners-detail-header-card\partners-detail-header.html"*/'<div class="partners" *ngIf="partnerLocationInfo">\n\n    <div class="headerCard partners" [style.background-image]="\'url(\' + partnerLocationInfo.img + \')\'" >\n\n\n\n        <h2> <img [src]="partnerLocationInfo.logo" alt=""/></h2>\n\n\n\n        <div class="row">\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerLocationInfo.offersCount }} <span>{{ partnerLocationInfo.offersCount == 1 ? (\'OFFER\' | translate) : (\'OFFERS\' | translate) }}</span></h5>\n\n            </div>\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerLocationInfo.distance | number}} <span>{{ \'KM\' | translate }} {{ \'APPROX\' | translate }}</span></h5>\n\n            </div>\n\n        </div>\n\n\n\n\n\n        <div class="footer"  >\n\n            <ul>\n\n                <li (click)="liked(partnerLocationInfo)"\n\n                    [ngClass]="{\'itemLiked\': partnerLocationInfo.isFavourite}">\n\n                    <a>\n\n                        <ion-icon name="icon-heart" *ngIf="!showSpinnerFavourite"></ion-icon>\n\n                        <ion-spinner *ngIf="showSpinnerFavourite"></ion-spinner>\n\n                    </a>\n\n                </li>\n\n                <li (click)="checkIn(partnerLocationInfo)"\n\n                    [ngClass]="{\'itemLiked\': partnerLocationInfo.isCheckedIn}"\n\n                    *ngIf="partnerLocationInfo.addressId && !shouldHideCheckin">\n\n                    <a>\n\n                        <ion-icon name="icon-check"></ion-icon>\n\n                    </a>\n\n                </li>\n\n                <li (click)="openMap(partnerLocationInfo)"\n\n                    *ngIf="partnerLocationInfo.latitude && partnerLocationInfo.longitude">\n\n                    <a>\n\n                        <ion-icon name="icon-navigation"></ion-icon>\n\n                    </a>\n\n                </li>\n\n            </ul>\n\n\n\n        </div>\n\n\n\n        <div class="overlay-black"></div>\n\n    </div>\n\n\n\n</div>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\partners-detail-header-card\partners-detail-header.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* ModalController */],
@@ -3442,126 +3709,445 @@ PartnersDetailHeaderComponent = __decorate([
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export PartnerRequest */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return PartnerResponse; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return PartnerInfo; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return PartnerLocationsRequest; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return PartnerLocationsResponse; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return PartnerLocationInfo; });
-/* unused harmony export IndustryTypesRequest */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return IndustryTypeResponse; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return IndustryTypeInfo; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CheckinInfo; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return CheckinRequest; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return VouchersInfo; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return MyVoucherRequest; });
-/* unused harmony export VouchersResponse */
-/* unused harmony export MyVouchersResponse */
-/* unused harmony export MyVoucherDto */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return redeemVoucherRequest; });
-var PartnerRequest = (function () {
-    function PartnerRequest() {
-    }
-    return PartnerRequest;
-}());
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UserUtils; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__session_utils__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__client_utils__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__ = __webpack_require__(52);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+/**
+ * Created by sandip on 1/16/17.
+ */
 
-var PartnerResponse = (function () {
-    function PartnerResponse() {
-    }
-    return PartnerResponse;
-}());
 
-var PartnerInfo = (function () {
-    function PartnerInfo() {
-    }
-    return PartnerInfo;
-}());
 
-var PartnerLocationsRequest = (function () {
-    function PartnerLocationsRequest() {
-    }
-    return PartnerLocationsRequest;
-}());
 
-var PartnerLocationsResponse = (function () {
-    function PartnerLocationsResponse() {
-    }
-    return PartnerLocationsResponse;
-}());
 
-var PartnerLocationInfo = (function () {
-    function PartnerLocationInfo() {
-    }
-    return PartnerLocationInfo;
-}());
 
-var IndustryTypesRequest = (function () {
-    function IndustryTypesRequest() {
-    }
-    return IndustryTypesRequest;
-}());
 
-var IndustryTypeResponse = (function () {
-    function IndustryTypeResponse() {
-    }
-    return IndustryTypeResponse;
-}());
 
-var IndustryTypeInfo = (function () {
-    function IndustryTypeInfo() {
-    }
-    return IndustryTypeInfo;
-}());
 
-var CheckinInfo = (function () {
-    function CheckinInfo() {
-    }
-    return CheckinInfo;
-}());
 
-var CheckinRequest = (function () {
-    function CheckinRequest() {
+var UserUtils = (function () {
+    function UserUtils(dataAccessService, serviceConstants, appConstants, sessionUtils, clientUtils, events) {
+        this.dataAccessService = dataAccessService;
+        this.serviceConstants = serviceConstants;
+        this.appConstants = appConstants;
+        this.sessionUtils = sessionUtils;
+        this.clientUtils = clientUtils;
+        this.events = events;
+        this.MIN_NUM_OF_CHAR_USERNAME = 11;
     }
-    return CheckinRequest;
+    UserUtils.prototype.saveUserInfo = function (contextObj) {
+        var rootContext = this.sessionUtils.getRootContext();
+        rootContext.memberInfo = contextObj;
+        this.sessionUtils.saveRootContext(rootContext);
+    };
+    UserUtils.prototype.clearUserInfo = function () {
+        var contextObj = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
+        this.saveUserInfo(contextObj);
+    };
+    UserUtils.prototype.isUserLoggedIn = function () {
+        return (this.sessionUtils.getAccessToken() != null);
+    };
+    UserUtils.prototype.isFacebookUser = function () {
+        var userProfile = this.sessionUtils.getMemberInfo();
+        return (userProfile && !this.clientUtils.isNullOrEmpty(userProfile.fbMemberId));
+    };
+    UserUtils.prototype.userProfilePic = function () {
+        var profilePic = null;
+        var userProfile = this.sessionUtils.getMemberInfo();
+        if (userProfile && !this.clientUtils.isNullOrEmpty(userProfile.memberPicture)) {
+            profilePic = userProfile.memberPicture;
+        }
+        return profilePic;
+    };
+    UserUtils.prototype.doLogin = function (username, password, successCallback, errorCallback) {
+        var _this = this;
+        var loginDataRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
+        loginDataRequest.membershipCardNumber = username;
+        loginDataRequest.password = password;
+        var loginRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["b" /* LoginRequest */]();
+        loginRequest.data = loginDataRequest;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_LOGIN, loginRequest);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
+                response.data = [];
+            }
+            var loginDataResponse = response.data[0];
+            var memberInfo = loginDataResponse.member;
+            memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
+            _this.saveUserInfo(memberInfo);
+            _this.events.publish(_this.appConstants.EVENT_LOGIN_STATUS_CHANGED);
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            if (errorCallback) {
+                var errorInfo = error.json();
+                errorCallback(errorInfo);
+            }
+        });
+    };
+    UserUtils.prototype.loginUsingFacebook = function (fbToken, successCallback, errorCallback) {
+        var _this = this;
+        var loginDataRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
+        loginDataRequest.facebookAccessToken = fbToken;
+        var loginRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["b" /* LoginRequest */]();
+        loginRequest.data = loginDataRequest;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_LOGIN, loginRequest);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
+                response.data = [];
+            }
+            var loginDataResponse = response.data[0];
+            var memberInfo = loginDataResponse.member;
+            memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
+            _this.saveUserInfo(memberInfo);
+            _this.events.publish(_this.appConstants.EVENT_LOGIN_STATUS_CHANGED);
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            if (errorCallback) {
+                var errorInfo = error.json();
+                errorCallback(errorInfo);
+            }
+        });
+    };
+    UserUtils.prototype.fetchProfile = function (successCallback, errorCallback) {
+        var _this = this;
+        if (this.sessionUtils.isUserLoggedIn()) {
+            var memberInfo = this.sessionUtils.getMemberInfo();
+            var requestData = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
+            requestData.membershipCardNumber = memberInfo.username;
+            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_PROFILE, requestData);
+            this.dataAccessService.call(serviceContext)
+                .subscribe(function (result) {
+                var response = result.json();
+                if (!response) {
+                    response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
+                    response.data = [];
+                }
+                var loginDataResponse = response.data[0];
+                var memberInfo = loginDataResponse.member;
+                var memInfo = _this.sessionUtils.getMemberInfo();
+                memberInfo.accessToken = memInfo.accessToken;
+                memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
+                _this.saveUserInfo(memberInfo);
+                _this.events.publish(_this.appConstants.EVENT_USER_PROFILE_CHANGED);
+                if (successCallback) {
+                    successCallback(response);
+                }
+            }, function (error) {
+                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                if (error) {
+                    errorInfo = error.json();
+                    errorInfo.code = error.status;
+                }
+                if (errorCallback) {
+                    errorCallback(errorInfo);
+                }
+                if (errorInfo.code == 401) {
+                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+                }
+            });
+        }
+    };
+    UserUtils.prototype.saveProfile = function (profileInfo, shouldEdit, successCallback, errorCallback) {
+        var _this = this;
+        var serviceName = (shouldEdit == true) ?
+            this.serviceConstants.ACCOUNT_SERVICE_NAME_EDIT_PROFILE :
+            this.serviceConstants.ACCOUNT_SERVICE_NAME_CREATE_PROFILE;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, serviceName, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
+                response.data = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.changePassword = function (profileInfo, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_CHANGE_PASSWORD, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
+                response.data = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.getMemberAddress = function (profileInfo, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_MEMBER_ADDRESS, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.getMemberSecurityQuestion = function (profileInfo, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_MEMBER_SECURITY_QUESTION, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
+                response.data = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.saveMemberSecurityQuestion = function (profileInfo, shouldEdit, successCallback, errorCallback) {
+        var _this = this;
+        var serviceName = (shouldEdit == true) ?
+            this.serviceConstants.ACCOUNT_SERVICE_NAME_EDIT_MEMBER_SECURITY_QUESTION :
+            this.serviceConstants.ACCOUNT_SERVICE_NAME_CREATE_MEMBER_SECURITY_QUESTION;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, serviceName, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = { message: '' };
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.verifyMemberSecurityQuestion = function (profileInfo, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_VERIFY_MEMBER_SECURITY_QUESTION, profileInfo);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = { message: '' };
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.getPasswordHints = function (successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_PASSWORD_HINTS, null);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["i" /* PasswordHintResponse */]();
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.validateUsername = function (username) {
+        var textValue = username;
+        if (textValue && (textValue.length < this.MIN_NUM_OF_CHAR_USERNAME)) {
+            var diffValue = this.MIN_NUM_OF_CHAR_USERNAME - textValue.length;
+            for (var i = 0; i < diffValue; i++) {
+                textValue = '0' + textValue;
+            }
+        }
+        return textValue;
+    };
+    UserUtils.prototype.calculateMilesExpiryDateInDays = function (expDateString) {
+        var diffHours = this.clientUtils.getDateTimeDiff(expDateString) / 3600;
+        var diffDays = 0;
+        if (diffHours >= 24) {
+            diffDays = Math.floor(diffHours / 24);
+        }
+        return diffDays;
+    };
+    UserUtils.prototype.getConsentDate = function (reqObj, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_TNC_CONSENT, reqObj);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    UserUtils.prototype.postConsentDate = function (reqObj, successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_POST_TNC_CONSENT, reqObj);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    return UserUtils;
 }());
+UserUtils = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__["a" /* DataAccessService */],
+        __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__["a" /* ServiceConstants */],
+        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
+        __WEBPACK_IMPORTED_MODULE_7__session_utils__["a" /* SessionUtils */],
+        __WEBPACK_IMPORTED_MODULE_8__client_utils__["a" /* ClientUtils */],
+        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */]])
+], UserUtils);
 
-var VouchersInfo = (function () {
-    function VouchersInfo() {
-    }
-    return VouchersInfo;
-}());
-
-var MyVoucherRequest = (function () {
-    function MyVoucherRequest() {
-    }
-    return MyVoucherRequest;
-}());
-
-var VouchersResponse = (function () {
-    function VouchersResponse() {
-    }
-    return VouchersResponse;
-}());
-
-var MyVouchersResponse = (function () {
-    function MyVouchersResponse() {
-    }
-    return MyVouchersResponse;
-}());
-
-var MyVoucherDto = (function () {
-    function MyVoucherDto() {
-    }
-    return MyVoucherDto;
-}());
-
-var redeemVoucherRequest = (function () {
-    function redeemVoucherRequest() {
-    }
-    return redeemVoucherRequest;
-}());
-
-//# sourceMappingURL=partners.dto.js.map
+//# sourceMappingURL=user.utils.js.map
 
 /***/ }),
 
@@ -3571,7 +4157,7 @@ var redeemVoucherRequest = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FileService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(138);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_common_dto__ = __webpack_require__(22);
@@ -3784,15 +4370,15 @@ FileService = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DeviceUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(96);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_app_version_service__ = __webpack_require__(527);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_app_version_service__ = __webpack_require__(526);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_remote_notification_service__ = __webpack_require__(523);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_remote_notification_service__ = __webpack_require__(522);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__dto_device_dto__ = __webpack_require__(1081);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__services_commons_local_notification_service__ = __webpack_require__(308);
@@ -4176,7 +4762,7 @@ DeviceUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_social_sharing_service__ = __webpack_require__(524);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_social_sharing_service__ = __webpack_require__(523);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_common_dto__ = __webpack_require__(22);
 /**
  * Created by C00121 on 11/01/2017.
@@ -4263,13 +4849,13 @@ SocialSharingUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__location_notification_utils__ = __webpack_require__(310);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__menu_utils__ = __webpack_require__(201);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__user_utils__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__wallet_utils__ = __webpack_require__(109);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__user_utils__ = __webpack_require__(110);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__wallet_utils__ = __webpack_require__(107);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__target_utils__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__transaction_utils__ = __webpack_require__(203);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(43);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4532,8 +5118,8 @@ SyncDataUtils = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PartnersListPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__terms_terms__ = __webpack_require__(314);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__terms_terms__ = __webpack_require__(313);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__partners_partners__ = __webpack_require__(670);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_slider_dto__ = __webpack_require__(204);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__ = __webpack_require__(9);
@@ -4541,7 +5127,7 @@ SyncDataUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -4712,7 +5298,7 @@ __decorate([
 ], PartnersListPage.prototype, "content", void 0);
 PartnersListPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-partner-list',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\partners-list\partner-list.html"*/'<ion-header class=" header-dark no-back-button-text" no-border>\n\n    <ion-navbar color="transparent">\n\n        <ion-buttons start>\n\n            <button menuToggle>\n\n                <ion-icon name="menu"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'PARTNER_LOCATIONS\' | translate }}</ion-title>\n\n\n\n\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="openWebSite(partnerDetail)" *ngIf="partnerDetail.terms">\n\n                <ion-icon name="information-circle"></ion-icon>\n\n            </button>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area">\n\n\n\n    <div class="partners-list" [style.background-image]="\'url(\' + partnerDetail.partnerImagePath + \')\'">\n\n\n\n        <h2> <img [src]="partnerDetail.partnerLogoPath" alt=""/></h2>\n\n\n\n        <div class="row">\n\n            <div class="col-xs-12" *ngIf="partnerDetail.organizationDescription">\n\n                <h3>{{partnerDetail.organizationDescription}}</h3>\n\n            </div>\n\n            <div class="col-xs-12" *ngIf="partnerDetail.partnerName">\n\n                <h3>{{partnerDetail.partnerName}}</h3>\n\n            </div>\n\n        </div>\n\n        <div class="row">\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerDetail.offersCount}} <span>{{ \'OFFERS\' | translate }}</span></h5>\n\n            </div>\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerDetail.partnerLocationCount}} <span>{{ \'LOCATIONS\' | translate }}</span></h5>\n\n            </div>\n\n        </div>\n\n\n\n        <div class="overlay-black"></div>\n\n    </div>\n\n\n\n\n\n    <div class="contain-area" padding>\n\n\n\n        <div class="search-result-status" *ngIf="!partnerLocations || (partnerLocations.length == 0)">\n\n            <span>{{noLocationText}}</span>\n\n        </div>\n\n        <div *ngIf="partnerLocations && (partnerLocations.length > 0)">\n\n            <div *ngFor="let i of partnerLocations">\n\n                <div class="card-item">\n\n                    <div class="row main-row" (click)="viewDetails(i)">\n\n                        <div class="col-xs-12">\n\n                            <div class="row small-icon">\n\n                                <div class="col-xs-12">\n\n                                    <h3>{{i.storeName}}</h3>\n\n                                </div>\n\n                                <div class="col-xs-6">\n\n                                    <ion-icon name="icon-offers"></ion-icon>\n\n                                    {{i.numberOfOffers}} {{ \'OFFERS\' | translate }}\n\n                                </div>\n\n                                <div class="col-xs-6">\n\n                                    <ion-icon name="icon-location"></ion-icon>\n\n                                    {{i.distance | number}} {{ \'KM\' | translate }} {{ \'APPROX\' | translate }}\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n            <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n        </ion-infinite-scroll>\n\n\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\partners-list\partner-list.html"*/
+        selector: 'page-partner-list',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\partners-list\partner-list.html"*/'<ion-header class=" header-dark no-back-button-text" no-border>\n\n    <ion-navbar color="transparent">\n\n        <ion-buttons start>\n\n            <button menuToggle>\n\n                <ion-icon name="menu"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'PARTNER_LOCATIONS\' | translate }}</ion-title>\n\n\n\n\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="openWebSite(partnerDetail)" *ngIf="partnerDetail.terms">\n\n                <ion-icon name="information-circle"></ion-icon>\n\n            </button>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area">\n\n\n\n    <div class="partners-list" [style.background-image]="\'url(\' + partnerDetail.partnerImagePath + \')\'">\n\n\n\n        <h2> <img [src]="partnerDetail.partnerLogoPath" alt=""/></h2>\n\n\n\n        <div class="row">\n\n            <div class="col-xs-12" *ngIf="partnerDetail.organizationDescription">\n\n                <h3>{{partnerDetail.organizationDescription}}</h3>\n\n            </div>\n\n            <div class="col-xs-12" *ngIf="partnerDetail.partnerName">\n\n                <h3>{{partnerDetail.partnerName}}</h3>\n\n            </div>\n\n        </div>\n\n        <div class="row">\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerDetail.offersCount}} <span>{{ \'OFFERS\' | translate }}</span></h5>\n\n            </div>\n\n            <div class="col-xs-6">\n\n                <h5>{{partnerDetail.partnerLocationCount}} <span>{{ \'LOCATIONS\' | translate }}</span></h5>\n\n            </div>\n\n        </div>\n\n\n\n        <div class="overlay-black"></div>\n\n    </div>\n\n\n\n\n\n    <div class="contain-area" padding>\n\n\n\n        <div class="search-result-status" *ngIf="!partnerLocations || (partnerLocations.length == 0)">\n\n            <span>{{noLocationText}}</span>\n\n        </div>\n\n        <div *ngIf="partnerLocations && (partnerLocations.length > 0)">\n\n            <div *ngFor="let i of partnerLocations">\n\n                <div class="card-item">\n\n                    <div class="row main-row" (click)="viewDetails(i)">\n\n                        <div class="col-xs-12">\n\n                            <div class="row small-icon">\n\n                                <div class="col-xs-12">\n\n                                    <h3>{{i.storeName}}</h3>\n\n                                </div>\n\n                                <div class="col-xs-6">\n\n                                    <ion-icon name="icon-offers"></ion-icon>\n\n                                    {{i.numberOfOffers}} {{ \'OFFERS\' | translate }}\n\n                                </div>\n\n                                <div class="col-xs-6">\n\n                                    <ion-icon name="icon-location"></ion-icon>\n\n                                    {{i.distance | number}} {{ \'KM\' | translate }} {{ \'APPROX\' | translate }}\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n            <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n        </ion-infinite-scroll>\n\n\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\partners-list\partner-list.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* ModalController */],
@@ -4737,7 +5323,7 @@ PartnersListPage = __decorate([
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GoogleAnalyticsUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_commons_google_analytics_service__ = __webpack_require__(525);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_commons_google_analytics_service__ = __webpack_require__(524);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__client_utils__ = __webpack_require__(9);
 /**
  * Created by C00121 on 17/01/2017.
@@ -4807,9 +5393,9 @@ GoogleAnalyticsUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__dto_force_update_dto__ = __webpack_require__(1077);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -5312,7 +5898,7 @@ ConfigUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_data_access_service__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_service_constants__ = __webpack_require__(8);
@@ -5799,75 +6385,6 @@ var SystemQueryResponse = (function () {
 
 /***/ }),
 
-/***/ 29:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return McfLoaderService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/**
- * Created by anjum on 30/11/16.
- */
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-var McfLoaderService = (function () {
-    function McfLoaderService(loadingCtrl, translate) {
-        this.loadingCtrl = loadingCtrl;
-        this.translate = translate;
-    }
-    McfLoaderService.prototype.show = function (param) {
-        this.loader = this.loadingCtrl.create({
-            content: param.message || this.translate.instant('PLEASE_WAIT'),
-            duration: param.time
-        });
-        this.loader.present()
-            .then(function (result) {
-            // console.log('Present Loader: ' + JSON.stringify(result));
-        }, function (error) {
-            console.log('Present Loader Failed: ' + JSON.stringify(error));
-        });
-    };
-    McfLoaderService.prototype.hide = function () {
-        var _this = this;
-        if (this.loader) {
-            this.loader.dismiss()
-                .then(function (result) {
-                // console.log('Dismiss Loader: ' + JSON.stringify(result));
-                if (result == false) {
-                    setTimeout(function () {
-                        // console.log('Trying again to dismiss Loader');
-                        _this.loader.dismiss();
-                    }, 1000);
-                }
-            }, function (error) {
-                console.log('Dismiss Loader Failed: ' + JSON.stringify(error));
-            });
-        }
-    };
-    return McfLoaderService;
-}());
-McfLoaderService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* LoadingController */],
-        __WEBPACK_IMPORTED_MODULE_2_ng2_translate__["c" /* TranslateService */]])
-], McfLoaderService);
-
-//# sourceMappingURL=service.loading.js.map
-
-/***/ }),
-
 /***/ 307:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6056,6 +6573,75 @@ var GoalInfo = (function () {
 
 /***/ }),
 
+/***/ 31:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return McfLoaderService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/**
+ * Created by anjum on 30/11/16.
+ */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+var McfLoaderService = (function () {
+    function McfLoaderService(loadingCtrl, translate) {
+        this.loadingCtrl = loadingCtrl;
+        this.translate = translate;
+    }
+    McfLoaderService.prototype.show = function (param) {
+        this.loader = this.loadingCtrl.create({
+            content: param.message || this.translate.instant('PLEASE_WAIT'),
+            duration: param.time
+        });
+        this.loader.present()
+            .then(function (result) {
+            // console.log('Present Loader: ' + JSON.stringify(result));
+        }, function (error) {
+            console.log('Present Loader Failed: ' + JSON.stringify(error));
+        });
+    };
+    McfLoaderService.prototype.hide = function () {
+        var _this = this;
+        if (this.loader) {
+            this.loader.dismiss()
+                .then(function (result) {
+                // console.log('Dismiss Loader: ' + JSON.stringify(result));
+                if (result == false) {
+                    setTimeout(function () {
+                        // console.log('Trying again to dismiss Loader');
+                        _this.loader.dismiss();
+                    }, 1000);
+                }
+            }, function (error) {
+                console.log('Dismiss Loader Failed: ' + JSON.stringify(error));
+            });
+        }
+    };
+    return McfLoaderService;
+}());
+McfLoaderService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* LoadingController */],
+        __WEBPACK_IMPORTED_MODULE_2_ng2_translate__["c" /* TranslateService */]])
+], McfLoaderService);
+
+//# sourceMappingURL=service.loading.js.map
+
+/***/ }),
+
 /***/ 310:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6067,7 +6653,7 @@ var GoalInfo = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__device_utils__ = __webpack_require__(144);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__dto_location_notification_dto__ = __webpack_require__(1082);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_local_notification_service__ = __webpack_require__(308);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_geolocation_service__ = __webpack_require__(307);
@@ -6313,202 +6899,6 @@ LocationNotificationUtils = __decorate([
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LovItemUtils; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/**
- * Created by sandip on 10/05/17.
- */
-
-
-
-
-
-
-
-var LovItemUtils = (function () {
-    function LovItemUtils(events, appConstants, dataAccessService, serviceConstants) {
-        this.events = events;
-        this.appConstants = appConstants;
-        this.dataAccessService = dataAccessService;
-        this.serviceConstants = serviceConstants;
-    }
-    LovItemUtils.prototype.getSecurityQuestions = function (successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_SECURITY_QUESTIONS, null);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    LovItemUtils.prototype.getCountryLov = function (successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_COUNTRY, null);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    LovItemUtils.prototype.getStateLov = function (countryCode, successCallback, errorCallback) {
-        var _this = this;
-        if (countryCode) {
-            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_STATE, { countryCode: countryCode });
-            this.dataAccessService.call(serviceContext)
-                .subscribe(function (result) {
-                var response = result.json();
-                if (!response) {
-                    response = [];
-                }
-                if (successCallback) {
-                    successCallback(response);
-                }
-            }, function (error) {
-                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                if (error) {
-                    errorInfo = error.json();
-                    errorInfo.code = error.status;
-                }
-                if (errorCallback) {
-                    errorCallback(errorInfo);
-                }
-                if (errorInfo.code == 401) {
-                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-                }
-            });
-        }
-        else {
-            if (errorCallback) {
-                errorCallback(null);
-            }
-        }
-    };
-    LovItemUtils.prototype.getCityLov = function (countryCode, successCallback, errorCallback) {
-        var _this = this;
-        if (countryCode) {
-            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_CITY, { countryCode: countryCode });
-            this.dataAccessService.call(serviceContext)
-                .subscribe(function (result) {
-                var response = result.json();
-                if (!response) {
-                    response = [];
-                }
-                if (successCallback) {
-                    successCallback(response);
-                }
-            }, function (error) {
-                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                if (error) {
-                    errorInfo = error.json();
-                    errorInfo.code = error.status;
-                }
-                if (errorCallback) {
-                    errorCallback(errorInfo);
-                }
-                if (errorInfo.code == 401) {
-                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-                }
-            });
-        }
-        else {
-            if (errorCallback) {
-                errorCallback(null);
-            }
-        }
-    };
-    LovItemUtils.prototype.getNameSuffixLov = function (successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_NAME_SUFFIX, null);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    return LovItemUtils;
-}());
-LovItemUtils = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
-        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__["a" /* DataAccessService */],
-        __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__["a" /* ServiceConstants */]])
-], LovItemUtils);
-
-//# sourceMappingURL=lov-item.utils.js.map
-
-/***/ }),
-
-/***/ 312:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TabsPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
@@ -6583,7 +6973,7 @@ __decorate([
     __metadata("design:type", __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["s" /* Tabs */])
 ], TabsPage.prototype, "tabRef", void 0);
 TabsPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tabs\tabs.html"*/'<ion-tabs #myTabs class="footer-tabs" [selectedIndex]="mySelectedIndex">\n\n    <ion-tab [root]="tab1Root" tabIcon="icon-home"></ion-tab>\n\n    <ion-tab [root]="tab2Root" tabIcon="icon-folder" (ionSelect)="openModal()"></ion-tab>\n\n    <ion-tab [root]="tab3Root" tabIcon="icon-search" ></ion-tab>\n\n</ion-tabs>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tabs\tabs.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tabs\tabs.html"*/'<ion-tabs #myTabs class="footer-tabs" [selectedIndex]="mySelectedIndex">\n\n    <ion-tab [root]="tab1Root" tabIcon="icon-home"></ion-tab>\n\n    <ion-tab [root]="tab2Root" tabIcon="icon-folder" (ionSelect)="openModal()"></ion-tab>\n\n    <ion-tab [root]="tab3Root" tabIcon="icon-search" ></ion-tab>\n\n</ion-tabs>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tabs\tabs.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
@@ -6596,7 +6986,7 @@ TabsPage = __decorate([
 
 /***/ }),
 
-/***/ 313:
+/***/ 312:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6604,19 +6994,19 @@ TabsPage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_forms__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_native__ = __webpack_require__(98);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_native__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_user_utils__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_user_utils__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_user_address_utils__ = __webpack_require__(97);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_lov_item_utils__ = __webpack_require__(311);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_user_address_utils__ = __webpack_require__(108);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_lov_item_utils__ = __webpack_require__(649);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__dto_account_dto__ = __webpack_require__(52);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__dto_lov_item_dto__ = __webpack_require__(1084);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__constants_app_constants__ = __webpack_require__(7);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -7817,7 +8207,7 @@ __decorate([
 ], EnrollmentPage.prototype, "submitButton3", void 0);
 EnrollmentPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'enrollment-page',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\enrollment\enrollment.html"*/'<ion-header class="header-dark offer-popup-content">\n\n    <ion-navbar #navBar>\n\n\n\n        <ion-title>\n\n            <span *ngIf="editingProfile != true">{{\'Enrollment\' | translate}}</span>\n\n            <span *ngIf="editingProfile == true">{{\'Edit Profile\' | translate}}</span>\n\n        </ion-title>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n<ion-content>\n\n    <div>\n\n        <div class="registration-progress" *ngIf="pageState < 5">\n\n            <ion-grid>\n\n                <ion-row>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(1)"\n\n                             *ngIf="pageState == 1 && pageState < 4">\n\n                        <span>{{\'Personal\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(1)"\n\n                             *ngIf="pageState != 1 && pageState < 4">\n\n                        <span>{{\'Personal\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(2)"\n\n                             *ngIf="pageState == 2 && pageState < 4">\n\n                        <span>{{\'Contact\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(2)"\n\n                             *ngIf="pageState != 2 && pageState < 4">\n\n                        <span>{{\'Contact\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(3)"\n\n                             *ngIf="pageState == 3 && pageState < 4">\n\n                        <span>{{\'Password\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(3)"\n\n                             *ngIf="pageState != 3 && pageState < 4">\n\n                        <span>{{\'Password\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             *ngIf="pageState == 4">\n\n                        <span>{{\'Summary\' | translate}}</span>\n\n                    </ion-col>\n\n                </ion-row>\n\n            </ion-grid>\n\n        </div>\n\n        <div class="registration-form" *ngIf="pageState < 5">\n\n            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 1">\n\n                <ion-list>\n\n                        <ion-item>\n\n                                <ion-label floating>{{ \'Member ID\' | translate }}</ion-label>\n\n                                <ion-input type="text"\n\n                                           [(ngModel)]="activeCardNo"\n\n                                           name="activeCardNo"\n\n                                           id="activeCardNo"\n\n                                           spellcheck="false"\n\n                                           autocapitalize="sentences"\n\n                                           minlength="2"\n\n                                           maxlength="20"\n\n                                           pattern=""\n\n                                           [disabled]="shouldDisablePersonalInfo"\n\n                                           required>\n\n                                </ion-input>\n\n                            </ion-item>\n\n                    <ul>\n\n                        <li>{{\'Name should match travel documents such as Passport\' | translate}}</li>\n\n                    </ul>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Title\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="titleObj"\n\n                                    name="titleText"\n\n                                    id="titleText"\n\n                                    [disabled]="shouldDisablePersonalInfo"\n\n                                    required>\n\n                            <ion-option *ngFor="let item of titles"\n\n                                        [value]="item"\n\n                                        [selected]="titleObj && (item.value == titleObj.value)">\n\n                                {{item.value}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Last Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="lastName"\n\n                                   name="lastName"\n\n                                   id="lastName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="2"\n\n                                   maxlength="20"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'First Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="firstName"\n\n                                   name="firstName"\n\n                                   id="firstName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="2"\n\n                                   maxlength="20"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="!shouldDisablePersonalInfo || middleName">\n\n                        <ion-label floating>{{\'Middle Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="middleName"\n\n                                   name="middleName"\n\n                                   id="middleName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   maxlength="20">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="!shouldDisablePersonalInfo || (nameSuffixLovs && nameSuffixLovs.length > 0)">\n\n                        <ion-label floating>{{\'Suffix\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedNameSuffix"\n\n                                    name="selectedNameSuffix"\n\n                                    id="selectedNameSuffix"\n\n                                    [disabled]="shouldDisablePersonalInfo">\n\n                            <ion-option *ngFor="let item of nameSuffixLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedNameSuffix && (item.code == selectedNameSuffix.code)">\n\n                                {{item.code}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Date Of Birth\' | translate}}</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="dobText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="dobText"\n\n                                      id="dobText"\n\n                                      [disabled]="shouldDisablePersonalInfo"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton1 ion-button full class="submit-btn" type="submit">\n\n                            <span>{{\'Continue\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <div class="loading-status" *ngIf="(pageState == 2) && (shouldShowAddressLoading == true)">\n\n                <span>{{\'Loading\' | translate}} ...</span>\n\n            </div>\n\n            <form #form2="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="(pageState == 2) && (shouldShowAddressLoading != true)">\n\n                <ion-list>\n\n                    <div class="contact-number-fields">\n\n                        <ion-label class="required-field">{{\'Preferred Contact Number\' | translate}}</ion-label>\n\n                        <div class="row">\n\n                            <div class="col-xs-3">\n\n                                <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                            okText="{{\'SELECT\' | translate}}"\n\n                                            selectedText="{{countryDialObj.isdCode}}"\n\n                                            (ionChange)="onSelectIsd($event)"\n\n                                            name="countryDialObj"\n\n                                            id="countryDialObj"\n\n                                            *ngIf="countryDialObj"\n\n                                            disabled="shouldHideContactNumber == true">\n\n                                    <ion-option *ngFor="let item of countryLovs"\n\n                                                [value]="item"\n\n                                                [selected]="countryDialObj && (item.code == countryDialObj.code)">\n\n                                        {{item.descr}} ({{item.isdCode}})\n\n                                    </ion-option>\n\n                                </ion-select>\n\n                            </div>\n\n                            <div class="col-xs-3">\n\n                                <ion-input type="tel"\n\n                                           [(ngModel)]="areaCode"\n\n                                           name="areaCode"\n\n                                           id="areaCode"\n\n                                           placeholder="{{\'Area Code\' | translate}}"\n\n                                           minlength="1"\n\n                                           [maxlength]="areaCodeLength"\n\n                                           pattern=""\n\n                                           required\n\n                                           *ngIf="shouldHideContactNumber != true">\n\n                                </ion-input>\n\n                            </div>\n\n                            <div class="col-xs-6">\n\n                                <ion-input type="tel"\n\n                                           [(ngModel)]="contactNumber"\n\n                                           name="contactNumber"\n\n                                           id="contactNumber"\n\n                                           placeholder="XXXXXXX"\n\n                                           minlength="5"\n\n                                           maxlength="8"\n\n                                           pattern=""\n\n                                           *ngIf="shouldHideContactNumber != true">\n\n                                </ion-input>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Email Address\' | translate}}</ion-label>\n\n                        <ion-input type="email"\n\n                                   [(ngModel)]="emailAddress"\n\n                                   name="emailAddress"\n\n                                   id="emailAddress"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="40"\n\n                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="countryAddressObj">\n\n                        <ion-label class="required-field" floating>{{\'Country\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    (ionChange)="onSelectCountry($event)"\n\n                                    name="countryAddressObj"\n\n                                    id="countryAddressObj">\n\n                            <ion-option *ngFor="let item of countryLovs"\n\n                                        [value]="item"\n\n                                        [selected]="countryAddressObj && (item.code == countryAddressObj.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="stateLovs && stateLovs.length > 0">\n\n                        <ion-label floating>{{\'State/Region\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedStateLov"\n\n                                    name="selectedStateLov"\n\n                                    id="selectedStateLov">\n\n                            <ion-option *ngFor="let item of stateLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedStateLov && (item.code == selectedStateLov.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="cityLovs && cityLovs.length > 0">\n\n                        <ion-label class="required-field" floating>{{\'City/Province\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedCityLov"\n\n                                    name="selectedCityLov"\n\n                                    id="selectedCityLov">\n\n                            <ion-option *ngFor="let item of cityLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedCityLov && (item.code == selectedCityLov.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Number/Street\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="address1Text"\n\n                                   name="address1Text"\n\n                                   id="address1Text"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label floating>{{\'Floor/Building/Village\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="address2Text"\n\n                                   name="address2Text"\n\n                                   id="address2Text"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern="">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Postal/Zip Code\' | translate}}</ion-label>\n\n                        <ion-input type="number"\n\n                                   [(ngModel)]="postalText"\n\n                                   name="postalText"\n\n                                   id="postalText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="1"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton2 ion-button full class="submit-btn" type="submit">\n\n                            <span *ngIf="acceptTerms != true">{{\'Continue\' | translate}}</span>\n\n                            <span *ngIf="acceptTerms == true">{{\'Save\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <form #form3="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 3">\n\n                <ion-list>\n\n                    <ul *ngIf="passwordGuidelines">\n\n                        <span [innerHTML]="passwordGuidelines"></span>\n\n                    </ul>\n\n                    <ion-item *ngIf="editingProfile == true">\n\n                        <ion-label class="required-field" floating>{{\'Current Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="currentPasswordText"\n\n                                   name="currentPasswordText"\n\n                                   id="currentPasswordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{passwordFieldLabel}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="passwordText"\n\n                                   name="passwordText"\n\n                                   id="passwordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Reenter Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="rePasswordText"\n\n                                   name="rePasswordText"\n\n                                   id="rePasswordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="questions && (questions.length > 0)">\n\n                        <ion-label class="required-field" floating>{{\'Security Question\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedQuestion"\n\n                                    name="selectedQuestion"\n\n                                    id="selectedQuestion"\n\n                                    *ngIf="recievedMemberAnswer != true">\n\n                            <ion-option *ngFor="let item of questions"\n\n                                        [value]="item"\n\n                                        [selected]="selectedQuestion && (item.code === selectedQuestion.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                        <ion-input value="{{selectedQuestion.descr}}"\n\n                                   disabled="true"\n\n                                   *ngIf="selectedQuestion && recievedMemberAnswer == true">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="questions && (questions.length > 0) && selectedQuestion">\n\n                        <ion-label class="required-field" floating>{{\'Security Answer\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowAnswer? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="answerText"\n\n                                   name="answerText"\n\n                                   id="answerText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showAnswer()">\n\n                            <ion-icon name="{{shouldShowAnswer?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton3 ion-button full class="submit-btn" type="submit">\n\n                            <span *ngIf="acceptTerms != true">{{\'Continue\' | translate}}</span>\n\n                            <span *ngIf="acceptTerms == true">{{\'Save\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <div *ngIf="pageState == 4">\n\n                <ion-list>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && activeCardNo && activeCardNo.length > 0">\n\n                                <ion-label floating>{{\'Member ID\' | translate}}</ion-label>\n\n                                <ion-input value="{{ activeCardNo }}" disabled="true"></ion-input>\n\n                            </ion-item>\n\n                    <ul *ngIf="((editingProfile != true) || formHasChanges)">\n\n                        <li>{{\'Name should match travel documents such as Passport\' | translate}}</li>\n\n                    </ul>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && titleObj && titleObj.value">\n\n                        <ion-label floating>{{\'Title\' | translate}}</ion-label>\n\n                        <ion-input value="{{titleObj.value}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && lastName && lastName.trim().length > 0">\n\n                        <ion-label floating>{{\'Last Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{lastName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && firstName && firstName.trim().length > 0">\n\n                        <ion-label floating>{{\'First Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{firstName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && middleName && middleName.trim().length > 0">\n\n                        <ion-label floating>{{\'Middle Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{middleName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedNameSuffix && selectedNameSuffix.code && selectedNameSuffix.descr">\n\n                        <ion-label floating>{{\'Suffix\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedNameSuffix.code}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && dobText && dobText.length > 0">\n\n                        <ion-label floating>{{\'Date Of Birth\' | translate}}</ion-label>\n\n                        <ion-input value="{{dobText}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryDialObj && areaCode && contactNumber && contactNumber.trim().length > 0">\n\n                        <ion-label floating>{{\'Preferred Contact Number\' | translate}}</ion-label>\n\n                        <ion-input value="{{countryDialObj.isdCode}}{{areaCode}}{{contactNumber}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && emailAddress && emailAddress.trim().length > 0">\n\n                        <ion-label floating>{{\'Email Address\' | translate}}</ion-label>\n\n                        <ion-input value="{{emailAddress}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address1Text && address1Text.trim().length > 0">\n\n                        <ion-label floating>{{\'Number/Street\' | translate}}</ion-label>\n\n                        <ion-input value="{{address1Text}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address2Text && address2Text.trim().length > 0">\n\n                        <ion-label floating>{{\'Floor/Building/Village\' | translate}}</ion-label>\n\n                        <ion-input value="{{address2Text}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedCityLov && selectedCityLov.code">\n\n                        <ion-label floating>{{\'City/Province\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedCityLov.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && postalText && postalText.trim().length > 0">\n\n                        <ion-label floating>{{\'Postal/Zip Code\' | translate}}</ion-label>\n\n                        <ion-input value="{{postalText}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedStateLov && selectedStateLov.code">\n\n                        <ion-label floating>{{\'State/Region\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedStateLov.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryAddressObj && countryAddressObj.code">\n\n                        <ion-label floating>{{\'Country\' | translate}}</ion-label>\n\n                        <ion-input value="{{countryAddressObj.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="currentPasswordText && currentPasswordText.trim().length > 0">\n\n                        <ion-label floating>{{\'Current Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   value="{{currentPasswordText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="passwordText && passwordText.trim().length > 0">\n\n                        <ion-label floating>{{passwordFieldLabel}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   value="{{passwordText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">\n\n                        <ion-label floating>{{\'Security Question\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedQuestion.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">\n\n                        <ion-label floating>{{\'Security Answer\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowAnswer? \'text\' : \'password\'}}"\n\n                                   value="{{answerText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showAnswer()">\n\n                            <ion-icon name="{{shouldShowAnswer?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button class="submit-btn" full (click)="editButtonTapped()">{{\'Edit\' | translate}}</button>\n\n                    </div>\n\n                </div>\n\n                <div class="privacy-terms-checkbox">\n\n                    <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>\n\n                    <span>{{\'I have read and agree with the\' | translate}}\n\n                        <a (click)="termsConditionsTapped()">\n\n                            {{\'Terms n Conditions\' | translate}}\n\n                        </a> and\n\n                        <a (click)="privacyPolicyTapped()">\n\n                            {{\'Privacy Policy\' | translate}}\n\n                        </a>.\n\n                    </span>\n\n                </div>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button class="submit-btn" full (click)="bottomButtonTapped()">\n\n                            {{\'Submit\' | translate}}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n        <div class="registration-confirmation" *ngIf="pageState == 5">\n\n            <h1>{{\'Welcome\' | translate}}</h1>\n\n            <h2>{{\'to\' | translate}} {{appDisplayName}}</h2>\n\n            <div [innerHTML]="confirmMsg"\n\n                 *ngIf="confirmMsg"\n\n                 class="in-app-browser-anchor"\n\n                 onclick="onInnerHTMLTap(event)">\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container">\n\n                    <button ion-button class="submit-btn" full (click)="loginButtonTapped()">\n\n                        {{ \'LOGIN\' | translate }}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\enrollment\enrollment.html"*/
+        selector: 'enrollment-page',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\enrollment\enrollment.html"*/'<ion-header class="header-dark offer-popup-content">\n\n    <ion-navbar #navBar>\n\n\n\n        <ion-title>\n\n            <span *ngIf="editingProfile != true">{{\'Enrollment\' | translate}}</span>\n\n            <span *ngIf="editingProfile == true">{{\'Edit Profile\' | translate}}</span>\n\n        </ion-title>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n<ion-content>\n\n    <div>\n\n        <div class="registration-progress" *ngIf="pageState < 5">\n\n            <ion-grid>\n\n                <ion-row>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(1)"\n\n                             *ngIf="pageState == 1 && pageState < 4">\n\n                        <span>{{\'Personal\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(1)"\n\n                             *ngIf="pageState != 1 && pageState < 4">\n\n                        <span>{{\'Personal\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(2)"\n\n                             *ngIf="pageState == 2 && pageState < 4">\n\n                        <span>{{\'Contact\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(2)"\n\n                             *ngIf="pageState != 2 && pageState < 4">\n\n                        <span>{{\'Contact\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             (click)="tabButtonsTapped(3)"\n\n                             *ngIf="pageState == 3 && pageState < 4">\n\n                        <span>{{\'Password\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="not-filled"\n\n                             (click)="tabButtonsTapped(3)"\n\n                             *ngIf="pageState != 3 && pageState < 4">\n\n                        <span>{{\'Password\' | translate}}</span>\n\n                    </ion-col>\n\n                    <ion-col col-sm-4 col-md-4 col-lg-4\n\n                             class="filled"\n\n                             *ngIf="pageState == 4">\n\n                        <span>{{\'Summary\' | translate}}</span>\n\n                    </ion-col>\n\n                </ion-row>\n\n            </ion-grid>\n\n        </div>\n\n        <div class="registration-form" *ngIf="pageState < 5">\n\n            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 1">\n\n                <ion-list>\n\n                        <ion-item>\n\n                                <ion-label floating>{{ \'Member ID\' | translate }}</ion-label>\n\n                                <ion-input type="text"\n\n                                           [(ngModel)]="activeCardNo"\n\n                                           name="activeCardNo"\n\n                                           id="activeCardNo"\n\n                                           spellcheck="false"\n\n                                           autocapitalize="sentences"\n\n                                           minlength="2"\n\n                                           maxlength="20"\n\n                                           pattern=""\n\n                                           [disabled]="shouldDisablePersonalInfo"\n\n                                           required>\n\n                                </ion-input>\n\n                            </ion-item>\n\n                    <ul>\n\n                        <li>{{\'Name should match travel documents such as Passport\' | translate}}</li>\n\n                    </ul>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Title\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="titleObj"\n\n                                    name="titleText"\n\n                                    id="titleText"\n\n                                    [disabled]="shouldDisablePersonalInfo"\n\n                                    required>\n\n                            <ion-option *ngFor="let item of titles"\n\n                                        [value]="item"\n\n                                        [selected]="titleObj && (item.value == titleObj.value)">\n\n                                {{item.value}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Last Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="lastName"\n\n                                   name="lastName"\n\n                                   id="lastName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="2"\n\n                                   maxlength="20"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'First Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="firstName"\n\n                                   name="firstName"\n\n                                   id="firstName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="2"\n\n                                   maxlength="20"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="!shouldDisablePersonalInfo || middleName">\n\n                        <ion-label floating>{{\'Middle Name\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="middleName"\n\n                                   name="middleName"\n\n                                   id="middleName"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   pattern=""\n\n                                   [disabled]="shouldDisablePersonalInfo"\n\n                                   maxlength="20">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="!shouldDisablePersonalInfo || (nameSuffixLovs && nameSuffixLovs.length > 0)">\n\n                        <ion-label floating>{{\'Suffix\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedNameSuffix"\n\n                                    name="selectedNameSuffix"\n\n                                    id="selectedNameSuffix"\n\n                                    [disabled]="shouldDisablePersonalInfo">\n\n                            <ion-option *ngFor="let item of nameSuffixLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedNameSuffix && (item.code == selectedNameSuffix.code)">\n\n                                {{item.code}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Date Of Birth\' | translate}}</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="dobText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="dobText"\n\n                                      id="dobText"\n\n                                      [disabled]="shouldDisablePersonalInfo"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton1 ion-button full class="submit-btn" type="submit">\n\n                            <span>{{\'Continue\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <div class="loading-status" *ngIf="(pageState == 2) && (shouldShowAddressLoading == true)">\n\n                <span>{{\'Loading\' | translate}} ...</span>\n\n            </div>\n\n            <form #form2="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="(pageState == 2) && (shouldShowAddressLoading != true)">\n\n                <ion-list>\n\n                    <div class="contact-number-fields">\n\n                        <ion-label class="required-field">{{\'Preferred Contact Number\' | translate}}</ion-label>\n\n                        <div class="row">\n\n                            <div class="col-xs-3">\n\n                                <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                            okText="{{\'SELECT\' | translate}}"\n\n                                            selectedText="{{countryDialObj.isdCode}}"\n\n                                            (ionChange)="onSelectIsd($event)"\n\n                                            name="countryDialObj"\n\n                                            id="countryDialObj"\n\n                                            *ngIf="countryDialObj"\n\n                                            disabled="shouldHideContactNumber == true">\n\n                                    <ion-option *ngFor="let item of countryLovs"\n\n                                                [value]="item"\n\n                                                [selected]="countryDialObj && (item.code == countryDialObj.code)">\n\n                                        {{item.descr}} ({{item.isdCode}})\n\n                                    </ion-option>\n\n                                </ion-select>\n\n                            </div>\n\n                            <div class="col-xs-3">\n\n                                <ion-input type="tel"\n\n                                           [(ngModel)]="areaCode"\n\n                                           name="areaCode"\n\n                                           id="areaCode"\n\n                                           placeholder="{{\'Area Code\' | translate}}"\n\n                                           minlength="1"\n\n                                           [maxlength]="areaCodeLength"\n\n                                           pattern=""\n\n                                           required\n\n                                           *ngIf="shouldHideContactNumber != true">\n\n                                </ion-input>\n\n                            </div>\n\n                            <div class="col-xs-6">\n\n                                <ion-input type="tel"\n\n                                           [(ngModel)]="contactNumber"\n\n                                           name="contactNumber"\n\n                                           id="contactNumber"\n\n                                           placeholder="XXXXXXX"\n\n                                           minlength="5"\n\n                                           maxlength="8"\n\n                                           pattern=""\n\n                                           *ngIf="shouldHideContactNumber != true">\n\n                                </ion-input>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Email Address\' | translate}}</ion-label>\n\n                        <ion-input type="email"\n\n                                   [(ngModel)]="emailAddress"\n\n                                   name="emailAddress"\n\n                                   id="emailAddress"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="40"\n\n                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="countryAddressObj">\n\n                        <ion-label class="required-field" floating>{{\'Country\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    (ionChange)="onSelectCountry($event)"\n\n                                    name="countryAddressObj"\n\n                                    id="countryAddressObj">\n\n                            <ion-option *ngFor="let item of countryLovs"\n\n                                        [value]="item"\n\n                                        [selected]="countryAddressObj && (item.code == countryAddressObj.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="stateLovs && stateLovs.length > 0">\n\n                        <ion-label floating>{{\'State/Region\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedStateLov"\n\n                                    name="selectedStateLov"\n\n                                    id="selectedStateLov">\n\n                            <ion-option *ngFor="let item of stateLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedStateLov && (item.code == selectedStateLov.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="cityLovs && cityLovs.length > 0">\n\n                        <ion-label class="required-field" floating>{{\'City/Province\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedCityLov"\n\n                                    name="selectedCityLov"\n\n                                    id="selectedCityLov">\n\n                            <ion-option *ngFor="let item of cityLovs"\n\n                                        [value]="item"\n\n                                        [selected]="selectedCityLov && (item.code == selectedCityLov.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Number/Street\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="address1Text"\n\n                                   name="address1Text"\n\n                                   id="address1Text"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label floating>{{\'Floor/Building/Village\' | translate}}</ion-label>\n\n                        <ion-input type="text"\n\n                                   [(ngModel)]="address2Text"\n\n                                   name="address2Text"\n\n                                   id="address2Text"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="sentences"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern="">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Postal/Zip Code\' | translate}}</ion-label>\n\n                        <ion-input type="number"\n\n                                   [(ngModel)]="postalText"\n\n                                   name="postalText"\n\n                                   id="postalText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="1"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton2 ion-button full class="submit-btn" type="submit">\n\n                            <span *ngIf="acceptTerms != true">{{\'Continue\' | translate}}</span>\n\n                            <span *ngIf="acceptTerms == true">{{\'Save\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <form #form3="ngForm" (ngSubmit)="bottomButtonTapped()" *ngIf="pageState == 3">\n\n                <ion-list>\n\n                    <ul *ngIf="passwordGuidelines">\n\n                        <span [innerHTML]="passwordGuidelines"></span>\n\n                    </ul>\n\n                    <ion-item *ngIf="editingProfile == true">\n\n                        <ion-label class="required-field" floating>{{\'Current Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="currentPasswordText"\n\n                                   name="currentPasswordText"\n\n                                   id="currentPasswordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required>\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{passwordFieldLabel}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="passwordText"\n\n                                   name="passwordText"\n\n                                   id="passwordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label class="required-field" floating>{{\'Reenter Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="rePasswordText"\n\n                                   name="rePasswordText"\n\n                                   id="rePasswordText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="5"\n\n                                   maxlength="8"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="questions && (questions.length > 0)">\n\n                        <ion-label class="required-field" floating>{{\'Security Question\' | translate}}</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedQuestion"\n\n                                    name="selectedQuestion"\n\n                                    id="selectedQuestion"\n\n                                    *ngIf="recievedMemberAnswer != true">\n\n                            <ion-option *ngFor="let item of questions"\n\n                                        [value]="item"\n\n                                        [selected]="selectedQuestion && (item.code === selectedQuestion.code)">\n\n                                {{item.descr}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                        <ion-input value="{{selectedQuestion.descr}}"\n\n                                   disabled="true"\n\n                                   *ngIf="selectedQuestion && recievedMemberAnswer == true">\n\n                        </ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="questions && (questions.length > 0) && selectedQuestion">\n\n                        <ion-label class="required-field" floating>{{\'Security Answer\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowAnswer? \'text\' : \'password\'}}"\n\n                                   [(ngModel)]="answerText"\n\n                                   name="answerText"\n\n                                   id="answerText"\n\n                                   spellcheck="false"\n\n                                   autocapitalize="none"\n\n                                   minlength="1"\n\n                                   maxlength="40"\n\n                                   pattern=""\n\n                                   required="editingProfile != true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showAnswer()">\n\n                            <ion-icon name="{{shouldShowAnswer?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button #submitButton3 ion-button full class="submit-btn" type="submit">\n\n                            <span *ngIf="acceptTerms != true">{{\'Continue\' | translate}}</span>\n\n                            <span *ngIf="acceptTerms == true">{{\'Save\' | translate}}</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n            <div *ngIf="pageState == 4">\n\n                <ion-list>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && activeCardNo && activeCardNo.length > 0">\n\n                                <ion-label floating>{{\'Member ID\' | translate}}</ion-label>\n\n                                <ion-input value="{{ activeCardNo }}" disabled="true"></ion-input>\n\n                            </ion-item>\n\n                    <ul *ngIf="((editingProfile != true) || formHasChanges)">\n\n                        <li>{{\'Name should match travel documents such as Passport\' | translate}}</li>\n\n                    </ul>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && titleObj && titleObj.value">\n\n                        <ion-label floating>{{\'Title\' | translate}}</ion-label>\n\n                        <ion-input value="{{titleObj.value}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && lastName && lastName.trim().length > 0">\n\n                        <ion-label floating>{{\'Last Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{lastName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && firstName && firstName.trim().length > 0">\n\n                        <ion-label floating>{{\'First Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{firstName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && middleName && middleName.trim().length > 0">\n\n                        <ion-label floating>{{\'Middle Name\' | translate}}</ion-label>\n\n                        <ion-input value="{{middleName}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedNameSuffix && selectedNameSuffix.code && selectedNameSuffix.descr">\n\n                        <ion-label floating>{{\'Suffix\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedNameSuffix.code}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && dobText && dobText.length > 0">\n\n                        <ion-label floating>{{\'Date Of Birth\' | translate}}</ion-label>\n\n                        <ion-input value="{{dobText}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryDialObj && areaCode && contactNumber && contactNumber.trim().length > 0">\n\n                        <ion-label floating>{{\'Preferred Contact Number\' | translate}}</ion-label>\n\n                        <ion-input value="{{countryDialObj.isdCode}}{{areaCode}}{{contactNumber}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && emailAddress && emailAddress.trim().length > 0">\n\n                        <ion-label floating>{{\'Email Address\' | translate}}</ion-label>\n\n                        <ion-input value="{{emailAddress}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address1Text && address1Text.trim().length > 0">\n\n                        <ion-label floating>{{\'Number/Street\' | translate}}</ion-label>\n\n                        <ion-input value="{{address1Text}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && address2Text && address2Text.trim().length > 0">\n\n                        <ion-label floating>{{\'Floor/Building/Village\' | translate}}</ion-label>\n\n                        <ion-input value="{{address2Text}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedCityLov && selectedCityLov.code">\n\n                        <ion-label floating>{{\'City/Province\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedCityLov.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && postalText && postalText.trim().length > 0">\n\n                        <ion-label floating>{{\'Postal/Zip Code\' | translate}}</ion-label>\n\n                        <ion-input value="{{postalText}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && selectedStateLov && selectedStateLov.code">\n\n                        <ion-label floating>{{\'State/Region\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedStateLov.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="((editingProfile != true) || formHasChanges) && countryAddressObj && countryAddressObj.code">\n\n                        <ion-label floating>{{\'Country\' | translate}}</ion-label>\n\n                        <ion-input value="{{countryAddressObj.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="currentPasswordText && currentPasswordText.trim().length > 0">\n\n                        <ion-label floating>{{\'Current Password\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   value="{{currentPasswordText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="passwordText && passwordText.trim().length > 0">\n\n                        <ion-label floating>{{passwordFieldLabel}}</ion-label>\n\n                        <ion-input type="{{shouldShowPassword? \'text\' : \'password\'}}"\n\n                                   value="{{passwordText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showPassword()">\n\n                            <ion-icon name="{{shouldShowPassword?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">\n\n                        <ion-label floating>{{\'Security Question\' | translate}}</ion-label>\n\n                        <ion-input value="{{selectedQuestion.descr}}" disabled="true"></ion-input>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedQuestion && selectedQuestion.descr && answerText && answerText.trim().length > 0">\n\n                        <ion-label floating>{{\'Security Answer\' | translate}}</ion-label>\n\n                        <ion-input type="{{shouldShowAnswer? \'text\' : \'password\'}}"\n\n                                   value="{{answerText}}"\n\n                                   disabled="true">\n\n                        </ion-input>\n\n                        <button type="button"\n\n                                ion-button clear item-right\n\n                                color="dark"\n\n                                (click)="showAnswer()">\n\n                            <ion-icon name="{{shouldShowAnswer?\'ios-eye-outline\':\'ios-eye-off-outline\'}}"></ion-icon>\n\n                        </button>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button class="submit-btn" full (click)="editButtonTapped()">{{\'Edit\' | translate}}</button>\n\n                    </div>\n\n                </div>\n\n                <div class="privacy-terms-checkbox">\n\n                    <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>\n\n                    <span>{{\'I have read and agree with the\' | translate}}\n\n                        <a (click)="termsConditionsTapped()">\n\n                            {{\'Terms n Conditions\' | translate}}\n\n                        </a> and\n\n                        <a (click)="privacyPolicyTapped()">\n\n                            {{\'Privacy Policy\' | translate}}\n\n                        </a>.\n\n                    </span>\n\n                </div>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button class="submit-btn" full (click)="bottomButtonTapped()">\n\n                            {{\'Submit\' | translate}}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n\n        <div class="registration-confirmation" *ngIf="pageState == 5">\n\n            <h1>{{\'Welcome\' | translate}}</h1>\n\n            <h2>{{\'to\' | translate}} {{appDisplayName}}</h2>\n\n            <div [innerHTML]="confirmMsg"\n\n                 *ngIf="confirmMsg"\n\n                 class="in-app-browser-anchor"\n\n                 onclick="onInnerHTMLTap(event)">\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container">\n\n                    <button ion-button class="submit-btn" full (click)="loginButtonTapped()">\n\n                        {{ \'LOGIN\' | translate }}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\enrollment\enrollment.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_5__utils_commons_client_utils__["a" /* ClientUtils */],
@@ -7837,20 +8227,20 @@ EnrollmentPage = __decorate([
 
 /***/ }),
 
-/***/ 314:
+/***/ 313:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TermsPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_menu_utils__ = __webpack_require__(201);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_google_analytics_utils__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_client_utils__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -7962,7 +8352,7 @@ __decorate([
 ], TermsPage.prototype, "content", void 0);
 TermsPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-terms',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\terms\terms.html"*/'<ion-header class="header-dark no-back-button-text">\n\n\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()" *ngIf="shouldShowRefresh">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content padding>\n\n    <div class="" [innerHTML]="htmlData"\n\n         *ngIf="htmlData"\n\n         class="in-app-browser-anchor"\n\n         onclick="onInnerHTMLTap(event)">\n\n    </div>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\terms\terms.html"*/
+        selector: 'page-terms',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\terms\terms.html"*/'<ion-header class="header-dark no-back-button-text">\n\n\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()" *ngIf="shouldShowRefresh">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content padding>\n\n    <div class="" [innerHTML]="htmlData"\n\n         *ngIf="htmlData"\n\n         class="in-app-browser-anchor"\n\n         onclick="onInnerHTMLTap(event)">\n\n    </div>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\terms\terms.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -7981,7 +8371,7 @@ TermsPage = __decorate([
 
 /***/ }),
 
-/***/ 315:
+/***/ 314:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7993,8 +8383,8 @@ TermsPage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__dto_goal_dto__ = __webpack_require__(309);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__constants_language_constants__ = __webpack_require__(65);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -8102,7 +8492,7 @@ var TargetPopupPage = (function () {
     return TargetPopupPage;
 }());
 TargetPopupPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\target-popup\target.html"*/'<ion-content padding class="target-popup">\n\n\n\n\n\n    <h3> {{ \'CREATE_PERSONAL_GOAL\' | translate }}</h3>\n\n\n\n\n\n    <ion-list>\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'NAME_YOUR_GOAL\' | translate }}</ion-label>\n\n            <ion-input type="text" [(ngModel)]="name" maxlength="50"></ion-input>\n\n        </ion-item>\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'POINTS_TO_EARN\' | translate }}</ion-label>\n\n            <ion-input type="tel" [(ngModel)]="points" maxlength="9"></ion-input>\n\n        </ion-item>\n\n\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'EXPIRY_DATE\' | translate }}</ion-label>\n\n            <ion-datetime displayFormat="DD MMMM YYYY"\n\n                          [min]="minDate"\n\n                          [max]="maxDate"\n\n                          [(ngModel)]="myDate"\n\n                          [cancelText]="cancelText"\n\n                          [doneText]="selectText"\n\n                          [monthNames]="months">\n\n            </ion-datetime>\n\n        </ion-item>\n\n\n\n    </ion-list>\n\n\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button ion-button full\n\n                    class="submit-btn"\n\n                    (click)="createTarget()">\n\n                {{ \'CREATE_GOAL\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\target-popup\target.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\target-popup\target.html"*/'<ion-content padding class="target-popup">\n\n\n\n\n\n    <h3> {{ \'CREATE_PERSONAL_GOAL\' | translate }}</h3>\n\n\n\n\n\n    <ion-list>\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'NAME_YOUR_GOAL\' | translate }}</ion-label>\n\n            <ion-input type="text" [(ngModel)]="name" maxlength="50"></ion-input>\n\n        </ion-item>\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'POINTS_TO_EARN\' | translate }}</ion-label>\n\n            <ion-input type="tel" [(ngModel)]="points" maxlength="9"></ion-input>\n\n        </ion-item>\n\n\n\n\n\n        <ion-item>\n\n            <ion-label floating>{{ \'EXPIRY_DATE\' | translate }}</ion-label>\n\n            <ion-datetime displayFormat="DD MMMM YYYY"\n\n                          [min]="minDate"\n\n                          [max]="maxDate"\n\n                          [(ngModel)]="myDate"\n\n                          [cancelText]="cancelText"\n\n                          [doneText]="selectText"\n\n                          [monthNames]="months">\n\n            </ion-datetime>\n\n        </ion-item>\n\n\n\n    </ion-list>\n\n\n\n    <div class="row">\n\n        <div class="col-xs-12">\n\n            <button ion-button full\n\n                    class="submit-btn"\n\n                    (click)="createTarget()">\n\n                {{ \'CREATE_GOAL\' | translate }}\n\n            </button>\n\n        </div>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\target-popup\target.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -8121,7 +8511,7 @@ TargetPopupPage = __decorate([
 
 /***/ }),
 
-/***/ 337:
+/***/ 336:
 /***/ (function(module, exports) {
 
 function webpackEmptyAsyncContext(req) {
@@ -8134,7 +8524,7 @@ function webpackEmptyAsyncContext(req) {
 webpackEmptyAsyncContext.keys = function() { return []; };
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 337;
+webpackEmptyAsyncContext.id = 336;
 
 /***/ }),
 
@@ -8144,18 +8534,17 @@ webpackEmptyAsyncContext.id = 337;
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CustomHttpService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(138);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__ = __webpack_require__(298);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__constants_service_constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_network_service__ = __webpack_require__(43);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8175,16 +8564,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var CustomHttpService = (function () {
-    function CustomHttpService($http, networkService, translate, globalizationUtils, sessionUtils, clientUtils, serviceConstants) {
+    function CustomHttpService($http, networkService, translate, globalizationUtils, sessionUtils, clientUtils) {
         this.$http = $http;
         this.networkService = networkService;
         this.translate = translate;
         this.globalizationUtils = globalizationUtils;
         this.sessionUtils = sessionUtils;
         this.clientUtils = clientUtils;
-        this.serviceConstants = serviceConstants;
         this.offlineMessage = null;
         this.baseUrl = this.getBaseURL();
     }
@@ -8353,90 +8740,25 @@ CustomHttpService = __decorate([
         __WEBPACK_IMPORTED_MODULE_4_ng2_translate__["c" /* TranslateService */],
         __WEBPACK_IMPORTED_MODULE_5__utils_commons_globalization_utils__["a" /* GlobalizationUtils */],
         __WEBPACK_IMPORTED_MODULE_6__utils_commons_session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_8__utils_commons_client_utils__["a" /* ClientUtils */],
-        __WEBPACK_IMPORTED_MODULE_10__constants_service_constants__["a" /* ServiceConstants */]])
+        __WEBPACK_IMPORTED_MODULE_8__utils_commons_client_utils__["a" /* ClientUtils */]])
 ], CustomHttpService);
 
 //# sourceMappingURL=http.service.js.map
 
 /***/ }),
 
-/***/ 40:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NetworkService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_app_constants__ = __webpack_require__(7);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/**
- * Created by sandip on 1/22/17.
- */
-
-
-
-var NetworkService = (function () {
-    function NetworkService(events, appConstants) {
-        this.events = events;
-        this.appConstants = appConstants;
-    }
-    NetworkService.prototype.isOnline = function () {
-        if ((typeof cordova !== 'undefined') && navigator && navigator.connection && Connection && (navigator.connection.type === Connection.NONE)) {
-            return false;
-        }
-        return true;
-    };
-    NetworkService.prototype.subscribeOnline = function (callback) {
-        var _this = this;
-        document.addEventListener("online", function () {
-            _this.events.publish(_this.appConstants.EVENT_NETWORK_STATUS_CONNECTED);
-            if (callback) {
-                callback();
-            }
-        }, false);
-    };
-    NetworkService.prototype.subscribeOffline = function (callback) {
-        var _this = this;
-        document.addEventListener("offline", function () {
-            _this.events.publish(_this.appConstants.EVENT_NETWORK_STATUS_DISCONNECTED);
-            if (callback) {
-                callback();
-            }
-        }, false);
-    };
-    return NetworkService;
-}());
-NetworkService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
-        __WEBPACK_IMPORTED_MODULE_2__constants_app_constants__["a" /* AppConstants */]])
-], NetworkService);
-
-//# sourceMappingURL=network.service.js.map
-
-/***/ }),
-
-/***/ 43:
+/***/ 42:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GlobalizationUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_globalization_service__ = __webpack_require__(507);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_globalization_service__ = __webpack_require__(506);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8547,6 +8869,70 @@ GlobalizationUtils = __decorate([
 
 /***/ }),
 
+/***/ 43:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NetworkService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_app_constants__ = __webpack_require__(7);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+/**
+ * Created by sandip on 1/22/17.
+ */
+
+
+
+var NetworkService = (function () {
+    function NetworkService(events, appConstants) {
+        this.events = events;
+        this.appConstants = appConstants;
+    }
+    NetworkService.prototype.isOnline = function () {
+        if ((typeof cordova !== 'undefined') && navigator && navigator.connection && Connection && (navigator.connection.type === Connection.NONE)) {
+            return false;
+        }
+        return true;
+    };
+    NetworkService.prototype.subscribeOnline = function (callback) {
+        var _this = this;
+        document.addEventListener("online", function () {
+            _this.events.publish(_this.appConstants.EVENT_NETWORK_STATUS_CONNECTED);
+            if (callback) {
+                callback();
+            }
+        }, false);
+    };
+    NetworkService.prototype.subscribeOffline = function (callback) {
+        var _this = this;
+        document.addEventListener("offline", function () {
+            _this.events.publish(_this.appConstants.EVENT_NETWORK_STATUS_DISCONNECTED);
+            if (callback) {
+                callback();
+            }
+        }, false);
+    };
+    return NetworkService;
+}());
+NetworkService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
+        __WEBPACK_IMPORTED_MODULE_2__constants_app_constants__["a" /* AppConstants */]])
+], NetworkService);
+
+//# sourceMappingURL=network.service.js.map
+
+/***/ }),
+
 /***/ 44:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -8554,16 +8940,16 @@ GlobalizationUtils = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PartnerUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__dto_partners_dto__ = __webpack_require__(110);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__dto_partners_dto__ = __webpack_require__(109);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__user_address_utils__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__user_address_utils__ = __webpack_require__(108);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__client_utils__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -9132,20 +9518,20 @@ PartnerUtils = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DataAccessService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__message_content_service__ = __webpack_require__(504);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__system_query_service__ = __webpack_require__(510);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__offer_offer_service__ = __webpack_require__(511);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__menu_menu_services__ = __webpack_require__(512);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__configuration_config_service__ = __webpack_require__(513);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__account_profile_service__ = __webpack_require__(514);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__wallet_wallet_service__ = __webpack_require__(515);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__target_mytargets_service__ = __webpack_require__(516);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__partners_partner_service__ = __webpack_require__(517);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__favourites_favourites_services__ = __webpack_require__(518);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__industrytypes_industrytypes_services__ = __webpack_require__(519);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__device_service__ = __webpack_require__(520);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__locationNotification_location_notification_service__ = __webpack_require__(521);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__lovItem_lov_item_service__ = __webpack_require__(522);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__message_content_service__ = __webpack_require__(503);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__system_query_service__ = __webpack_require__(509);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__offer_offer_service__ = __webpack_require__(510);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__menu_menu_services__ = __webpack_require__(511);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__configuration_config_service__ = __webpack_require__(512);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__account_profile_service__ = __webpack_require__(513);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__wallet_wallet_service__ = __webpack_require__(514);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__target_mytargets_service__ = __webpack_require__(515);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__partners_partner_service__ = __webpack_require__(516);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__favourites_favourites_services__ = __webpack_require__(517);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__industrytypes_industrytypes_services__ = __webpack_require__(518);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__device_service__ = __webpack_require__(519);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__locationNotification_location_notification_service__ = __webpack_require__(520);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__lovItem_lov_item_service__ = __webpack_require__(521);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -9276,7 +9662,7 @@ DataAccessService = __decorate([
 
 /***/ }),
 
-/***/ 464:
+/***/ 463:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9368,7 +9754,7 @@ RoundProgressService = __decorate([
 
 /***/ }),
 
-/***/ 465:
+/***/ 464:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9671,7 +10057,7 @@ var ServiceContext = (function () {
 
 /***/ }),
 
-/***/ 504:
+/***/ 503:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9723,7 +10109,7 @@ MessageContentService = __decorate([
 
 /***/ }),
 
-/***/ 505:
+/***/ 504:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9771,7 +10157,7 @@ StorageService = __decorate([
 
 /***/ }),
 
-/***/ 506:
+/***/ 505:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9786,7 +10172,7 @@ var SessionRootInfo = (function () {
 
 /***/ }),
 
-/***/ 507:
+/***/ 506:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9844,7 +10230,7 @@ GlobalizationService = __decorate([
 
 /***/ }),
 
-/***/ 508:
+/***/ 507:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9947,7 +10333,7 @@ SafariViewService = __decorate([
 
 /***/ }),
 
-/***/ 509:
+/***/ 508:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9986,7 +10372,7 @@ InAppBrowserService = __decorate([
 
 /***/ }),
 
-/***/ 510:
+/***/ 509:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10038,7 +10424,7 @@ SystemQueryService = __decorate([
 
 /***/ }),
 
-/***/ 511:
+/***/ 510:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10101,7 +10487,7 @@ OfferService = __decorate([
 
 /***/ }),
 
-/***/ 512:
+/***/ 511:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10153,7 +10539,7 @@ MenuService = __decorate([
 
 /***/ }),
 
-/***/ 513:
+/***/ 512:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10205,7 +10591,7 @@ ConfigService = __decorate([
 
 /***/ }),
 
-/***/ 514:
+/***/ 513:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10344,7 +10730,7 @@ ProfileService = __decorate([
 
 /***/ }),
 
-/***/ 515:
+/***/ 514:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10403,7 +10789,7 @@ WalletService = __decorate([
 
 /***/ }),
 
-/***/ 516:
+/***/ 515:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10469,7 +10855,7 @@ MyTargetsService = __decorate([
 
 /***/ }),
 
-/***/ 517:
+/***/ 516:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10556,7 +10942,7 @@ PartnerService = __decorate([
 
 /***/ }),
 
-/***/ 518:
+/***/ 517:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10622,7 +11008,7 @@ FavouritesService = __decorate([
 
 /***/ }),
 
-/***/ 519:
+/***/ 518:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10671,6 +11057,56 @@ IndustryTypesService = __decorate([
 ], IndustryTypesService);
 
 //# sourceMappingURL=industrytypes.services.js.map
+
+/***/ }),
+
+/***/ 519:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DeviceService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__commons_http_service__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_service_constants__ = __webpack_require__(8);
+/**
+ * Created by C00124 on 22/12/2016.
+ */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+var DeviceService = (function () {
+    function DeviceService(httpService, serviceConstants) {
+        this.httpService = httpService;
+        this.serviceConstants = serviceConstants;
+        this.SERVICE_URL_REGISTER = '/api/Device/Register';
+    }
+    DeviceService.prototype.call = function (serviceContext) {
+        var serviceName = serviceContext.serviceName;
+        if (serviceName && (serviceName === this.serviceConstants.DEVICE_SERVICE_NAME_REGISTER)) {
+            return this.register(serviceContext.requestObject);
+        }
+    };
+    DeviceService.prototype.register = function (reqData) {
+        return this.httpService.postData(this.SERVICE_URL_REGISTER, reqData);
+    };
+    return DeviceService;
+}());
+DeviceService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__commons_http_service__["a" /* CustomHttpService */],
+        __WEBPACK_IMPORTED_MODULE_2__constants_service_constants__["a" /* ServiceConstants */]])
+], DeviceService);
+
+//# sourceMappingURL=device.service.js.map
 
 /***/ }),
 
@@ -10824,56 +11260,6 @@ var PasswordCharacter = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DeviceService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__commons_http_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_service_constants__ = __webpack_require__(8);
-/**
- * Created by C00124 on 22/12/2016.
- */
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-var DeviceService = (function () {
-    function DeviceService(httpService, serviceConstants) {
-        this.httpService = httpService;
-        this.serviceConstants = serviceConstants;
-        this.SERVICE_URL_REGISTER = '/api/Device/Register';
-    }
-    DeviceService.prototype.call = function (serviceContext) {
-        var serviceName = serviceContext.serviceName;
-        if (serviceName && (serviceName === this.serviceConstants.DEVICE_SERVICE_NAME_REGISTER)) {
-            return this.register(serviceContext.requestObject);
-        }
-    };
-    DeviceService.prototype.register = function (reqData) {
-        return this.httpService.postData(this.SERVICE_URL_REGISTER, reqData);
-    };
-    return DeviceService;
-}());
-DeviceService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__commons_http_service__["a" /* CustomHttpService */],
-        __WEBPACK_IMPORTED_MODULE_2__constants_service_constants__["a" /* ServiceConstants */]])
-], DeviceService);
-
-//# sourceMappingURL=device.service.js.map
-
-/***/ }),
-
-/***/ 521:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LocationNotificationService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__commons_http_service__ = __webpack_require__(36);
@@ -10922,7 +11308,7 @@ LocationNotificationService = __decorate([
 
 /***/ }),
 
-/***/ 522:
+/***/ 521:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11002,7 +11388,7 @@ LovItemService = __decorate([
 
 /***/ }),
 
-/***/ 523:
+/***/ 522:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11151,7 +11537,7 @@ RemoteNotificationService = __decorate([
 
 /***/ }),
 
-/***/ 524:
+/***/ 523:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11193,7 +11579,7 @@ SocialSharingService = __decorate([
 
 /***/ }),
 
-/***/ 525:
+/***/ 524:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11263,7 +11649,7 @@ GoogleAnalyticService = __decorate([
 
 /***/ }),
 
-/***/ 526:
+/***/ 525:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11272,7 +11658,7 @@ GoogleAnalyticService = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_http_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__dto_session_dto__ = __webpack_require__(506);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__dto_session_dto__ = __webpack_require__(505);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_configuration_dto__ = __webpack_require__(1076);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -11402,7 +11788,7 @@ ConfigurationUtils = __decorate([
 
 /***/ }),
 
-/***/ 527:
+/***/ 526:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11450,7 +11836,7 @@ AppVersionService = __decorate([
 
 /***/ }),
 
-/***/ 528:
+/***/ 527:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11588,7 +11974,7 @@ FacebookConnectService = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return OfferUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
@@ -11597,7 +11983,7 @@ FacebookConnectService = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__dto_common_dto__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_user_address_utils__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_user_address_utils__ = __webpack_require__(108);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11939,7 +12325,7 @@ OfferUtils = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TargetUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_goal_dto__ = __webpack_require__(309);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_app_constants__ = __webpack_require__(7);
@@ -12233,6 +12619,202 @@ TargetUtils = __decorate([
 
 /***/ }),
 
+/***/ 649:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LovItemUtils; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+/**
+ * Created by sandip on 10/05/17.
+ */
+
+
+
+
+
+
+
+var LovItemUtils = (function () {
+    function LovItemUtils(events, appConstants, dataAccessService, serviceConstants) {
+        this.events = events;
+        this.appConstants = appConstants;
+        this.dataAccessService = dataAccessService;
+        this.serviceConstants = serviceConstants;
+    }
+    LovItemUtils.prototype.getSecurityQuestions = function (successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_SECURITY_QUESTIONS, null);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    LovItemUtils.prototype.getCountryLov = function (successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_COUNTRY, null);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    LovItemUtils.prototype.getStateLov = function (countryCode, successCallback, errorCallback) {
+        var _this = this;
+        if (countryCode) {
+            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_STATE, { countryCode: countryCode });
+            this.dataAccessService.call(serviceContext)
+                .subscribe(function (result) {
+                var response = result.json();
+                if (!response) {
+                    response = [];
+                }
+                if (successCallback) {
+                    successCallback(response);
+                }
+            }, function (error) {
+                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                if (error) {
+                    errorInfo = error.json();
+                    errorInfo.code = error.status;
+                }
+                if (errorCallback) {
+                    errorCallback(errorInfo);
+                }
+                if (errorInfo.code == 401) {
+                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+                }
+            });
+        }
+        else {
+            if (errorCallback) {
+                errorCallback(null);
+            }
+        }
+    };
+    LovItemUtils.prototype.getCityLov = function (countryCode, successCallback, errorCallback) {
+        var _this = this;
+        if (countryCode) {
+            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_CITY, { countryCode: countryCode });
+            this.dataAccessService.call(serviceContext)
+                .subscribe(function (result) {
+                var response = result.json();
+                if (!response) {
+                    response = [];
+                }
+                if (successCallback) {
+                    successCallback(response);
+                }
+            }, function (error) {
+                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+                if (error) {
+                    errorInfo = error.json();
+                    errorInfo.code = error.status;
+                }
+                if (errorCallback) {
+                    errorCallback(errorInfo);
+                }
+                if (errorInfo.code == 401) {
+                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+                }
+            });
+        }
+        else {
+            if (errorCallback) {
+                errorCallback(null);
+            }
+        }
+    };
+    LovItemUtils.prototype.getNameSuffixLov = function (successCallback, errorCallback) {
+        var _this = this;
+        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_LOV_ITEM, this.serviceConstants.LOV_ITEM_SERVICE_NAME_NAME_SUFFIX, null);
+        this.dataAccessService.call(serviceContext)
+            .subscribe(function (result) {
+            var response = result.json();
+            if (!response) {
+                response = [];
+            }
+            if (successCallback) {
+                successCallback(response);
+            }
+        }, function (error) {
+            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
+            if (error) {
+                errorInfo = error.json();
+                errorInfo.code = error.status;
+            }
+            if (errorCallback) {
+                errorCallback(errorInfo);
+            }
+            if (errorInfo.code == 401) {
+                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
+            }
+        });
+    };
+    return LovItemUtils;
+}());
+LovItemUtils = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
+        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
+        __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__["a" /* DataAccessService */],
+        __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__["a" /* ServiceConstants */]])
+], LovItemUtils);
+
+//# sourceMappingURL=lov-item.utils.js.map
+
+/***/ }),
+
 /***/ 65:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -12287,13 +12869,12 @@ LanguageConstants = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_user_address_utils__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_user_address_utils__ = __webpack_require__(108);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_sync_data_utils__ = __webpack_require__(146);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__location_location__ = __webpack_require__(651);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__pages_mcalculator_mcalculator__ = __webpack_require__(652);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__utils_commons_user_utils__ = __webpack_require__(72);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12320,9 +12901,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var HomePage = (function () {
-    function HomePage(navCtrl, sessionUtils, offerUtils, partnerUtils, configUtils, clientUtils, userAddressUtils, geolocation, events, render, ngZone, platform, modalCtrl, translate, googleAnalyticsUtils, syncDataUtils, appConstants, networkService, userUtils, viewController) {
+    function HomePage(navCtrl, sessionUtils, offerUtils, partnerUtils, configUtils, clientUtils, userAddressUtils, geolocation, events, render, ngZone, platform, modalCtrl, translate, googleAnalyticsUtils, syncDataUtils, appConstants, networkService, viewController) {
         this.navCtrl = navCtrl;
         this.sessionUtils = sessionUtils;
         this.offerUtils = offerUtils;
@@ -12341,7 +12921,6 @@ var HomePage = (function () {
         this.syncDataUtils = syncDataUtils;
         this.appConstants = appConstants;
         this.networkService = networkService;
-        this.userUtils = userUtils;
         this.viewController = viewController;
         this.nearByOffersData = [];
         this.nearByParnersData = [];
@@ -12711,7 +13290,7 @@ __decorate([
 ], HomePage.prototype, "content", void 0);
 HomePage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-home',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\home\home.html"*/'<ion-header class="header-dark" no-border>\n\n\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{appDisplayName}}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content no-bounce>\n\n    <div class="header-container" no-bounce>\n\n        <!--header card -->\n\n        <login-component *ngIf="!memberInfo"></login-component>\n\n        <loggedin-component *ngIf="memberInfo" [data]="memberInfo">\n\n        </loggedin-component>\n\n        <!--header card end here-->\n\n    </div>\n\n\n\n\n\n    <!--<ion-title>{{ \'HOME.TITLE\' |  translate:param }}</ion-title>-->\n\n    <!--Content Area start-->\n\n    <div class="contain-area " no-bounce>\n\n        <div class="location-finder">\n\n            <div class="location-finder-input" (click)="doLocationSearch()" *ngIf="userLocationFinderStatus">\n\n                <div *ngIf="selectedLocationObj && selectedLocationObj.formatted_address">\n\n                    {{selectedLocationObj.formatted_address}}\n\n                </div>\n\n                <div *ngIf="!selectedLocationObj || !selectedLocationObj.formatted_address">\n\n                    {{ \'PLEASE_SELECT_YOUR_LOCATION\' | translate }}\n\n                </div>\n\n            </div>\n\n\n\n            <div class="location-finder-input location-finder-dot" *ngIf="!userLocationFinderStatus">\n\n                <ion-spinner name="dots"></ion-spinner>\n\n            </div>\n\n\n\n            <div class="location-finder-button">\n\n                <button (click)="findMyCurrentLocation()" *ngIf="userLocationFinderStatus">\n\n                    <ion-icon name="navigate"></ion-icon>\n\n                </button>\n\n\n\n                <div class="spinner-holder" *ngIf="!userLocationFinderStatus">\n\n                    <ion-spinner></ion-spinner>\n\n                </div>\n\n\n\n            </div>\n\n\n\n\n\n        </div>\n\n\n\n\n\n        <h2 class="title" *ngIf="nearByOffersData && nearByOffersData.length > 0">\n\n            {{ \'NEAR_ME_OFFERS\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="nearByOffersData && nearByOffersData.length > 0"\n\n                          [data]="nearByOffersData"\n\n                          [showTemplate]="1"\n\n        >\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="nearByParnersData && nearByParnersData.length > 0">\n\n            {{ \'NEAR_ME_STORES\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="nearByParnersData && nearByParnersData.length > 0"\n\n                          [data]="nearByParnersData"\n\n                          [showTemplate]="3">\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="recomOffersData && recomOffersData.length > 0">\n\n            {{ \'RECOMMENDED_OFFERS\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="recomOffersData && recomOffersData.length > 0"\n\n                          [data]="recomOffersData"\n\n                          [showTemplate]="1">\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="partnersData && partnersData.length > 0">\n\n            {{ \'FEATURED_PARTNERS\' | translate }}\n\n        </h2>\n\n        <div class="card-holder"\n\n             *ngIf="partnersData && partnersData.length > 0">\n\n            <span *ngFor="let i of partnersData">\n\n                <partners-card-component [data]="i"></partners-card-component>\n\n            </span>\n\n        </div>\n\n\n\n    </div>\n\n    <!--Content Area End-->\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\home\home.html"*/,
+        selector: 'page-home',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\home\home.html"*/'<ion-header class="header-dark" no-border>\n\n\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{appDisplayName}}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content no-bounce>\n\n    <div class="header-container" no-bounce>\n\n        <!--header card -->\n\n        <login-component *ngIf="!memberInfo"></login-component>\n\n        <loggedin-component *ngIf="memberInfo" [data]="memberInfo">\n\n        </loggedin-component>\n\n        <!--header card end here-->\n\n    </div>\n\n\n\n\n\n    <!--<ion-title>{{ \'HOME.TITLE\' |  translate:param }}</ion-title>-->\n\n    <!--Content Area start-->\n\n    <div class="contain-area " no-bounce>\n\n        <div class="location-finder">\n\n            <div class="location-finder-input" (click)="doLocationSearch()" *ngIf="userLocationFinderStatus">\n\n                <div *ngIf="selectedLocationObj && selectedLocationObj.formatted_address">\n\n                    {{selectedLocationObj.formatted_address}}\n\n                </div>\n\n                <div *ngIf="!selectedLocationObj || !selectedLocationObj.formatted_address">\n\n                    {{ \'PLEASE_SELECT_YOUR_LOCATION\' | translate }}\n\n                </div>\n\n            </div>\n\n\n\n            <div class="location-finder-input location-finder-dot" *ngIf="!userLocationFinderStatus">\n\n                <ion-spinner name="dots"></ion-spinner>\n\n            </div>\n\n\n\n            <div class="location-finder-button">\n\n                <button (click)="findMyCurrentLocation()" *ngIf="userLocationFinderStatus">\n\n                    <ion-icon name="navigate"></ion-icon>\n\n                </button>\n\n\n\n                <div class="spinner-holder" *ngIf="!userLocationFinderStatus">\n\n                    <ion-spinner></ion-spinner>\n\n                </div>\n\n\n\n            </div>\n\n\n\n\n\n        </div>\n\n\n\n\n\n        <h2 class="title" *ngIf="nearByOffersData && nearByOffersData.length > 0">\n\n            {{ \'NEAR_ME_OFFERS\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="nearByOffersData && nearByOffersData.length > 0"\n\n                          [data]="nearByOffersData"\n\n                          [showTemplate]="1"\n\n        >\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="nearByParnersData && nearByParnersData.length > 0">\n\n            {{ \'NEAR_ME_STORES\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="nearByParnersData && nearByParnersData.length > 0"\n\n                          [data]="nearByParnersData"\n\n                          [showTemplate]="3">\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="recomOffersData && recomOffersData.length > 0">\n\n            {{ \'RECOMMENDED_OFFERS\' | translate }}\n\n        </h2>\n\n        <component-swiper *ngIf="recomOffersData && recomOffersData.length > 0"\n\n                          [data]="recomOffersData"\n\n                          [showTemplate]="1">\n\n        </component-swiper>\n\n\n\n\n\n        <h2 class="title"\n\n            *ngIf="partnersData && partnersData.length > 0">\n\n            {{ \'FEATURED_PARTNERS\' | translate }}\n\n        </h2>\n\n        <div class="card-holder"\n\n             *ngIf="partnersData && partnersData.length > 0">\n\n            <span *ngFor="let i of partnersData">\n\n                <partners-card-component [data]="i"></partners-card-component>\n\n            </span>\n\n        </div>\n\n\n\n    </div>\n\n    <!--Content Area End-->\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\home\home.html"*/,
         providers: []
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
@@ -12732,7 +13311,6 @@ HomePage = __decorate([
         __WEBPACK_IMPORTED_MODULE_12__utils_commons_sync_data_utils__["a" /* SyncDataUtils */],
         __WEBPACK_IMPORTED_MODULE_10__constants_app_constants__["a" /* AppConstants */],
         __WEBPACK_IMPORTED_MODULE_15__services_commons_network_service__["a" /* NetworkService */],
-        __WEBPACK_IMPORTED_MODULE_17__utils_commons_user_utils__["a" /* UserUtils */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["u" /* ViewController */]])
 ], HomePage);
 
@@ -12747,8 +13325,8 @@ HomePage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LocationPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_address_utils__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_address_utils__ = __webpack_require__(108);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_completer__ = __webpack_require__(291);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_google_analytics_utils__ = __webpack_require__(18);
@@ -12833,7 +13411,7 @@ __decorate([
 ], LocationPage.prototype, "data", void 0);
 LocationPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-location',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\home\location\location.html"*/'\n\n\n\n<ion-header class="header-dark" [@fadeInOut]="toggle"  no-border>\n\n\n\n    <ion-navbar >\n\n        <ion-buttons start class="icon-color-white">\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="arrow-back"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{\'SEARCH_HERE\' | translate }}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n\n\n\n\n\n\n\n\n<ion-content padding [@fadeInOut]="toggle">\n\n    <div class="location-search">\n\n        <form action=".">\n\n        <div class="location-finder-input">\n\n            <ng2-completer type="search"\n\n                           [placeholder]="textPlaceholder"\n\n                           [textNoResults]="textNoResults"\n\n                           [textSearching]="textSearching"\n\n                           [(ngModel)]="searchStr"\n\n                           [datasource]="dataService"\n\n                           [minSearchLength]="3"\n\n                           [pause]="1000"\n\n                           [ngModelOptions]="{standalone: true}"\n\n                           (selected)="itemSelected($event)">\n\n            </ng2-completer>\n\n        </div>\n\n        </form>\n\n    </div>\n\n    <br/>\n\n    <ion-list>\n\n        <ion-item *ngFor="let item of locations" (click)="selectedLocation(item)">\n\n            {{item.formatted_address}}\n\n        </ion-item>\n\n    </ion-list>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\home\location\location.html"*/,
+        selector: 'page-location',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\home\location\location.html"*/'\n\n\n\n<ion-header class="header-dark" [@fadeInOut]="toggle"  no-border>\n\n\n\n    <ion-navbar >\n\n        <ion-buttons start class="icon-color-white">\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="arrow-back"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{\'SEARCH_HERE\' | translate }}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n\n\n\n\n\n\n\n\n<ion-content padding [@fadeInOut]="toggle">\n\n    <div class="location-search">\n\n        <form action=".">\n\n        <div class="location-finder-input">\n\n            <ng2-completer type="search"\n\n                           [placeholder]="textPlaceholder"\n\n                           [textNoResults]="textNoResults"\n\n                           [textSearching]="textSearching"\n\n                           [(ngModel)]="searchStr"\n\n                           [datasource]="dataService"\n\n                           [minSearchLength]="3"\n\n                           [pause]="1000"\n\n                           [ngModelOptions]="{standalone: true}"\n\n                           (selected)="itemSelected($event)">\n\n            </ng2-completer>\n\n        </div>\n\n        </form>\n\n    </div>\n\n    <br/>\n\n    <ion-list>\n\n        <ion-item *ngFor="let item of locations" (click)="selectedLocation(item)">\n\n            {{item.formatted_address}}\n\n        </ion-item>\n\n    </ion-list>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\home\location\location.html"*/,
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('fadeInOut', [
                 Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_37" /* transition */])('void => *', [
@@ -12869,12 +13447,12 @@ LocationPage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_forms__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_native__ = __webpack_require__(98);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_native__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_completer__ = __webpack_require__(291);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_partner_utils__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_widgets_filters_mcalculator_filters_mcalculator__ = __webpack_require__(653);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__dto_account_dto__ = __webpack_require__(52);
@@ -13070,7 +13648,7 @@ __decorate([
 ], MilesCalculatorPage.prototype, "form1", void 0);
 MilesCalculatorPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'miles-calculator-page',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mcalculator\mcalculator.html"*/'<ion-header class="header-dark offer-popup-content">\n\n    <ion-navbar #navBar>\n\n\n\n        <ion-title>\n\n            <span>Miles Calculator</span>\n\n        </ion-title>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n<ion-content padding>\n\n    <div *ngIf="shouldShowResults != true">\n\n\n\n        <!--<ion-slides class=" swiper-template-1 "  [slidesPerView]="3" [spaceBetween]="10">-->\n\n            <!--<div class="swiper-wrapper">-->\n\n                <!--<ion-slide class="swiper-slide" *ngFor="let i of industryTypes">-->\n\n\n\n                    <!--<div class="slider-holder "-->\n\n\n\n                         <!--[ngClass]="{\'industry-all\': i.code === INDUSTRY_TYPE_DEFAULT_CODE}"-->\n\n                         <!--[style.background-image]="\'url(\' + i.logoPath + \')\'"-->\n\n                         <!--(click)="selectIndustryType(i)">-->\n\n\n\n                        <!--<svg class="checkmark"-->\n\n                             <!--xmlns="http://www.w3.org/2000/svg"-->\n\n                             <!--*ngIf="i.code === selectIndustryTypeCode"-->\n\n                             <!--viewBox="0 0 52 52">-->\n\n                            <!--<circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>-->\n\n                            <!--<path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>-->\n\n                        <!--</svg>-->\n\n\n\n                        <!--<div class="slider-content">-->\n\n                            <!--<span>{{i.description}}</span>-->\n\n                        <!--</div>-->\n\n                    <!--</div>-->\n\n\n\n                <!--</ion-slide>-->\n\n            <!--</div>-->\n\n        <!--</ion-slides>-->\n\n\n\n        <div class="user-form">\n\n            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()">\n\n                <ion-list>\n\n                    <ion-segment name="tripType"\n\n                                 id="tripType"\n\n                                 [(ngModel)]="selectedTripType"\n\n                                 required>\n\n                        <ion-segment-button value="{{TRIP_TYPE_ONEWAY}}">\n\n                            One Way\n\n                        </ion-segment-button>\n\n                        <ion-segment-button value="{{TRIP_TYPE_RETURN}}">\n\n                            Return\n\n                        </ion-segment-button>\n\n                    </ion-segment>\n\n                    <div class="location-finder-input">\n\n                        <ng2-completer type="search"\n\n                                       placeholder="{{\'From\' | translate}}"\n\n                                       [textNoResults]="textNoResults"\n\n                                       [textSearching]="textSearching"\n\n                                       [(ngModel)]="fromText"\n\n                                       [datasource]="dataServiceFrom"\n\n                                       [minSearchLength]="3"\n\n                                       [pause]="1000"\n\n                                       [ngModelOptions]="{standalone: true}"\n\n                                       (selected)="itemSelected($event)">\n\n                        </ng2-completer>\n\n                    </div>\n\n                    <div class="location-finder-input">\n\n                        <ng2-completer type="search"\n\n                                       placeholder="{{\'To\' | translate}}"\n\n                                       [textNoResults]="textNoResults"\n\n                                       [textSearching]="textSearching"\n\n                                       [(ngModel)]="toText"\n\n                                       [datasource]="dataServiceTo"\n\n                                       [minSearchLength]="3"\n\n                                       [pause]="1000"\n\n                                       [ngModelOptions]="{standalone: true}"\n\n                                       (selected)="itemSelected($event)">\n\n                        </ng2-completer>\n\n                    </div>\n\n                    <ion-item>\n\n                        <ion-label class="required-field">Start Date</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="startDateText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="startDateText"\n\n                                      id="startDateText"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedTripType == TRIP_TYPE_RETURN">\n\n                        <ion-label class="required-field">End Date</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="endDateText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="endDateText"\n\n                                      id="endDateText"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label>Class</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedClassObj"\n\n                                    name="classText"\n\n                                    id="classText"\n\n                                    required>\n\n                            <ion-option *ngFor="let item of classList"\n\n                                        [value]="item"\n\n                                        [selected]="selectedClassObj && (item == selectedClassObj)">\n\n                                {{item}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button full class="submit-btn" type="submit">\n\n                            <span>Calculate</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n        </div>\n\n    </div>\n\n    <div *ngIf="shouldShowResults == true">\n\n        <table>\n\n            <tr>\n\n                <td>YOU WOULD EARN</td>\n\n                <td>MILES</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Deal (T,E)</td>\n\n                <td>805</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Saver (G,U,V)</td>\n\n                <td>1609</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Classic (L,Q,M,K)</td>\n\n                <td>2414</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Flex (H,B,Y)</td>\n\n                <td>3218</td>\n\n            </tr>\n\n        </table>\n\n        <div class="row">\n\n            <div class="col-xs-12 button-container">\n\n                <button ion-button full class="submit-btn" (click)="modifyTapped()">\n\n                    <span>{{ "Want to re-calculate?" | translate }}</span>\n\n                </button>\n\n            </div>\n\n        </div>\n\n    </div>\n\n    <ion-fab right bottom mini #fab *ngIf="shouldShowResults != true">\n\n        <button ion-fab color="light" (click)="doFilter(fab)">\n\n            <ion-icon name="color-filter"></ion-icon>\n\n        </button>\n\n    </ion-fab>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mcalculator\mcalculator.html"*/
+        selector: 'miles-calculator-page',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mcalculator\mcalculator.html"*/'<ion-header class="header-dark offer-popup-content">\n\n    <ion-navbar #navBar>\n\n\n\n        <ion-title>\n\n            <span>Miles Calculator</span>\n\n        </ion-title>\n\n\n\n    </ion-navbar>\n\n</ion-header>\n\n<ion-content padding>\n\n    <div *ngIf="shouldShowResults != true">\n\n\n\n        <!--<ion-slides class=" swiper-template-1 "  [slidesPerView]="3" [spaceBetween]="10">-->\n\n            <!--<div class="swiper-wrapper">-->\n\n                <!--<ion-slide class="swiper-slide" *ngFor="let i of industryTypes">-->\n\n\n\n                    <!--<div class="slider-holder "-->\n\n\n\n                         <!--[ngClass]="{\'industry-all\': i.code === INDUSTRY_TYPE_DEFAULT_CODE}"-->\n\n                         <!--[style.background-image]="\'url(\' + i.logoPath + \')\'"-->\n\n                         <!--(click)="selectIndustryType(i)">-->\n\n\n\n                        <!--<svg class="checkmark"-->\n\n                             <!--xmlns="http://www.w3.org/2000/svg"-->\n\n                             <!--*ngIf="i.code === selectIndustryTypeCode"-->\n\n                             <!--viewBox="0 0 52 52">-->\n\n                            <!--<circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>-->\n\n                            <!--<path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>-->\n\n                        <!--</svg>-->\n\n\n\n                        <!--<div class="slider-content">-->\n\n                            <!--<span>{{i.description}}</span>-->\n\n                        <!--</div>-->\n\n                    <!--</div>-->\n\n\n\n                <!--</ion-slide>-->\n\n            <!--</div>-->\n\n        <!--</ion-slides>-->\n\n\n\n        <div class="user-form">\n\n            <form #form1="ngForm" (ngSubmit)="bottomButtonTapped()">\n\n                <ion-list>\n\n                    <ion-segment name="tripType"\n\n                                 id="tripType"\n\n                                 [(ngModel)]="selectedTripType"\n\n                                 required>\n\n                        <ion-segment-button value="{{TRIP_TYPE_ONEWAY}}">\n\n                            One Way\n\n                        </ion-segment-button>\n\n                        <ion-segment-button value="{{TRIP_TYPE_RETURN}}">\n\n                            Return\n\n                        </ion-segment-button>\n\n                    </ion-segment>\n\n                    <div class="location-finder-input">\n\n                        <ng2-completer type="search"\n\n                                       placeholder="{{\'From\' | translate}}"\n\n                                       [textNoResults]="textNoResults"\n\n                                       [textSearching]="textSearching"\n\n                                       [(ngModel)]="fromText"\n\n                                       [datasource]="dataServiceFrom"\n\n                                       [minSearchLength]="3"\n\n                                       [pause]="1000"\n\n                                       [ngModelOptions]="{standalone: true}"\n\n                                       (selected)="itemSelected($event)">\n\n                        </ng2-completer>\n\n                    </div>\n\n                    <div class="location-finder-input">\n\n                        <ng2-completer type="search"\n\n                                       placeholder="{{\'To\' | translate}}"\n\n                                       [textNoResults]="textNoResults"\n\n                                       [textSearching]="textSearching"\n\n                                       [(ngModel)]="toText"\n\n                                       [datasource]="dataServiceTo"\n\n                                       [minSearchLength]="3"\n\n                                       [pause]="1000"\n\n                                       [ngModelOptions]="{standalone: true}"\n\n                                       (selected)="itemSelected($event)">\n\n                        </ng2-completer>\n\n                    </div>\n\n                    <ion-item>\n\n                        <ion-label class="required-field">Start Date</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="startDateText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="startDateText"\n\n                                      id="startDateText"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                    <ion-item *ngIf="selectedTripType == TRIP_TYPE_RETURN">\n\n                        <ion-label class="required-field">End Date</ion-label>\n\n                        <ion-datetime displayFormat="DD MMMM YYYY"\n\n                                      [min]="minDate"\n\n                                      [max]="maxDate"\n\n                                      [(ngModel)]="endDateText"\n\n                                      [cancelText]="cancelText"\n\n                                      [doneText]="selectText"\n\n                                      [monthNames]="months"\n\n                                      name="endDateText"\n\n                                      id="endDateText"\n\n                                      required>\n\n                        </ion-datetime>\n\n                    </ion-item>\n\n                    <ion-item>\n\n                        <ion-label>Class</ion-label>\n\n                        <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                                    okText="{{\'SELECT\' | translate}}"\n\n                                    [(ngModel)]="selectedClassObj"\n\n                                    name="classText"\n\n                                    id="classText"\n\n                                    required>\n\n                            <ion-option *ngFor="let item of classList"\n\n                                        [value]="item"\n\n                                        [selected]="selectedClassObj && (item == selectedClassObj)">\n\n                                {{item}}\n\n                            </ion-option>\n\n                        </ion-select>\n\n                    </ion-item>\n\n                </ion-list>\n\n                <div class="row">\n\n                    <div class="col-xs-12 button-container">\n\n                        <button ion-button full class="submit-btn" type="submit">\n\n                            <span>Calculate</span>\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n            </form>\n\n        </div>\n\n    </div>\n\n    <div *ngIf="shouldShowResults == true">\n\n        <table>\n\n            <tr>\n\n                <td>YOU WOULD EARN</td>\n\n                <td>MILES</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Deal (T,E)</td>\n\n                <td>805</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Saver (G,U,V)</td>\n\n                <td>1609</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Classic (L,Q,M,K)</td>\n\n                <td>2414</td>\n\n            </tr>\n\n            <tr>\n\n                <td>Economy Flex (H,B,Y)</td>\n\n                <td>3218</td>\n\n            </tr>\n\n        </table>\n\n        <div class="row">\n\n            <div class="col-xs-12 button-container">\n\n                <button ion-button full class="submit-btn" (click)="modifyTapped()">\n\n                    <span>{{ "Want to re-calculate?" | translate }}</span>\n\n                </button>\n\n            </div>\n\n        </div>\n\n    </div>\n\n    <ion-fab right bottom mini #fab *ngIf="shouldShowResults != true">\n\n        <button ion-fab color="light" (click)="doFilter(fab)">\n\n            <ion-icon name="color-filter"></ion-icon>\n\n        </button>\n\n    </ion-fab>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mcalculator\mcalculator.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["l" /* ModalController */],
@@ -13152,7 +13730,7 @@ var FilterMilesCalculator = (function () {
     return FilterMilesCalculator;
 }());
 FilterMilesCalculator = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\filters-mcalculator\filters-mcalculator.html"*/'<ion-content padding>\n\n    <h3>\n\n        More Options\n\n        <ion-icon name="close-circle" icon-right (click)="dismiss(null)"></ion-icon>\n\n    </h3>\n\n    <ion-list>\n\n        <ion-segment class="margin-top-2rem" name="milesType"\n\n                     id="milesType"\n\n                     [(ngModel)]="selectedMilesType"\n\n                     required>\n\n            <ion-segment-button value="{{MILES_TYPE_EARN}}">\n\n                Earn\n\n            </ion-segment-button>\n\n            <ion-segment-button value="{{MILES_TYPE_BURN}}">\n\n                Burn\n\n            </ion-segment-button>\n\n        </ion-segment>\n\n        <ion-item>\n\n            <ion-label>Promotion Code</ion-label>\n\n            <ion-input type="text"\n\n                       [(ngModel)]="promoText"\n\n                       name="promoText"\n\n                       id="promoText"\n\n                       spellcheck="false"\n\n                       autocapitalize="none"\n\n                       minlength="1"\n\n                       maxlength="20"\n\n                       placeholder="---------"\n\n                       pattern="">\n\n            </ion-input>\n\n        </ion-item>\n\n    </ion-list>\n\n    <div class="row">\n\n        <div class="col-xs-12 button-container">\n\n            <button #submitButton1 ion-button full class="submit-btn" (click)="saveFilters()">\n\n                <span>Done</span>\n\n            </button>\n\n        </div>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\filters-mcalculator\filters-mcalculator.html"*/,
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\filters-mcalculator\filters-mcalculator.html"*/'<ion-content padding>\n\n    <h3>\n\n        More Options\n\n        <ion-icon name="close-circle" icon-right (click)="dismiss(null)"></ion-icon>\n\n    </h3>\n\n    <ion-list>\n\n        <ion-segment class="margin-top-2rem" name="milesType"\n\n                     id="milesType"\n\n                     [(ngModel)]="selectedMilesType"\n\n                     required>\n\n            <ion-segment-button value="{{MILES_TYPE_EARN}}">\n\n                Earn\n\n            </ion-segment-button>\n\n            <ion-segment-button value="{{MILES_TYPE_BURN}}">\n\n                Burn\n\n            </ion-segment-button>\n\n        </ion-segment>\n\n        <ion-item>\n\n            <ion-label>Promotion Code</ion-label>\n\n            <ion-input type="text"\n\n                       [(ngModel)]="promoText"\n\n                       name="promoText"\n\n                       id="promoText"\n\n                       spellcheck="false"\n\n                       autocapitalize="none"\n\n                       minlength="1"\n\n                       maxlength="20"\n\n                       placeholder="---------"\n\n                       pattern="">\n\n            </ion-input>\n\n        </ion-item>\n\n    </ion-list>\n\n    <div class="row">\n\n        <div class="col-xs-12 button-container">\n\n            <button #submitButton1 ion-button full class="submit-btn" (click)="saveFilters()">\n\n                <span>Done</span>\n\n            </button>\n\n        </div>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\filters-mcalculator\filters-mcalculator.html"*/,
         selector: 'filters-mcalculator'
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -13173,17 +13751,17 @@ FilterMilesCalculator = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyWalletPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__qrcode_qrcode__ = __webpack_require__(655);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__fullscreen_fullscreen__ = __webpack_require__(656);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_wallet_utils__ = __webpack_require__(109);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_wallet_utils__ = __webpack_require__(107);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__utils_commons_sync_data_utils__ = __webpack_require__(146);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -13317,7 +13895,7 @@ var MyWalletPage = (function () {
 }());
 MyWalletPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-wallet',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\wallet.html"*/'<ion-header class="transparent-header " no-border>\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{ \'MY_WALLET\' | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content #myWallet class="no-scroll app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n\n\n    <div class="virtual-card-holder">\n\n        <virtual-card-component [isFrontVisible]="isFrontVisible"\n\n                                (changeIsFrontVisible)="isFrontVisibleChanged($event)">\n\n        </virtual-card-component>\n\n\n\n\n\n        <div class="card-button-holder" *ngIf="hasVirtualCardData == true">\n\n            <ul>\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only\n\n                            (click)="isFrontVisibleChanged(!isFrontVisible)">\n\n                        <ion-icon name="icon-flip"></ion-icon>\n\n                    </button>\n\n                </li>\n\n\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="openQR()">\n\n                        <ion-icon name="icon-barcode"></ion-icon>\n\n                    </button>\n\n                </li>\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="fullScreen()">\n\n                        <ion-icon name="icon-arrow-4"></ion-icon>\n\n                    </button>\n\n                </li>\n\n            </ul>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\wallet.html"*/
+        selector: 'page-wallet',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\wallet.html"*/'<ion-header class="transparent-header " no-border>\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{ \'MY_WALLET\' | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content #myWallet class="no-scroll app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n\n\n    <div class="virtual-card-holder">\n\n        <virtual-card-component [isFrontVisible]="isFrontVisible"\n\n                                (changeIsFrontVisible)="isFrontVisibleChanged($event)">\n\n        </virtual-card-component>\n\n\n\n\n\n        <div class="card-button-holder" *ngIf="hasVirtualCardData == true">\n\n            <ul>\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only\n\n                            (click)="isFrontVisibleChanged(!isFrontVisible)">\n\n                        <ion-icon name="icon-flip"></ion-icon>\n\n                    </button>\n\n                </li>\n\n\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="openQR()">\n\n                        <ion-icon name="icon-barcode"></ion-icon>\n\n                    </button>\n\n                </li>\n\n                <li>\n\n                    <button ion-button clear class="  button-icon-transparent" icon-only (click)="fullScreen()">\n\n                        <ion-icon name="icon-arrow-4"></ion-icon>\n\n                    </button>\n\n                </li>\n\n            </ul>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\wallet.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_6__utils_commons_client_utils__["a" /* ClientUtils */],
         __WEBPACK_IMPORTED_MODULE_7__utils_commons_config_utils__["a" /* ConfigUtils */],
@@ -13344,12 +13922,12 @@ MyWalletPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return QrCodePage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_file_service__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_wallet_utils__ = __webpack_require__(109);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_wallet_utils__ = __webpack_require__(107);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_client_utils__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -13456,7 +14034,7 @@ var QrCodePage = (function () {
     return QrCodePage;
 }());
 QrCodePage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\qrcode\qrcode.html"*/'<ion-header class="header-dark offer-popup-content " no-border>\n\n\n\n    <ion-navbar >\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'QR_CODE\' | translate }}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content class="no-scroll qr-code padding">\n\n\n\n    <img *ngIf="cardData"\n\n         src="{{cardData}}"\n\n         alt="">\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\qrcode\qrcode.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\qrcode\qrcode.html"*/'<ion-header class="header-dark offer-popup-content " no-border>\n\n\n\n    <ion-navbar >\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'QR_CODE\' | translate }}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content class="no-scroll qr-code padding">\n\n\n\n    <img *ngIf="cardData"\n\n         src="{{cardData}}"\n\n         alt="">\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\qrcode\qrcode.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -13547,7 +14125,7 @@ var FullScreenPage = (function () {
 }());
 FullScreenPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'virtual-card-full-screen',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\fullscreen\fullscreen.html"*/'<ion-content class="no-scroll app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n\n\n    <button  class="button-transparent button-full-screen" (click)="dismiss()" >\n\n        <ion-icon name="close"></ion-icon>\n\n    </button>\n\n\n\n    <virtual-card-component *ngIf="shouldDisplayCard"\n\n                            [isFrontVisible]="isFrontVisible"\n\n                            (changeIsFrontVisible)="isFrontVisibleChanged($event)">\n\n    </virtual-card-component>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mywallet\fullscreen\fullscreen.html"*/,
+        selector: 'virtual-card-full-screen',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\fullscreen\fullscreen.html"*/'<ion-content class="no-scroll app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n\n\n    <button  class="button-transparent button-full-screen" (click)="dismiss()" >\n\n        <ion-icon name="close"></ion-icon>\n\n    </button>\n\n\n\n    <virtual-card-component *ngIf="shouldDisplayCard"\n\n                            [isFrontVisible]="isFrontVisible"\n\n                            (changeIsFrontVisible)="isFrontVisibleChanged($event)">\n\n    </virtual-card-component>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mywallet\fullscreen\fullscreen.html"*/,
         animations: [
             Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_38" /* trigger */])('fadeInOut', [
                 Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_37" /* transition */])('void => *', [
@@ -13581,9 +14159,9 @@ FullScreenPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SearchPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__login_login__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_native__ = __webpack_require__(96);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__dto_partners_dto__ = __webpack_require__(110);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__dto_partners_dto__ = __webpack_require__(109);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_offers_dto__ = __webpack_require__(202);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_partner_utils__ = __webpack_require__(44);
@@ -13593,7 +14171,7 @@ FullScreenPage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__widgets_filters_popup_filter__ = __webpack_require__(659);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__utils_commons_client_utils__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -13679,9 +14257,11 @@ var SearchPage = (function () {
         this.isLoadingLocations = false;
         this.isLoadingVouchers = false;
         this.isRefreshing = false;
+        this.shouldShowVouchers = false;
     }
     SearchPage.prototype.ngOnInit = function () {
         var _this = this;
+        this.shouldShowVouchers = this.sessionUtils.getVoucherFlag();
         this.events.subscribe(this.appConstants.EVENT_APP_LANGUAGE_CHANGED, function () {
             _this.searchByOfferPlaceholder = _this.translate.instant('SEARCH_BY_OFFER_NAME');
             _this.searchByLocationPlaceholder = _this.translate.instant('SEARCH_BY_PARTNER_LOCATION');
@@ -14219,7 +14799,7 @@ __decorate([
 ], SearchPage.prototype, "fabContainer", void 0);
 SearchPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["u" /* Component */])({
-        selector: 'page-search',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\search\search.html"*/'<ion-header class="header-dark" no-border>\n\n\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{ \'DISCOVER\' | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n    <div class="inline-tabs">\n\n        <ion-segment [(ngModel)]="activeTab">\n\n            <ion-segment-button value="tab01" (click)="activeTabEvent(SEARCH_PARTNERS_TAB)">\n\n                {{ \'PARTNERS\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab03" (click)="activeTabEvent(SEARCH_LOCATIONS_TAB)">\n\n                {{ \'LOCATIONS\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab02" (click)="activeTabEvent(SEARCH_OFFERS_TAB)">\n\n                {{ \'OFFERS\' | translate }}\n\n            </ion-segment-button>\n\n            <!-- <ion-segment-button value="tab04" (click)="activeTabEvent(SEARCH_VOUCHERS_TAB)">\n\n                {{ "VOUCHERS" | translate }}\n\n            </ion-segment-button> -->\n\n        </ion-segment>\n\n    </div>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area-full app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n    <div [ngSwitch]="activeTab" padding>\n\n        <!--Tabs 01 start-->\n\n        <div class="tab01-holder " *ngSwitchCase="SEARCH_PARTNERS_TAB">\n\n\n\n            <ion-slides class=" swiper-template-1 " [slidesPerView]="3" [spaceBetween]="10">\n\n                <div class="swiper-wrapper">\n\n                    <ion-slide class="swiper-slide" *ngFor="let i of industryTypes">\n\n\n\n                        <div class="slider-holder " [ngClass]="{\'industry-all\': i.code === INDUSTRY_TYPE_DEFAULT_CODE}" [style.background-image]="\'url(\' + i.logoPath + \')\'"\n\n                            (click)="industryTypesTapped(i)">\n\n\n\n                            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" *ngIf="i.code === selectIndustryTypeCode" viewBox="0 0 52 52">\n\n                                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />\n\n                                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />\n\n                            </svg>\n\n\n\n                            <div class="slider-content">\n\n                                <span>{{i.description}}</span>\n\n                            </div>\n\n                        </div>\n\n\n\n                    </ion-slide>\n\n                </div>\n\n            </ion-slides>\n\n\n\n            <!--search -->\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="partnersSearchKey" [ngModelOptions]="{standalone: true}" (search)="searchWithKeyword(activeTab)"\n\n                    (ionCancel)="onCancel($event)" [showCancelButton]="shouldShowCancel" [placeholder]="searchByPartnerPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedPartners || (searchedPartners.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingPartners == true"></ion-spinner>\n\n                <span>{{searchNoPartnerText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedPartners && (searchedPartners.length > 0)">\n\n                <span *ngFor="let i of searchedPartners">\n\n                    <partners-card-component [data]="i"></partners-card-component>\n\n                </span>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n\n\n        </div>\n\n        <!--Tabs 01 End-->\n\n\n\n\n\n        <!--Tabs 02 start-->\n\n        <div class="tab02-holder" *ngSwitchCase="SEARCH_OFFERS_TAB">\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="offersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByOfferPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedOffers || (searchedOffers.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingOffers == true"></ion-spinner>\n\n                <span>{{searchNoOfferText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedOffers && (searchedOffers.length > 0)">\n\n                <span *ngFor="let data of searchedOffers">\n\n                    <expandable-component [data]="data"></expandable-component>\n\n                </span>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n\n\n        </div>\n\n        <!--Tabs 02 End-->\n\n\n\n\n\n        <!--Tabs 03 start-->\n\n        <div class="tab03-holder" *ngSwitchCase="SEARCH_LOCATIONS_TAB">\n\n            <!--tab 03-->\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="locationsSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByLocationPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedLocations || (searchedLocations.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingLocations == true"></ion-spinner>\n\n                <span>{{searchNoLocationText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedLocations && (searchedLocations.length > 0)">\n\n                <div *ngFor="let data of searchedLocations">\n\n                    <expandable-location-component [data]="data"></expandable-location-component>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <!--Tabs 03 End-->\n\n\n\n        <!--Tabs 04 start-->\n\n        <div class="tab03-holder" *ngSwitchCase="SEARCH_VOUCHERS_TAB">\n\n            <!--tab 04-->\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedVouchers || searchedVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="searchedVouchers && searchedVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of searchedVouchers">\n\n                    <div class="voucher" (click)="redeemVoucher(voucher)">\n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.description}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryPeriod">\n\n                            Valid for {{voucher.expiryPeriod}} months.\n\n                        </div>\n\n                        <div>\n\n                             <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n                        \n\n                    </div>\n\n                    <div class="voucher-strip" >\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <!--Tabs 04 End-->\n\n    </div>\n\n    <ion-fab *ngIf="shouldShowScrollTopButton || shouldShowOfferFilterButton" right bottom mini #fab>\n\n        <button ion-fab color="light">\n\n            <ion-icon name="more"></ion-icon>\n\n        </button>\n\n        <ion-fab-list side="left">\n\n            <button *ngIf="shouldShowScrollTopButton" ion-fab (click)="scrollToTop(fab)">\n\n                <ion-icon name="arrow-up"></ion-icon>\n\n            </button>\n\n            <button *ngIf="shouldShowOfferFilterButton" ion-fab (click)="doFilter(fab)">\n\n                <ion-icon name="color-filter"></ion-icon>\n\n            </button>\n\n        </ion-fab-list>\n\n    </ion-fab>\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\search\search.html"*/,
+        selector: 'page-search',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\search\search.html"*/'<ion-header class="header-dark" no-border>\n\n\n\n    <ion-navbar>\n\n        <button ion-button menuToggle>\n\n            <ion-icon name="menu"></ion-icon>\n\n        </button>\n\n        <ion-title>{{ \'DISCOVER\' | translate }}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n    <div class="inline-tabs">\n\n        <ion-segment [(ngModel)]="activeTab">\n\n            <ion-segment-button value="tab01" (click)="activeTabEvent(SEARCH_PARTNERS_TAB)">\n\n                {{ \'PARTNERS\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab03" (click)="activeTabEvent(SEARCH_LOCATIONS_TAB)">\n\n                {{ \'LOCATIONS\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab02" (click)="activeTabEvent(SEARCH_OFFERS_TAB)">\n\n                {{ \'OFFERS\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button *ngIf="shouldShowVouchers" value="tab04" (click)="activeTabEvent(SEARCH_VOUCHERS_TAB)">\n\n                {{ "VOUCHERS" | translate }}\n\n            </ion-segment-button>\n\n        </ion-segment>\n\n    </div>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area-full app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n    <div [ngSwitch]="activeTab" padding>\n\n        <!--Tabs 01 start-->\n\n        <div class="tab01-holder " *ngSwitchCase="SEARCH_PARTNERS_TAB">\n\n\n\n            <ion-slides class=" swiper-template-1 " [slidesPerView]="3" [spaceBetween]="10">\n\n                <div class="swiper-wrapper">\n\n                    <ion-slide class="swiper-slide" *ngFor="let i of industryTypes">\n\n\n\n                        <div class="slider-holder " [ngClass]="{\'industry-all\': i.code === INDUSTRY_TYPE_DEFAULT_CODE}" [style.background-image]="\'url(\' + i.logoPath + \')\'"\n\n                            (click)="industryTypesTapped(i)">\n\n\n\n                            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" *ngIf="i.code === selectIndustryTypeCode" viewBox="0 0 52 52">\n\n                                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />\n\n                                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />\n\n                            </svg>\n\n\n\n                            <div class="slider-content">\n\n                                <span>{{i.description}}</span>\n\n                            </div>\n\n                        </div>\n\n\n\n                    </ion-slide>\n\n                </div>\n\n            </ion-slides>\n\n\n\n            <!--search -->\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="partnersSearchKey" [ngModelOptions]="{standalone: true}" (search)="searchWithKeyword(activeTab)"\n\n                    (ionCancel)="onCancel($event)" [showCancelButton]="shouldShowCancel" [placeholder]="searchByPartnerPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedPartners || (searchedPartners.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingPartners == true"></ion-spinner>\n\n                <span>{{searchNoPartnerText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedPartners && (searchedPartners.length > 0)">\n\n                <span *ngFor="let i of searchedPartners">\n\n                    <partners-card-component [data]="i"></partners-card-component>\n\n                </span>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n\n\n        </div>\n\n        <!--Tabs 01 End-->\n\n\n\n\n\n        <!--Tabs 02 start-->\n\n        <div class="tab02-holder" *ngSwitchCase="SEARCH_OFFERS_TAB">\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="offersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByOfferPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedOffers || (searchedOffers.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingOffers == true"></ion-spinner>\n\n                <span>{{searchNoOfferText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedOffers && (searchedOffers.length > 0)">\n\n                <span *ngFor="let data of searchedOffers">\n\n                    <expandable-component [data]="data"></expandable-component>\n\n                </span>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n\n\n        </div>\n\n        <!--Tabs 02 End-->\n\n\n\n\n\n        <!--Tabs 03 start-->\n\n        <div class="tab03-holder" *ngSwitchCase="SEARCH_LOCATIONS_TAB">\n\n            <!--tab 03-->\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="locationsSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{standalone: true}"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByLocationPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedLocations || (searchedLocations.length == 0)">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingLocations == true"></ion-spinner>\n\n                <span>{{searchNoLocationText}}</span>\n\n            </div>\n\n            <div *ngIf="searchedLocations && (searchedLocations.length > 0)">\n\n                <div *ngFor="let data of searchedLocations">\n\n                    <expandable-location-component [data]="data"></expandable-location-component>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <!--Tabs 03 End-->\n\n\n\n        <!--Tabs 04 start-->\n\n        <div class="tab03-holder" *ngSwitchCase="SEARCH_VOUCHERS_TAB">\n\n            <!--tab 04-->\n\n\n\n            <form action=".">\n\n                <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"\n\n                    (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"\n\n                    [animated]="false" [value]="" name="search">\n\n                </ion-searchbar>\n\n            </form>\n\n\n\n            <div class="margin-bottom"></div>\n\n            <div class="search-result-status" *ngIf="!searchedVouchers || searchedVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="searchedVouchers && searchedVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of searchedVouchers">\n\n                    <div class="voucher" (click)="redeemVoucher(voucher)">\n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.description}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryPeriod">\n\n                            Valid for {{voucher.expiryPeriod}} months.\n\n                        </div>\n\n                        <div>\n\n                             <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n                        \n\n                    </div>\n\n                    <div class="voucher-strip" >\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <!--Tabs 04 End-->\n\n    </div>\n\n    <ion-fab *ngIf="shouldShowScrollTopButton || shouldShowOfferFilterButton" right bottom mini #fab>\n\n        <button ion-fab color="light">\n\n            <ion-icon name="more"></ion-icon>\n\n        </button>\n\n        <ion-fab-list side="left">\n\n            <button *ngIf="shouldShowScrollTopButton" ion-fab (click)="scrollToTop(fab)">\n\n                <ion-icon name="arrow-up"></ion-icon>\n\n            </button>\n\n            <button *ngIf="shouldShowOfferFilterButton" ion-fab (click)="doFilter(fab)">\n\n                <ion-icon name="color-filter"></ion-icon>\n\n            </button>\n\n        </ion-fab-list>\n\n    </ion-fab>\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\search\search.html"*/,
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["l" /* ModalController */],
@@ -14249,17 +14829,16 @@ SearchPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TncPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_ionic_native__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_network_service__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_ionic_native__ = __webpack_require__(96);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_globalization_utils__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__constants_service_constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_globalization_utils__ = __webpack_require__(42);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -14281,11 +14860,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var TncPage = (function () {
-    function TncPage(viewController, events, userUtils, configUtils, appConstants, translate, networkService, render, googleAnalyticsUtils, clientUtils, sessionUtils, modalCtrl, globalizationUtils, serviceConstants) {
+    function TncPage(viewController, userUtils, configUtils, appConstants, translate, networkService, render, googleAnalyticsUtils, clientUtils, sessionUtils, globalizationUtils) {
         this.viewController = viewController;
-        this.events = events;
         this.userUtils = userUtils;
         this.configUtils = configUtils;
         this.appConstants = appConstants;
@@ -14295,9 +14872,7 @@ var TncPage = (function () {
         this.googleAnalyticsUtils = googleAnalyticsUtils;
         this.clientUtils = clientUtils;
         this.sessionUtils = sessionUtils;
-        this.modalCtrl = modalCtrl;
         this.globalizationUtils = globalizationUtils;
-        this.serviceConstants = serviceConstants;
         this.memberInfo = null;
         this.consentResponse = { "activeCardNumber": "", "consentStatus": "", "consentCode": "" };
     }
@@ -14392,10 +14967,9 @@ var TncPage = (function () {
     return TncPage;
 }());
 TncPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tnc\tnc.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n    <div class="login-box">\n\n        <div class="container">\n\n            <div style="margin-bottom:2rem;">\n\n                {{tncMessage}}\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12">\n\n                    <div class="privacy-terms-checkbox" style="display: flex;justify-content: center;align-items: flex-start;">\n\n                        <ion-checkbox [(ngModel)]="acceptTerms" style="padding: 0.2rem 1.5rem 0rem 0rem;"></ion-checkbox>\n\n                        <span>{{\'I have read and agree with the\' | translate}}\n\n                            <a (click)="termsConditionsTapped()">\n\n                                {{\'Terms n Conditions\' | translate}}\n\n                            </a> and\n\n                            <a (click)="privacyPolicyTapped()">\n\n                                {{\'Privacy Policy\' | translate}}\n\n                            </a>.\n\n                        </span>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container" style="margin-top: 2rem;">\n\n                    <button [disabled]="!acceptTerms" ion-button class="submit-btn nochnageonhover" full (click)="submitButtonTapped()">\n\n                        {{\'Agree\' | translate}}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tnc\tnc.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tnc\tnc.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n    <div class="login-box">\n\n        <div class="container">\n\n            <div style="margin-bottom:2rem;">\n\n                {{tncMessage}}\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12">\n\n                    <div class="privacy-terms-checkbox" style="display: flex;justify-content: center;align-items: flex-start;">\n\n                        <ion-checkbox [(ngModel)]="acceptTerms" style="padding: 0.2rem 1.5rem 0rem 0rem;"></ion-checkbox>\n\n                        <span>{{\'I have read and agree with the\' | translate}}\n\n                            <a (click)="termsConditionsTapped()">\n\n                                {{\'Terms n Conditions\' | translate}}\n\n                            </a> and\n\n                            <a (click)="privacyPolicyTapped()">\n\n                                {{\'Privacy Policy\' | translate}}\n\n                            </a>.\n\n                        </span>\n\n                    </div>\n\n                </div>\n\n            </div>\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container" style="margin-top: 2rem;">\n\n                    <button [disabled]="!acceptTerms" ion-button class="submit-btn nochnageonhover" full (click)="submitButtonTapped()">\n\n                        {{\'Agree\' | translate}}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tnc\tnc.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["u" /* ViewController */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
         __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__["a" /* UserUtils */],
         __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__["a" /* ConfigUtils */],
         __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
@@ -14405,9 +14979,7 @@ TncPage = __decorate([
         __WEBPACK_IMPORTED_MODULE_9__utils_commons_google_analytics_utils__["a" /* GoogleAnalyticsUtils */],
         __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__["a" /* ClientUtils */],
         __WEBPACK_IMPORTED_MODULE_10__utils_commons_session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* ModalController */],
-        __WEBPACK_IMPORTED_MODULE_11__utils_commons_globalization_utils__["a" /* GlobalizationUtils */],
-        __WEBPACK_IMPORTED_MODULE_12__constants_service_constants__["a" /* ServiceConstants */]])
+        __WEBPACK_IMPORTED_MODULE_11__utils_commons_globalization_utils__["a" /* GlobalizationUtils */]])
 ], TncPage);
 
 //# sourceMappingURL=tnc.js.map
@@ -14485,7 +15057,7 @@ var FilterPopupPage = (function () {
     return FilterPopupPage;
 }());
 FilterPopupPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\filters-popup\filter.html"*/'<ion-content padding class="target-popup">\n\n    <h3>{{ \'FILTERS\' | translate }} <ion-icon name="close-circle" icon-right (click)="dismiss()"></ion-icon></h3>\n\n    <ion-list>\n\n\n\n        <h4>{{ \'OFFER_TYPE\' | translate }}</h4>\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'EARN\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isEarn" (ionChange)="earnValueChanged()"></ion-toggle>\n\n        </ion-item>\n\n\n\n        <ion-item no-lines>\n\n            <ion-label> {{ languageConstants.BURN | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isBurn" (ionChange)="burnValueChanged()"></ion-toggle>\n\n        </ion-item>\n\n\n\n\n\n        <h4>{{ \'PROMOTION\' | translate }}</h4>\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'PROMOTIONS\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isPromotion"></ion-toggle>\n\n        </ion-item>\n\n\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'RECOMMENDATIONS\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isRecommended"></ion-toggle>\n\n        </ion-item>\n\n\n\n    </ion-list>\n\n\n\n\n\n    <button ion-button full class="submit-btn" (click)="saveFilters()">{{ \'GO\' | translate }}</button>\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\filters-popup\filter.html"*/,
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\filters-popup\filter.html"*/'<ion-content padding class="target-popup">\n\n    <h3>{{ \'FILTERS\' | translate }} <ion-icon name="close-circle" icon-right (click)="dismiss()"></ion-icon></h3>\n\n    <ion-list>\n\n\n\n        <h4>{{ \'OFFER_TYPE\' | translate }}</h4>\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'EARN\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isEarn" (ionChange)="earnValueChanged()"></ion-toggle>\n\n        </ion-item>\n\n\n\n        <ion-item no-lines>\n\n            <ion-label> {{ languageConstants.BURN | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isBurn" (ionChange)="burnValueChanged()"></ion-toggle>\n\n        </ion-item>\n\n\n\n\n\n        <h4>{{ \'PROMOTION\' | translate }}</h4>\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'PROMOTIONS\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isPromotion"></ion-toggle>\n\n        </ion-item>\n\n\n\n        <ion-item no-lines>\n\n            <ion-label> {{ \'RECOMMENDATIONS\' | translate }}</ion-label>\n\n            <ion-toggle [(ngModel)]="isRecommended"></ion-toggle>\n\n        </ion-item>\n\n\n\n    </ion-list>\n\n\n\n\n\n    <button ion-button full class="submit-btn" (click)="saveFilters()">{{ \'GO\' | translate }}</button>\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\filters-popup\filter.html"*/,
         selector: 'filter-popup-component'
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
@@ -14507,15 +15079,15 @@ FilterPopupPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoginPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_facebook_connect_service__ = __webpack_require__(528);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_network_service__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_facebook_connect_service__ = __webpack_require__(527);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__tnc_tnc__ = __webpack_require__(658);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -14825,7 +15397,7 @@ var LoginPage = (function () {
     return LoginPage;
 }());
 LoginPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\login\login.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n\n\n    <div class="header-clear">\n\n        <h1>{{ \'LOGIN\' | translate }} </h1>\n\n        <button class="button-right-close" icon-only (click)="dismiss(false)">\n\n            <ion-icon name="close-circle" icon-right></ion-icon>\n\n        </button>\n\n\n\n\n\n    </div>\n\n\n\n\n\n\n\n    <div class="login-box">\n\n        <form #registerForm="ngForm" novalidate>\n\n\n\n            <div class="container">\n\n\n\n                <div class="row">\n\n\n\n                    <div class="col-xs-12">\n\n\n\n                        <input type="number" pattern="[0-9]*" inputmode="numeric" placeholder="{{ \'ACCOUNT_NUMBER\' | translate }}" name="username"\n\n                            [(ngModel)]="username" />\n\n                    </div>\n\n                    <div class="col-xs-12" style="position:relative;">\n\n                        <input type="{{type}}" placeholder="{{ \'Password\' | translate }}" name="password" [(ngModel)]="password" id="password" />\n\n                        <ion-icon *ngIf="showPass" name="ios-eye-outline" (click)="showPassword()" style="position: absolute;\n\n                               top: 12px;\n\n                               right: 10px;font-size:20px;"></ion-icon>\n\n                        <ion-icon *ngIf="!showPass" name="ios-eye-off-outline" (click)="showPassword()" style="position: absolute;\n\n                               top: 10px;\n\n                               right: 10px;font-size:20px;"></ion-icon>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row">\n\n                    <div class="col-xs-12">\n\n                        <button ion-button class="submit-btn" full type="submit" (click)="doLogin()">\n\n                            {{ \'LOGIN\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row" *ngIf="shouldShowFBLogin == true">\n\n                    <div class="col-xs-12">\n\n                        <button ion-button class="submit-btn" full (click)="doLoginWithFacebook()">\n\n                            {{ \'Login with Facebook\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row">\n\n                    <div class="col-xs-12 signup-col">\n\n                        <button ion-button block clear class="register-btn" (click)="forgotPassword()" *ngIf="forgotPasswordURL && forgotPasswordURL.trim().length > 0">\n\n                            {{ "Forgot Your Password?" | translate }}\n\n                        </button>\n\n                        <button ion-button block clear class="register-btn" (click)="registerNow()" *ngIf="registrationURL && registrationURL.trim().length > 0">\n\n                            {{ "No Password Yet? Register Now!" | translate }}\n\n                        </button>\n\n                        <button ion-button block clear class="register-btn" (click)="enrollUser()">\n\n                            {{ \'NOT_MEMBER_ENROLL_HERE\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n            </div>\n\n\n\n        </form>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\login\login.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\login\login.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n\n\n    <div class="header-clear">\n\n        <h1>{{ \'LOGIN\' | translate }} </h1>\n\n        <button class="button-right-close" icon-only (click)="dismiss(false)">\n\n            <ion-icon name="close-circle" icon-right></ion-icon>\n\n        </button>\n\n\n\n\n\n    </div>\n\n\n\n\n\n\n\n    <div class="login-box">\n\n        <form #registerForm="ngForm" novalidate>\n\n\n\n            <div class="container">\n\n\n\n                <div class="row">\n\n\n\n                    <div class="col-xs-12">\n\n\n\n                        <input type="number" pattern="[0-9]*" inputmode="numeric" placeholder="{{ \'ACCOUNT_NUMBER\' | translate }}" name="username"\n\n                            [(ngModel)]="username" />\n\n                    </div>\n\n                    <div class="col-xs-12" style="position:relative;">\n\n                        <input type="{{type}}" placeholder="{{ \'Password\' | translate }}" name="password" [(ngModel)]="password" id="password" />\n\n                        <ion-icon *ngIf="showPass" name="ios-eye-outline" (click)="showPassword()" style="position: absolute;\n\n                               top: 12px;\n\n                               right: 10px;font-size:20px;"></ion-icon>\n\n                        <ion-icon *ngIf="!showPass" name="ios-eye-off-outline" (click)="showPassword()" style="position: absolute;\n\n                               top: 10px;\n\n                               right: 10px;font-size:20px;"></ion-icon>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row">\n\n                    <div class="col-xs-12">\n\n                        <button ion-button class="submit-btn" full type="submit" (click)="doLogin()">\n\n                            {{ \'LOGIN\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row" *ngIf="shouldShowFBLogin == true">\n\n                    <div class="col-xs-12">\n\n                        <button ion-button class="submit-btn" full (click)="doLoginWithFacebook()">\n\n                            {{ \'Login with Facebook\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n                <div class="row">\n\n                    <div class="col-xs-12 signup-col">\n\n                        <button ion-button block clear class="register-btn" (click)="forgotPassword()" *ngIf="forgotPasswordURL && forgotPasswordURL.trim().length > 0">\n\n                            {{ "Forgot Your Password?" | translate }}\n\n                        </button>\n\n                        <button ion-button block clear class="register-btn" (click)="registerNow()" *ngIf="registrationURL && registrationURL.trim().length > 0">\n\n                            {{ "No Password Yet? Register Now!" | translate }}\n\n                        </button>\n\n                        <button ion-button block clear class="register-btn" (click)="enrollUser()">\n\n                            {{ \'NOT_MEMBER_ENROLL_HERE\' | translate }}\n\n                        </button>\n\n                    </div>\n\n                </div>\n\n\n\n            </div>\n\n\n\n        </form>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\login\login.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["u" /* ViewController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
@@ -14864,11 +15436,11 @@ LoginPage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__constants_language_constants__ = __webpack_require__(65);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_commons_network_service__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_commons_network_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__pages_enrollment_enrollment__ = __webpack_require__(313);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__pages_enrollment_enrollment__ = __webpack_require__(312);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__utils_commons_sync_data_utils__ = __webpack_require__(146);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__myvouchers_my_vouchers__ = __webpack_require__(662);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -14934,6 +15506,7 @@ var ProfilePage = (function () {
         this.shouldDisplayLoading = true;
         this.isRefreshing = false;
         this.backgroundImageURL = '';
+        this.shouldShowVouchers = false;
     }
     ProfilePage.prototype.ngOnInit = function () {
         var _this = this;
@@ -15029,6 +15602,7 @@ var ProfilePage = (function () {
         }
         this.shouldHideAvatar = this.clientUtils.shouldHideAvatar();
         this.shouldShowEnrollment = this.clientUtils.shouldShowEnrollment();
+        this.shouldShowVouchers = this.sessionUtils.getVoucherFlag();
         setTimeout(function () {
             _this.shouldDisplayLoading = false;
         }, 60000);
@@ -15293,7 +15867,7 @@ __decorate([
 ], ProfilePage.prototype, "content", void 0);
 ProfilePage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-profile',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\profile\profile.html"*/'<ion-header class="header-dark" no-border>\n\n    <ion-navbar>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="editProfileTapped()" *ngIf="shouldShowEnrollment == true">\n\n                <ion-icon name="create"></ion-icon>\n\n            </button>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content>\n\n\n\n\n\n    <div class="user-profile-side-menu app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n        <h1 class="icon-user-header">\n\n            <ion-icon *ngIf="(shouldHideAvatar === false) && (!memberInfo.memberPicture || memberInfo.memberPicture.length == 0)" name="icon-user"></ion-icon>\n\n            <img *ngIf="memberInfo.memberPicture && memberInfo.memberPicture.length > 0" [src]="memberInfo.memberPicture" alt="" />\n\n        </h1>\n\n        <h2>{{memberInfo.preferredCardName}}</h2>\n\n        <span *ngIf="memberInfo.tierDescr">\n\n            <div class="row user-points">\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.availableBalanceMiles | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.tierPointsBalance | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.tierDescr | translate }}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="row user-points">\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.TIER_POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.TIER | translate }}</span>\n\n                </div>\n\n            </div>\n\n        </span>\n\n        <span *ngIf="!memberInfo.tierDescr">\n\n            <div class="row user-points">\n\n                <div class="col-xs-6">\n\n                    <h4>{{memberInfo.availableBalanceMiles | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <h4>{{memberInfo.tierPointsBalance | number}}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="row user-points">\n\n                <div class="col-xs-6">\n\n                    <span>{{ languageConstants.POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <span>{{ languageConstants.TIER_POINTS | translate }}</span>\n\n                </div>\n\n            </div>\n\n        </span>\n\n    </div>\n\n\n\n\n\n    <div class="contain-area">\n\n\n\n        <h2 class="title" *ngIf="shouldDisplayTargets === true">\n\n            {{ \'MY_GOALS\' | translate }}\n\n            <button right ion-button round color="transparent" *ngIf="targetSliderItems && targetSliderItems.length > 0" (click)="viewAll(\'ALL_MY_TARGETS\')">\n\n            {{ \'VIEW_ALL\' | translate }}\n\n            </button>\n\n        </h2>\n\n        <component-swiper *ngIf="shouldDisplayTargets === true" [data]="targetSliderItems" [showTemplate]="5" [isMyTarget]="true">\n\n        </component-swiper>\n\n\n\n\n\n        <div class="row" *ngIf="favOffersData && favOffersData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'MY_FAVOURITE_OFFERS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="favOffersData && favOffersData.length > 0" [data]="favOffersData" [showTemplate]="1">\n\n        </component-swiper>\n\n\n\n\n\n        <div class="row" *ngIf="favParnerLocationsData && favParnerLocationsData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'MY_FAVOURITE_LOCATIONS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="favParnerLocationsData && favParnerLocationsData.length > 0" [data]="favParnerLocationsData" [showTemplate]="3">\n\n        </component-swiper>\n\n\n\n        <!-- <div class="row" *ngIf="vouchersData && vouchersData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title">\n\n                    {{ "MY_VOUCHERS" | translate }}\n\n                    <button right ion-button round color="transparent" (click)="viewAll(\'MY_VOUCHERS\')">\n\n                        {{ "VIEW_ALL" | translate }}\n\n                    </button>\n\n                </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="vouchersData && vouchersData.length > 0" [data]="vouchersData" [showTemplate]="6">\n\n        </component-swiper> -->\n\n\n\n        <div class="row" *ngIf="transactionDates && transactionDates.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'RECENT_TRANSACTIONS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <div class="card-holder" *ngIf="transactionDates && transactionDates.length > 0">\n\n            <div>\n\n                <span *ngFor="let i of transactionDates">\n\n                    <div class="date-row">\n\n                        {{i}}\n\n                    </div>\n\n                    <div class="data-row-recent" *ngFor="let profile of transactionsByDate[i]">\n\n                        <div class="row">\n\n                            <div class="col-xs-8">\n\n                                <h5>{{profile.transactionDescr}}</h5>\n\n                            </div>\n\n                            <div class="col-xs-4">\n\n                                <div class="points points-green" *ngIf="profile.redemptionMiles >= 0">\n\n                                    {{profile.redemptionMiles | number}} {{ languageConstants.POINTS | translate }}\n\n                                </div>\n\n                                <div class="points points-red" *ngIf="profile.redemptionMiles < 0">\n\n                                    {{profile.redemptionMiles | number}} {{ languageConstants.POINTS | translate }}\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </span>\n\n            </div>\n\n        </div>\n\n\n\n        <div class="result-status" *ngIf="shouldDisplayLoading == true">\n\n            <ion-spinner name="ios-small"></ion-spinner>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\profile\profile.html"*/
+        selector: 'page-profile',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\profile\profile.html"*/'<ion-header class="header-dark" no-border>\n\n    <ion-navbar>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="editProfileTapped()" *ngIf="shouldShowEnrollment == true">\n\n                <ion-icon name="create"></ion-icon>\n\n            </button>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                <span class="spin-animation">\n\n                    <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content>\n\n\n\n\n\n    <div class="user-profile-side-menu app-background-image" [style.background-image]="\'url(\' + backgroundImageURL +\')\'">\n\n\n\n        <h1 class="icon-user-header">\n\n            <ion-icon *ngIf="(shouldHideAvatar === false) && (!memberInfo.memberPicture || memberInfo.memberPicture.length == 0)" name="icon-user"></ion-icon>\n\n            <img *ngIf="memberInfo.memberPicture && memberInfo.memberPicture.length > 0" [src]="memberInfo.memberPicture" alt="" />\n\n        </h1>\n\n        <h2>{{memberInfo.preferredCardName}}</h2>\n\n        <span *ngIf="memberInfo.tierDescr">\n\n            <div class="row user-points">\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.availableBalanceMiles | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.tierPointsBalance | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <h4>{{memberInfo.tierDescr | translate }}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="row user-points">\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.TIER_POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-4">\n\n                    <span>{{ languageConstants.TIER | translate }}</span>\n\n                </div>\n\n            </div>\n\n        </span>\n\n        <span *ngIf="!memberInfo.tierDescr">\n\n            <div class="row user-points">\n\n                <div class="col-xs-6">\n\n                    <h4>{{memberInfo.availableBalanceMiles | number}}</h4>\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <h4>{{memberInfo.tierPointsBalance | number}}</h4>\n\n                </div>\n\n            </div>\n\n            <div class="row user-points">\n\n                <div class="col-xs-6">\n\n                    <span>{{ languageConstants.POINTS | translate }}</span>\n\n                </div>\n\n                <div class="col-xs-6">\n\n                    <span>{{ languageConstants.TIER_POINTS | translate }}</span>\n\n                </div>\n\n            </div>\n\n        </span>\n\n    </div>\n\n\n\n\n\n    <div class="contain-area">\n\n\n\n        <h2 class="title" *ngIf="shouldDisplayTargets === true">\n\n            {{ \'MY_GOALS\' | translate }}\n\n            <button right ion-button round color="transparent" *ngIf="targetSliderItems && targetSliderItems.length > 0" (click)="viewAll(\'ALL_MY_TARGETS\')">\n\n            {{ \'VIEW_ALL\' | translate }}\n\n            </button>\n\n        </h2>\n\n        <component-swiper *ngIf="shouldDisplayTargets === true" [data]="targetSliderItems" [showTemplate]="5" [isMyTarget]="true">\n\n        </component-swiper>\n\n\n\n\n\n        <div class="row" *ngIf="favOffersData && favOffersData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'MY_FAVOURITE_OFFERS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="favOffersData && favOffersData.length > 0" [data]="favOffersData" [showTemplate]="1">\n\n        </component-swiper>\n\n\n\n\n\n        <div class="row" *ngIf="favParnerLocationsData && favParnerLocationsData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'MY_FAVOURITE_LOCATIONS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="favParnerLocationsData && favParnerLocationsData.length > 0" [data]="favParnerLocationsData" [showTemplate]="3">\n\n        </component-swiper>\n\n\n\n        <div class="row" *ngIf="shouldShowVouchers && vouchersData && vouchersData.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title">\n\n                    {{ "MY_VOUCHERS" | translate }}\n\n                    <button right ion-button round color="transparent" (click)="viewAll(\'MY_VOUCHERS\')">\n\n                        {{ "VIEW_ALL" | translate }}\n\n                    </button>\n\n                </h2>\n\n            </div>\n\n        </div>\n\n        <component-swiper *ngIf="shouldShowVouchers && vouchersData && vouchersData.length > 0" [data]="vouchersData" [showTemplate]="6">\n\n        </component-swiper>\n\n\n\n        <div class="row" *ngIf="transactionDates && transactionDates.length > 0">\n\n            <div class="col-xs-12">\n\n                <h2 class="title"> {{ \'RECENT_TRANSACTIONS\' | translate }} </h2>\n\n            </div>\n\n        </div>\n\n        <div class="card-holder" *ngIf="transactionDates && transactionDates.length > 0">\n\n            <div>\n\n                <span *ngFor="let i of transactionDates">\n\n                    <div class="date-row">\n\n                        {{i}}\n\n                    </div>\n\n                    <div class="data-row-recent" *ngFor="let profile of transactionsByDate[i]">\n\n                        <div class="row">\n\n                            <div class="col-xs-8">\n\n                                <h5>{{profile.transactionDescr}}</h5>\n\n                            </div>\n\n                            <div class="col-xs-4">\n\n                                <div class="points points-green" *ngIf="profile.redemptionMiles >= 0">\n\n                                    {{profile.redemptionMiles | number}} {{ languageConstants.POINTS | translate }}\n\n                                </div>\n\n                                <div class="points points-red" *ngIf="profile.redemptionMiles < 0">\n\n                                    {{profile.redemptionMiles | number}} {{ languageConstants.POINTS | translate }}\n\n                                </div>\n\n                            </div>\n\n                        </div>\n\n                    </div>\n\n                </span>\n\n            </div>\n\n        </div>\n\n\n\n        <div class="result-status" *ngIf="shouldDisplayLoading == true">\n\n            <ion-spinner name="ios-small"></ion-spinner>\n\n        </div>\n\n\n\n    </div>\n\n\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\profile\profile.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_12__constants_language_constants__["a" /* LanguageConstants */],
@@ -15323,7 +15897,7 @@ ProfilePage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyTargetsAllPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_target_utils__ = __webpack_require__(64);
@@ -15331,7 +15905,7 @@ ProfilePage = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_client_utils__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -15456,7 +16030,7 @@ var MyTargetsAllPage = (function () {
 }());
 MyTargetsAllPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-my-targets-all',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mytargetsall\my-targets-all.html"*/'<ion-header class="header-dark  " no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content padding no-bounce>\n\n    <span *ngFor="let data of allMyTargets">\n\n          <component-personal-target-list [data]="data"></component-personal-target-list>\n\n    </span>\n\n\n\n    <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n        <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n    </ion-infinite-scroll>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mytargetsall\my-targets-all.html"*/
+        selector: 'page-my-targets-all',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mytargetsall\my-targets-all.html"*/'<ion-header class="header-dark  " no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n\n\n<ion-content padding no-bounce>\n\n    <span *ngFor="let data of allMyTargets">\n\n          <component-personal-target-list [data]="data"></component-personal-target-list>\n\n    </span>\n\n\n\n    <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n        <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n    </ion-infinite-scroll>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mytargetsall\my-targets-all.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -15481,17 +16055,15 @@ MyTargetsAllPage = __decorate([
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyVouchers; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_utils_commons_partner_utils__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__dto_account_dto__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_google_analytics_utils__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_ionic_native__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_account_dto__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_session_utils__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_google_analytics_utils__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_client_utils__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_ionic_native__ = __webpack_require__(96);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -15511,21 +16083,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
-
 var MyVouchers = (function () {
-    function MyVouchers(navCtrl, navParams, clientUtils, sessionUtils, googleAnalyticsUtils, appConstants, serviceConstants, configUtils, partnerUtils, translate) {
+    function MyVouchers(navCtrl, navParams, clientUtils, sessionUtils, googleAnalyticsUtils, appConstants, partnerUtils, translate) {
         this.navCtrl = navCtrl;
         this.navParams = navParams;
         this.clientUtils = clientUtils;
         this.sessionUtils = sessionUtils;
         this.googleAnalyticsUtils = googleAnalyticsUtils;
         this.appConstants = appConstants;
-        this.serviceConstants = serviceConstants;
-        this.configUtils = configUtils;
         this.partnerUtils = partnerUtils;
         this.translate = translate;
-        this.memberInfo = new __WEBPACK_IMPORTED_MODULE_5__dto_account_dto__["f" /* MemberInfo */]();
+        this.memberInfo = new __WEBPACK_IMPORTED_MODULE_3__dto_account_dto__["f" /* MemberInfo */]();
         this.isLoadingPartners = false;
         this.isLoadingOffers = false;
         this.isLoadingLocations = false;
@@ -15551,7 +16119,6 @@ var MyVouchers = (function () {
     };
     MyVouchers.prototype.getMyVouchers = function (flag) {
         var _this = this;
-        var numOfRecords = this.configUtils.getNumOfRecordsForKey(this.serviceConstants.PAGINATION_NO_OF_RECORDS);
         if (this.myVouchers.length == 0) {
             this.isLoadingVouchers = true;
         }
@@ -15564,7 +16131,6 @@ var MyVouchers = (function () {
                 _this.myVouchers = result.data;
             }
             _this.isLoadingVouchers = false;
-            var maxLimit = _this.configUtils.getPaginationLimit();
             if (_this.myVouchers.length == 0) {
                 _this.searchNoVoucherText = _this.translate.instant("SEARCH_NO_PARTNER_VOUCHER");
             }
@@ -15575,8 +16141,7 @@ var MyVouchers = (function () {
         });
     };
     MyVouchers.prototype.activeTabEvent = function (tab) {
-        __WEBPACK_IMPORTED_MODULE_11_ionic_native__["b" /* Keyboard */].close();
-        var shouldLoadData = false;
+        __WEBPACK_IMPORTED_MODULE_9_ionic_native__["b" /* Keyboard */].close();
         this.googleAnalyticsUtils.trackPage(this.appConstants.MY_VOUCHERS_SCREEN);
         if (tab == this.UTILIZED_VOUCHERS_TAB) {
             this.activeTab = this.UTILIZED_VOUCHERS_TAB;
@@ -15596,23 +16161,21 @@ var MyVouchers = (function () {
     return MyVouchers;
 }());
 __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_3__angular_core__["_17" /* ViewChild */])(__WEBPACK_IMPORTED_MODULE_4_ionic_angular__["d" /* Content */]),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_4_ionic_angular__["d" /* Content */])
+    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["_17" /* ViewChild */])(__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["d" /* Content */]),
+    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["d" /* Content */])
 ], MyVouchers.prototype, "content", void 0);
 MyVouchers = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_3__angular_core__["u" /* Component */])({
-        selector: 'page-my-vouchers',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\myvouchers\my-vouchers.html"*/'<ion-header class="header-dark  " no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n    </ion-navbar>\n\n    <div class="inline-tabs">\n\n        <ion-segment [(ngModel)]="activeTab">\n\n            <ion-segment-button value="tab01" (click)="activeTabEvent(ALL_VOUCHERS_TAB)">\n\n                {{ \'ALL\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab02" (click)="activeTabEvent(UTILIZED_VOUCHERS_TAB)">\n\n                {{ \'UTILIZED\' | translate }}\n\n            </ion-segment-button>\n\n        </ion-segment>\n\n    </div>\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area-full" padding no-bounce>\n\n    <!-- <form action=".">\n\n            <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"\n\n                (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"\n\n                [animated]="false" [value]="" name="search">\n\n            </ion-searchbar>\n\n        </form>\n\n\n\n        <div class="margin-bottom"></div> -->\n\n    <div [ngSwitch]="activeTab" style="padding:0px">\n\n        <!--Tabs 01 start-->\n\n        <div class="tab01-holder " *ngSwitchCase="ALL_VOUCHERS_TAB">\n\n            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of myVouchers">\n\n                    <div class="voucher" > \n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.voucherDescription}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.issueDate">\n\n                            Issued on {{voucher.issueDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate&&voucher.voucherUtilized==\'Y\'">\n\n                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">\n\n                            Valid until {{voucher.expiryDate|date}}.\n\n                        </div>\n\n                        <div>\n\n                            <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n\n\n                    </div>\n\n                    <div class="voucher-strip">\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <div class="tab02-holder " *ngSwitchCase="UTILIZED_VOUCHERS_TAB">\n\n            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of myVouchers">\n\n                    <div class="voucher">\n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.voucherDescription}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.issueDate">\n\n                            Issued on {{voucher.issueDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate">\n\n                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">\n\n                            Valid until {{voucher.expiryDate|date}}.\n\n                        </div>\n\n                        <div>\n\n                            <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n\n\n                    </div>\n\n                    <div class="voucher-strip">\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\myvouchers\my-vouchers.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["u" /* Component */])({
+        selector: 'page-my-vouchers',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\myvouchers\my-vouchers.html"*/'<ion-header class="header-dark  " no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ pageTitle | translate }}</ion-title>\n\n    </ion-navbar>\n\n    <div class="inline-tabs">\n\n        <ion-segment [(ngModel)]="activeTab">\n\n            <ion-segment-button value="tab01" (click)="activeTabEvent(ALL_VOUCHERS_TAB)">\n\n                {{ \'ALL\' | translate }}\n\n            </ion-segment-button>\n\n            <ion-segment-button value="tab02" (click)="activeTabEvent(UTILIZED_VOUCHERS_TAB)">\n\n                {{ \'UTILIZED\' | translate }}\n\n            </ion-segment-button>\n\n        </ion-segment>\n\n    </div>\n\n</ion-header>\n\n\n\n\n\n<ion-content class="contain-area-full" padding no-bounce>\n\n    <!-- <form action=".">\n\n            <ion-searchbar [(ngModel)]="vouchersSearchKey" [showCancelButton]="shouldShowCancel" [ngModelOptions]="{ standalone: true }"\n\n                (search)="searchWithKeyword(activeTab)" (ionCancel)="onCancel($event)" [placeholder]="searchByVoucherPlaceholder"\n\n                [animated]="false" [value]="" name="search">\n\n            </ion-searchbar>\n\n        </form>\n\n\n\n        <div class="margin-bottom"></div> -->\n\n    <div [ngSwitch]="activeTab" style="padding:0px">\n\n        <!--Tabs 01 start-->\n\n        <div class="tab01-holder " *ngSwitchCase="ALL_VOUCHERS_TAB">\n\n            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of myVouchers">\n\n                    <div class="voucher" > \n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.voucherDescription}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.issueDate">\n\n                            Issued on {{voucher.issueDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate&&voucher.voucherUtilized==\'Y\'">\n\n                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">\n\n                            Valid until {{voucher.expiryDate|date}}.\n\n                        </div>\n\n                        <div>\n\n                            <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n\n\n                    </div>\n\n                    <div class="voucher-strip">\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n        <div class="tab02-holder " *ngSwitchCase="UTILIZED_VOUCHERS_TAB">\n\n            <div class="search-result-status" *ngIf="!myVouchers || myVouchers.length == 0">\n\n                <ion-spinner name="ios-small" *ngIf="isLoadingVouchers == true"></ion-spinner>\n\n                <span>{{ searchNoVoucherText }}</span>\n\n            </div>\n\n            <div *ngIf="myVouchers && myVouchers.length > 0" class="voucher-search-result">\n\n                <div *ngFor="let voucher of myVouchers">\n\n                    <div class="voucher">\n\n                        <div class="heading">\n\n                            <span class="desc">{{voucher.voucherDescription}}</span>\n\n                            <span class="free-space"></span>\n\n                            <span class="miles">-for {{ voucher.points }} miles</span>\n\n                        </div>\n\n                        <div class="margin-bottom"></div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.issueDate">\n\n                            Issued on {{voucher.issueDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.voucherUtilizedDate">\n\n                            Voucher utilized on {{voucher.voucherUtilizedDate|date}}.\n\n                        </div>\n\n                        <div style="font-size:11px;" *ngIf="voucher.expiryDate">\n\n                            Valid until {{voucher.expiryDate|date}}.\n\n                        </div>\n\n                        <div>\n\n                            <span style="font-size:11px;">Can be used at any location</span>\n\n                        </div>\n\n\n\n                    </div>\n\n                    <div class="voucher-strip">\n\n                        <div class="partner">\n\n                            <img [src]="voucher.partnerLogoPath" alt="" />\n\n                            <span>{{voucher.partnerDescription}}\n\n                            </span>\n\n                        </div>\n\n                    </div>\n\n                </div>\n\n                <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n                    <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n                </ion-infinite-scroll>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\myvouchers\my-vouchers.html"*/
     }),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_4_ionic_angular__["n" /* NavController */],
-        __WEBPACK_IMPORTED_MODULE_4_ionic_angular__["o" /* NavParams */],
-        __WEBPACK_IMPORTED_MODULE_9__utils_commons_client_utils__["a" /* ClientUtils */],
-        __WEBPACK_IMPORTED_MODULE_6__utils_commons_session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_7__utils_commons_google_analytics_utils__["a" /* GoogleAnalyticsUtils */],
-        __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_2__src_constants_service_constants__["a" /* ServiceConstants */],
-        __WEBPACK_IMPORTED_MODULE_1__utils_commons_config_utils__["a" /* ConfigUtils */],
+    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["n" /* NavController */],
+        __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["o" /* NavParams */],
+        __WEBPACK_IMPORTED_MODULE_7__utils_commons_client_utils__["a" /* ClientUtils */],
+        __WEBPACK_IMPORTED_MODULE_4__utils_commons_session_utils__["a" /* SessionUtils */],
+        __WEBPACK_IMPORTED_MODULE_5__utils_commons_google_analytics_utils__["a" /* GoogleAnalyticsUtils */],
+        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
         __WEBPACK_IMPORTED_MODULE_0__src_utils_commons_partner_utils__["a" /* PartnerUtils */],
-        __WEBPACK_IMPORTED_MODULE_10_ng2_translate__["c" /* TranslateService */]])
+        __WEBPACK_IMPORTED_MODULE_8_ng2_translate__["c" /* TranslateService */]])
 ], MyVouchers);
 
 //# sourceMappingURL=my-vouchers.js.map
@@ -15629,8 +16192,8 @@ MyVouchers = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_device_utils__ = __webpack_require__(144);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_commons_service_loading__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_config_utils__ = __webpack_require__(19);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -15753,7 +16316,7 @@ var SettingsPage = (function () {
 }());
 SettingsPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-settings',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\settings\settings.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ \'App Settings\' | translate }}</ion-title>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content class="app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             padding>\n\n\n\n    <ion-list>\n\n        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">\n\n            <ion-icon name="notifications"></ion-icon>\n\n            {{\'NOTIFICATIONS\' | translate}}\n\n        </ion-list-header>\n\n\n\n        <ion-item class="item-transparent item-left-zero item-border-none">\n\n            <ion-label>{{\'APP_NOTIFICATIONS\' | translate}}</ion-label>\n\n            <ion-toggle color="primary"\n\n                        [(ngModel)]="appNotification"\n\n                        (ionChange)="appNotificationToggle()">\n\n            </ion-toggle>\n\n        </ion-item>\n\n        <!--<ion-item class="item-transparent item-left-zero item-border-none">-->\n\n        <!--<ion-label>{{\'PARTNERS_NOTIFICATIONS\' | translate}}</ion-label>-->\n\n        <!--<ion-toggle color="primary"-->\n\n        <!--[(ngModel)]="partnerNotification"-->\n\n        <!--(ionChange)="partnerNotificationToggle()">-->\n\n        <!--</ion-toggle>-->\n\n        <!--</ion-item>-->\n\n    </ion-list>\n\n\n\n    <ion-list *ngIf="languageList && (languageList.length > 1)">\n\n        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">\n\n            <ion-icon name="icon-location"></ion-icon>\n\n            {{\'LANGUAGE\' | translate}}\n\n        </ion-list-header>\n\n\n\n        <ion-item class="item-transparent item-left-zero item-border-none">\n\n            <ion-label> {{\'LANGUAGE\' | translate}}</ion-label>\n\n            <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                        okText="{{\'SELECT\' | translate}}"\n\n                        (ionChange)="updateLang($event)">\n\n\n\n                <ion-option *ngFor="let lang of languageList"\n\n                            [value]="lang.code"\n\n                            [selected]="lang.code === selectedLanguageCode">\n\n                    {{lang.description }}\n\n                </ion-option>\n\n\n\n            </ion-select>\n\n        </ion-item>\n\n    </ion-list>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\settings\settings.html"*/
+        selector: 'page-settings',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\settings\settings.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{ \'App Settings\' | translate }}</ion-title>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n<ion-content class="app-background-image"\n\n             [style.background-image]="\'url(\' + backgroundImageURL +\')\'"\n\n             padding>\n\n\n\n    <ion-list>\n\n        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">\n\n            <ion-icon name="notifications"></ion-icon>\n\n            {{\'NOTIFICATIONS\' | translate}}\n\n        </ion-list-header>\n\n\n\n        <ion-item class="item-transparent item-left-zero item-border-none">\n\n            <ion-label>{{\'APP_NOTIFICATIONS\' | translate}}</ion-label>\n\n            <ion-toggle color="primary"\n\n                        [(ngModel)]="appNotification"\n\n                        (ionChange)="appNotificationToggle()">\n\n            </ion-toggle>\n\n        </ion-item>\n\n        <!--<ion-item class="item-transparent item-left-zero item-border-none">-->\n\n        <!--<ion-label>{{\'PARTNERS_NOTIFICATIONS\' | translate}}</ion-label>-->\n\n        <!--<ion-toggle color="primary"-->\n\n        <!--[(ngModel)]="partnerNotification"-->\n\n        <!--(ionChange)="partnerNotificationToggle()">-->\n\n        <!--</ion-toggle>-->\n\n        <!--</ion-item>-->\n\n    </ion-list>\n\n\n\n    <ion-list *ngIf="languageList && (languageList.length > 1)">\n\n        <ion-list-header class="list-item-header item-transparent item-left-zero item-border-none">\n\n            <ion-icon name="icon-location"></ion-icon>\n\n            {{\'LANGUAGE\' | translate}}\n\n        </ion-list-header>\n\n\n\n        <ion-item class="item-transparent item-left-zero item-border-none">\n\n            <ion-label> {{\'LANGUAGE\' | translate}}</ion-label>\n\n            <ion-select cancelText="{{\'CANCEL\' | translate}}"\n\n                        okText="{{\'SELECT\' | translate}}"\n\n                        (ionChange)="updateLang($event)">\n\n\n\n                <ion-option *ngFor="let lang of languageList"\n\n                            [value]="lang.code"\n\n                            [selected]="lang.code === selectedLanguageCode">\n\n                    {{lang.description }}\n\n                </ion-option>\n\n\n\n            </ion-select>\n\n        </ion-item>\n\n    </ion-list>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\settings\settings.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -15805,7 +16368,7 @@ var OfflinePopupPage = (function () {
     return OfflinePopupPage;
 }());
 OfflinePopupPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\offline-popup\offline-popup.html"*/'<ion-header class="header-dark offer-popup-content ">\n\n    <ion-navbar>\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'WHAT_IS_OFFLINE_MODE\' | translate }}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content padding>\n\n    <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="offlineMsg"></div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\offline-popup\offline-popup.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\offline-popup\offline-popup.html"*/'<ion-header class="header-dark offer-popup-content ">\n\n    <ion-navbar>\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{ \'WHAT_IS_OFFLINE_MODE\' | translate }}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content padding>\n\n    <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="offlineMsg"></div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\offline-popup\offline-popup.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -15823,18 +16386,7 @@ OfflinePopupPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TutorialPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_user_utils__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_user_address_utils__ = __webpack_require__(97);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_lov_item_utils__ = __webpack_require__(311);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_service_loading__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_commons_google_analytics_utils__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_tabs_tabs__ = __webpack_require__(312);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pages_tabs_tabs__ = __webpack_require__(311);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -15850,31 +16402,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 var TutorialPage = (function () {
-    function TutorialPage(navCtrl, clientUtils, userUtils, sessionUtils, configUtils, userAddressUtils, googleAnalyticsUtils, appConstants, lovItemUtils, mcfLoadService, translate, networkService, appCtrl) {
+    function TutorialPage(navCtrl, appCtrl) {
         this.navCtrl = navCtrl;
-        this.clientUtils = clientUtils;
-        this.userUtils = userUtils;
-        this.sessionUtils = sessionUtils;
-        this.configUtils = configUtils;
-        this.userAddressUtils = userAddressUtils;
-        this.googleAnalyticsUtils = googleAnalyticsUtils;
-        this.appConstants = appConstants;
-        this.lovItemUtils = lovItemUtils;
-        this.mcfLoadService = mcfLoadService;
-        this.translate = translate;
-        this.networkService = networkService;
         this.appCtrl = appCtrl;
     }
     TutorialPage.prototype.ngOnInit = function () {
@@ -15885,7 +16415,7 @@ var TutorialPage = (function () {
         this.slides.slideNext();
     };
     TutorialPage.prototype.goToHome = function () {
-        this.appCtrl.getRootNav().push(__WEBPACK_IMPORTED_MODULE_13__pages_tabs_tabs__["a" /* TabsPage */]);
+        this.appCtrl.getRootNav().push(__WEBPACK_IMPORTED_MODULE_2__pages_tabs_tabs__["a" /* TabsPage */]);
     };
     return TutorialPage;
 }());
@@ -15899,20 +16429,9 @@ __decorate([
 ], TutorialPage.prototype, "nav", void 0);
 TutorialPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'tutorial',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tutorial\tutorial.html"*/'<ion-content>\n\n    <ion-slides pager="true" loop="false" speed="500" dir="ltr">\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-1.jpg" />\n\n        </ion-slide>\n\n\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-2.jpg" />\n\n        </ion-slide>\n\n\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-3.jpg" />\n\n\n\n        </ion-slide>\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-4.jpg" />\n\n            <div class="turorial-continue">\n\n                <img (click)="goToHome()" src="assets/img/continue.jpg" />\n\n            </div>\n\n        </ion-slide>\n\n        <!-- <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-4.jpg" usemap="#image-map">\n\n            <div (click)="goToHome()" class="nextBtn">Finish</div>\n\n            <map name="image-map">\n\n                <area target="" alt="" title="" href="" coords="598,3464,1644,3690" shape="rect" (click)="goToHome()">\n\n            </map>\n\n        </ion-slide> -->\n\n\n\n    </ion-slides>\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\tutorial\tutorial.html"*/,
+        selector: 'tutorial',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tutorial\tutorial.html"*/'<ion-content>\n\n    <ion-slides pager="true" loop="false" speed="500" dir="ltr">\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-1.jpg" />\n\n        </ion-slide>\n\n\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-2.jpg" />\n\n        </ion-slide>\n\n\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-3.jpg" />\n\n\n\n        </ion-slide>\n\n        <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-4.jpg" />\n\n            <div class="turorial-continue">\n\n                <img (click)="goToHome()" src="assets/img/continue.jpg" />\n\n            </div>\n\n        </ion-slide>\n\n        <!-- <ion-slide>\n\n            <img src="assets/img/In-App Tutorial-4-4.jpg" usemap="#image-map">\n\n            <div (click)="goToHome()" class="nextBtn">Finish</div>\n\n            <map name="image-map">\n\n                <area target="" alt="" title="" href="" coords="598,3464,1644,3690" shape="rect" (click)="goToHome()">\n\n            </map>\n\n        </ion-slide> -->\n\n\n\n    </ion-slides>\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\tutorial\tutorial.html"*/,
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
-        __WEBPACK_IMPORTED_MODULE_3__utils_commons_client_utils__["a" /* ClientUtils */],
-        __WEBPACK_IMPORTED_MODULE_4__utils_commons_user_utils__["a" /* UserUtils */],
-        __WEBPACK_IMPORTED_MODULE_5__utils_commons_session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_8__utils_commons_config_utils__["a" /* ConfigUtils */],
-        __WEBPACK_IMPORTED_MODULE_6__utils_commons_user_address_utils__["a" /* UserAddressUtils */],
-        __WEBPACK_IMPORTED_MODULE_11__utils_commons_google_analytics_utils__["a" /* GoogleAnalyticsUtils */],
-        __WEBPACK_IMPORTED_MODULE_12__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_7__utils_commons_lov_item_utils__["a" /* LovItemUtils */],
-        __WEBPACK_IMPORTED_MODULE_9__services_commons_service_loading__["a" /* McfLoaderService */],
-        __WEBPACK_IMPORTED_MODULE_2_ng2_translate__["c" /* TranslateService */],
-        __WEBPACK_IMPORTED_MODULE_10__services_commons_network_service__["a" /* NetworkService */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["b" /* App */]])
 ], TutorialPage);
 
@@ -15927,17 +16446,11 @@ TutorialPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ForceUpdatePage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_commons_google_analytics_utils__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils_commons_session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_commons_globalization_utils__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_commons_device_utils__ = __webpack_require__(144);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_commons_client_utils__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_config_utils__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_session_utils__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_commons_globalization_utils__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_device_utils__ = __webpack_require__(144);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -15954,28 +16467,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
-
-
-
-
-
 var ForceUpdatePage = (function () {
-    function ForceUpdatePage(viewController, events, userUtils, configUtils, appConstants, translate, networkService, render, googleAnalyticsUtils, clientUtils, sessionUtils, modalCtrl, globalizationUtils, serviceConstants, deviceUtils) {
+    function ForceUpdatePage(viewController, configUtils, render, clientUtils, sessionUtils, globalizationUtils, deviceUtils) {
         this.viewController = viewController;
-        this.events = events;
-        this.userUtils = userUtils;
         this.configUtils = configUtils;
-        this.appConstants = appConstants;
-        this.translate = translate;
-        this.networkService = networkService;
         this.render = render;
-        this.googleAnalyticsUtils = googleAnalyticsUtils;
         this.clientUtils = clientUtils;
         this.sessionUtils = sessionUtils;
-        this.modalCtrl = modalCtrl;
         this.globalizationUtils = globalizationUtils;
-        this.serviceConstants = serviceConstants;
         this.deviceUtils = deviceUtils;
         this.memberInfo = null;
     }
@@ -16019,23 +16518,15 @@ var ForceUpdatePage = (function () {
     return ForceUpdatePage;
 }());
 ForceUpdatePage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\forceUpdate\forceUpdate.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n    <div class="login-box">\n\n        <div class="container">\n\n            <div style="margin-bottom:2rem;">\n\n                {{UpdateMessage}}\n\n            </div>\n\n            <!-- <div class="row">\n\n                <div class="col-xs-12">\n\n                    <div class="privacy-terms-checkbox">\n\n                        <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>\n\n                        <span>{{\'I have read and agree with the\' | translate}}\n\n                            <a (click)="termsConditionsTapped()">\n\n                                {{\'Terms n Conditions\' | translate}}\n\n                            </a> and\n\n                            <a (click)="privacyPolicyTapped()">\n\n                                {{\'Privacy Policy\' | translate}}\n\n                            </a>.\n\n                        </span>\n\n                    </div>\n\n                </div>\n\n            </div> -->\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container" style="margin-top: 2rem;">\n\n                    <button ion-button class="submit-btn nochnageonhover" full (click)="submitButtonTapped()">\n\n                        {{\'OK\' | translate}}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\forceUpdate\forceUpdate.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\forceUpdate\forceUpdate.html"*/'<ion-content class=" login-modal-small no-scroll">\n\n    <div class="login-box">\n\n        <div class="container">\n\n            <div style="margin-bottom:2rem;">\n\n                {{UpdateMessage}}\n\n            </div>\n\n            <!-- <div class="row">\n\n                <div class="col-xs-12">\n\n                    <div class="privacy-terms-checkbox">\n\n                        <ion-checkbox [(ngModel)]="acceptTerms"></ion-checkbox>\n\n                        <span>{{\'I have read and agree with the\' | translate}}\n\n                            <a (click)="termsConditionsTapped()">\n\n                                {{\'Terms n Conditions\' | translate}}\n\n                            </a> and\n\n                            <a (click)="privacyPolicyTapped()">\n\n                                {{\'Privacy Policy\' | translate}}\n\n                            </a>.\n\n                        </span>\n\n                    </div>\n\n                </div>\n\n            </div> -->\n\n            <div class="row">\n\n                <div class="col-xs-12 button-container" style="margin-top: 2rem;">\n\n                    <button ion-button class="submit-btn nochnageonhover" full (click)="submitButtonTapped()">\n\n                        {{\'OK\' | translate}}\n\n                    </button>\n\n                </div>\n\n            </div>\n\n        </div>\n\n    </div>\n\n</ion-content>'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\forceUpdate\forceUpdate.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["u" /* ViewController */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */],
-        __WEBPACK_IMPORTED_MODULE_3__utils_commons_user_utils__["a" /* UserUtils */],
-        __WEBPACK_IMPORTED_MODULE_5__utils_commons_config_utils__["a" /* ConfigUtils */],
-        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_2_ng2_translate__["c" /* TranslateService */],
-        __WEBPACK_IMPORTED_MODULE_7__services_commons_network_service__["a" /* NetworkService */],
+        __WEBPACK_IMPORTED_MODULE_3__utils_commons_config_utils__["a" /* ConfigUtils */],
         __WEBPACK_IMPORTED_MODULE_0__angular_core__["_4" /* Renderer */],
-        __WEBPACK_IMPORTED_MODULE_8__utils_commons_google_analytics_utils__["a" /* GoogleAnalyticsUtils */],
-        __WEBPACK_IMPORTED_MODULE_4__utils_commons_client_utils__["a" /* ClientUtils */],
-        __WEBPACK_IMPORTED_MODULE_9__utils_commons_session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* ModalController */],
-        __WEBPACK_IMPORTED_MODULE_10__utils_commons_globalization_utils__["a" /* GlobalizationUtils */],
-        __WEBPACK_IMPORTED_MODULE_11__constants_service_constants__["a" /* ServiceConstants */],
-        __WEBPACK_IMPORTED_MODULE_12__utils_commons_device_utils__["a" /* DeviceUtils */]])
+        __WEBPACK_IMPORTED_MODULE_2__utils_commons_client_utils__["a" /* ClientUtils */],
+        __WEBPACK_IMPORTED_MODULE_4__utils_commons_session_utils__["a" /* SessionUtils */],
+        __WEBPACK_IMPORTED_MODULE_5__utils_commons_globalization_utils__["a" /* GlobalizationUtils */],
+        __WEBPACK_IMPORTED_MODULE_6__utils_commons_device_utils__["a" /* DeviceUtils */]])
 ], ForceUpdatePage);
 
 //# sourceMappingURL=forceUpdate.js.map
@@ -16118,7 +16609,7 @@ var OffersPage = (function () {
 }());
 OffersPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-offers',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\offers\offers.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{pageTitle | translate}}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content class="dark-body-color no-scroll" no-bounce>\n\n    <component-swiper [data]="offersData" [activeSlide]="currentIndex" [showTemplate]="2"></component-swiper>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\offers\offers.html"*/
+        selector: 'page-offers',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\offers\offers.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n    <ion-navbar>\n\n        <ion-title>{{pageTitle | translate}}</ion-title>\n\n    </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content class="dark-body-color no-scroll" no-bounce>\n\n    <component-swiper [data]="offersData" [activeSlide]="currentIndex" [showTemplate]="2"></component-swiper>\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\offers\offers.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -16176,7 +16667,7 @@ var OffersPopupPage = (function () {
     return OffersPopupPage;
 }());
 OffersPopupPage = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\offers-popup\offers-popup.html"*/'\n\n\n\n<ion-header class="header-dark offer-popup-content ">\n\n    <ion-navbar>\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{dataObj.title}}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n\n\n\n\n<ion-content padding>\n\n\n\n    <img *ngIf="dataObj.img" [src]="dataObj.img" alt="">\n\n    <!--<h3>{{ \'ABOUT\' | translate }} : </h3>-->\n\n\n\n    <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.description"></div>\n\n\n\n    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_H">\n\n        <br/>\n\n        <h5>{{ \'Terms n Conditions\' | translate }} : </h5>\n\n        <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.terms"></div>\n\n    </div>\n\n    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_U">\n\n        <a (click)="openWebSite()">\n\n            {{ \'Terms n Conditions\' | translate }}\n\n        </a>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\widgets\offers-popup\offers-popup.html"*/
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\offers-popup\offers-popup.html"*/'\n\n\n\n<ion-header class="header-dark offer-popup-content ">\n\n    <ion-navbar>\n\n\n\n        <ion-buttons start>\n\n            <button ion-button icon-only (click)="dismiss()">\n\n                <ion-icon name="close-circle"></ion-icon>\n\n            </button>\n\n        </ion-buttons>\n\n\n\n        <ion-title>{{dataObj.title}}</ion-title>\n\n\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n\n\n\n\n<ion-content padding>\n\n\n\n    <img *ngIf="dataObj.img" [src]="dataObj.img" alt="">\n\n    <!--<h3>{{ \'ABOUT\' | translate }} : </h3>-->\n\n\n\n    <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.description"></div>\n\n\n\n    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_H">\n\n        <br/>\n\n        <h5>{{ \'Terms n Conditions\' | translate }} : </h5>\n\n        <div class="in-app-browser-anchor" onclick="onInnerHTMLTap(event)" [innerHTML]="dataObj.terms"></div>\n\n    </div>\n\n    <div *ngIf="dataObj.terms && dataObj.termsType === serviceConstants.TERMS_CONTENT_TYPE_U">\n\n        <a (click)="openWebSite()">\n\n            {{ \'Terms n Conditions\' | translate }}\n\n        </a>\n\n    </div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\widgets\offers-popup\offers-popup.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -16196,8 +16687,8 @@ OffersPopupPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyTargetsPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widgets_target_popup_target__ = __webpack_require__(315);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widgets_target_popup_target__ = __webpack_require__(314);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_commons_target_utils__ = __webpack_require__(64);
@@ -16269,7 +16760,7 @@ var MyTargetsPage = (function () {
 }());
 MyTargetsPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-my-targets',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mytargets\my-targets.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n\n\n    <ion-navbar>\n\n        <ion-title>{{pageTitle | translate}}</ion-title>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content class="dark-body-color my-targets-page" no-bounce>\n\n\n\n\n\n    <component-swiper *ngIf="offerTargetList && personalTargetList"\n\n            [data]="offerTargetList"\n\n            [activeSlide]="currentIndex"\n\n            [personalTargetData]="personalTargetList"\n\n            [showTemplate]="4"\n\n            [isMyTarget]="true"\n\n    >\n\n    </component-swiper>\n\n\n\n    <div class="add-new-target">\n\n        <ion-icon name="ios-add-circle-outline" (click)="setTarget()"></ion-icon>\n\n    </div>\n\n\n\n</ion-content>\n\n\n\n\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\mytargets\my-targets.html"*/
+        selector: 'page-my-targets',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mytargets\my-targets.html"*/'<ion-header class="header-dark no-back-button-text" no-border>\n\n\n\n    <ion-navbar>\n\n        <ion-title>{{pageTitle | translate}}</ion-title>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content class="dark-body-color my-targets-page" no-bounce>\n\n\n\n\n\n    <component-swiper *ngIf="offerTargetList && personalTargetList"\n\n            [data]="offerTargetList"\n\n            [activeSlide]="currentIndex"\n\n            [personalTargetData]="personalTargetList"\n\n            [showTemplate]="4"\n\n            [isMyTarget]="true"\n\n    >\n\n    </component-swiper>\n\n\n\n    <div class="add-new-target">\n\n        <ion-icon name="ios-add-circle-outline" (click)="setTarget()"></ion-icon>\n\n    </div>\n\n\n\n</ion-content>\n\n\n\n\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\mytargets\my-targets.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -16293,11 +16784,11 @@ MyTargetsPage = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PartnersPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__ = __webpack_require__(7);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -16412,7 +16903,7 @@ __decorate([
 ], PartnersPage.prototype, "content", void 0);
 PartnersPage = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["u" /* Component */])({
-        selector: 'page-partners',template:/*ion-inline-start:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\partners\partners.html"*/'<ion-header class=" header-dark no-back-button-text" no-border>\n\n    <ion-navbar color="transparent">\n\n        <ion-title>{{pageTitle}}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                    <span class="spin-animation">\n\n                        <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                    </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content  class="contain-area" parallax-header>\n\n\n\n\n\n    <partners-detail-header-component></partners-detail-header-component>\n\n\n\n    <div class="contain-area" padding>\n\n\n\n        <div class="search-result-status" *ngIf="!offers || (offers.length == 0)">\n\n            <span>{{noOfferText}}</span>\n\n        </div>\n\n        <div *ngFor="let data of offers">\n\n            <expandable-component [data]="data"></expandable-component>\n\n        </div>\n\n\n\n        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n            <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n        </ion-infinite-scroll>\n\n    </div>\n\n\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\Sunil Mane\Documents\Project\pal\src\pages\partners\partners.html"*/
+        selector: 'page-partners',template:/*ion-inline-start:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\partners\partners.html"*/'<ion-header class=" header-dark no-back-button-text" no-border>\n\n    <ion-navbar color="transparent">\n\n        <ion-title>{{pageTitle}}</ion-title>\n\n        <ion-buttons end>\n\n            <button ion-button class="icon-white" (click)="refreshButtonTapped()">\n\n                    <span class="spin-animation">\n\n                        <ion-icon name="md-sync" [ngClass]="{\'spin-elem\': isRefreshing}"></ion-icon>\n\n                    </span>\n\n            </button>\n\n        </ion-buttons>\n\n    </ion-navbar>\n\n\n\n</ion-header>\n\n\n\n\n\n<ion-content  class="contain-area" parallax-header>\n\n\n\n\n\n    <partners-detail-header-component></partners-detail-header-component>\n\n\n\n    <div class="contain-area" padding>\n\n\n\n        <div class="search-result-status" *ngIf="!offers || (offers.length == 0)">\n\n            <span>{{noOfferText}}</span>\n\n        </div>\n\n        <div *ngFor="let data of offers">\n\n            <expandable-component [data]="data"></expandable-component>\n\n        </div>\n\n\n\n        <ion-infinite-scroll (ionInfinite)="doInfinite($event)">\n\n            <ion-infinite-scroll-content></ion-infinite-scroll-content>\n\n        </ion-infinite-scroll>\n\n    </div>\n\n\n\n\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\sunil.mane\Documents\Project\pal\pal\src\pages\partners\partners.html"*/
     }),
     __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["n" /* NavController */],
         __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["o" /* NavParams */],
@@ -16635,527 +17126,81 @@ AppConstants = __decorate([
 
 /***/ }),
 
-/***/ 72:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UserUtils; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__ = __webpack_require__(52);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/**
- * Created by sandip on 1/16/17.
- */
-
-
-
-
-
-
-
-
-
-
-var UserUtils = (function () {
-    function UserUtils(dataAccessService, serviceConstants, appConstants, sessionUtils, clientUtils, events) {
-        this.dataAccessService = dataAccessService;
-        this.serviceConstants = serviceConstants;
-        this.appConstants = appConstants;
-        this.sessionUtils = sessionUtils;
-        this.clientUtils = clientUtils;
-        this.events = events;
-        this.MIN_NUM_OF_CHAR_USERNAME = 11;
-    }
-    UserUtils.prototype.saveUserInfo = function (contextObj) {
-        var rootContext = this.sessionUtils.getRootContext();
-        rootContext.memberInfo = contextObj;
-        this.sessionUtils.saveRootContext(rootContext);
-    };
-    UserUtils.prototype.clearUserInfo = function () {
-        var contextObj = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
-        this.saveUserInfo(contextObj);
-    };
-    UserUtils.prototype.isUserLoggedIn = function () {
-        return (this.sessionUtils.getAccessToken() != null);
-    };
-    UserUtils.prototype.isFacebookUser = function () {
-        var userProfile = this.sessionUtils.getMemberInfo();
-        return (userProfile && !this.clientUtils.isNullOrEmpty(userProfile.fbMemberId));
-    };
-    UserUtils.prototype.userProfilePic = function () {
-        var profilePic = null;
-        var userProfile = this.sessionUtils.getMemberInfo();
-        if (userProfile && !this.clientUtils.isNullOrEmpty(userProfile.memberPicture)) {
-            profilePic = userProfile.memberPicture;
-        }
-        return profilePic;
-    };
-    UserUtils.prototype.doLogin = function (username, password, successCallback, errorCallback) {
-        var _this = this;
-        var loginDataRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
-        loginDataRequest.membershipCardNumber = username;
-        loginDataRequest.password = password;
-        var loginRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["b" /* LoginRequest */]();
-        loginRequest.data = loginDataRequest;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_LOGIN, loginRequest);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
-                response.data = [];
-            }
-            var loginDataResponse = response.data[0];
-            var memberInfo = loginDataResponse.member;
-            memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
-            _this.saveUserInfo(memberInfo);
-            _this.events.publish(_this.appConstants.EVENT_LOGIN_STATUS_CHANGED);
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            if (errorCallback) {
-                var errorInfo = error.json();
-                errorCallback(errorInfo);
-            }
-        });
-    };
-    UserUtils.prototype.loginUsingFacebook = function (fbToken, successCallback, errorCallback) {
-        var _this = this;
-        var loginDataRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
-        loginDataRequest.facebookAccessToken = fbToken;
-        var loginRequest = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["b" /* LoginRequest */]();
-        loginRequest.data = loginDataRequest;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_LOGIN, loginRequest);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
-                response.data = [];
-            }
-            var loginDataResponse = response.data[0];
-            var memberInfo = loginDataResponse.member;
-            memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
-            _this.saveUserInfo(memberInfo);
-            _this.events.publish(_this.appConstants.EVENT_LOGIN_STATUS_CHANGED);
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            if (errorCallback) {
-                var errorInfo = error.json();
-                errorCallback(errorInfo);
-            }
-        });
-    };
-    UserUtils.prototype.fetchProfile = function (successCallback, errorCallback) {
-        var _this = this;
-        if (this.sessionUtils.isUserLoggedIn()) {
-            var memberInfo = this.sessionUtils.getMemberInfo();
-            var requestData = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["f" /* MemberInfo */]();
-            requestData.membershipCardNumber = memberInfo.username;
-            var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_PROFILE, requestData);
-            this.dataAccessService.call(serviceContext)
-                .subscribe(function (result) {
-                var response = result.json();
-                if (!response) {
-                    response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["c" /* LoginResponse */]();
-                    response.data = [];
-                }
-                var loginDataResponse = response.data[0];
-                var memberInfo = loginDataResponse.member;
-                var memInfo = _this.sessionUtils.getMemberInfo();
-                memberInfo.accessToken = memInfo.accessToken;
-                memberInfo.milesExpiryDiff = _this.calculateMilesExpiryDateInDays(memberInfo.milesExpiryDate);
-                _this.saveUserInfo(memberInfo);
-                _this.events.publish(_this.appConstants.EVENT_USER_PROFILE_CHANGED);
-                if (successCallback) {
-                    successCallback(response);
-                }
-            }, function (error) {
-                var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-                if (error) {
-                    errorInfo = error.json();
-                    errorInfo.code = error.status;
-                }
-                if (errorCallback) {
-                    errorCallback(errorInfo);
-                }
-                if (errorInfo.code == 401) {
-                    _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-                }
-            });
-        }
-    };
-    UserUtils.prototype.saveProfile = function (profileInfo, shouldEdit, successCallback, errorCallback) {
-        var _this = this;
-        var serviceName = (shouldEdit == true) ?
-            this.serviceConstants.ACCOUNT_SERVICE_NAME_EDIT_PROFILE :
-            this.serviceConstants.ACCOUNT_SERVICE_NAME_CREATE_PROFILE;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, serviceName, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
-                response.data = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.changePassword = function (profileInfo, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_CHANGE_PASSWORD, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
-                response.data = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.getMemberAddress = function (profileInfo, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_MEMBER_ADDRESS, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.getMemberSecurityQuestion = function (profileInfo, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_MEMBER_SECURITY_QUESTION, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["a" /* EnrollResponse */]();
-                response.data = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.saveMemberSecurityQuestion = function (profileInfo, shouldEdit, successCallback, errorCallback) {
-        var _this = this;
-        var serviceName = (shouldEdit == true) ?
-            this.serviceConstants.ACCOUNT_SERVICE_NAME_EDIT_MEMBER_SECURITY_QUESTION :
-            this.serviceConstants.ACCOUNT_SERVICE_NAME_CREATE_MEMBER_SECURITY_QUESTION;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, serviceName, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = { message: '' };
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.verifyMemberSecurityQuestion = function (profileInfo, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_VERIFY_MEMBER_SECURITY_QUESTION, profileInfo);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = { message: '' };
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.getPasswordHints = function (successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_PASSWORD_HINTS, null);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = new __WEBPACK_IMPORTED_MODULE_9__dto_account_dto__["i" /* PasswordHintResponse */]();
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.validateUsername = function (username) {
-        var textValue = username;
-        if (textValue && (textValue.length < this.MIN_NUM_OF_CHAR_USERNAME)) {
-            var diffValue = this.MIN_NUM_OF_CHAR_USERNAME - textValue.length;
-            for (var i = 0; i < diffValue; i++) {
-                textValue = '0' + textValue;
-            }
-        }
-        return textValue;
-    };
-    UserUtils.prototype.calculateMilesExpiryDateInDays = function (expDateString) {
-        var diffHours = this.clientUtils.getDateTimeDiff(expDateString) / 3600;
-        var diffDays = 0;
-        if (diffHours >= 24) {
-            diffDays = Math.floor(diffHours / 24);
-        }
-        return diffDays;
-    };
-    UserUtils.prototype.getConsentDate = function (reqObj, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_GET_TNC_CONSENT, reqObj);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    UserUtils.prototype.postConsentDate = function (reqObj, successCallback, errorCallback) {
-        var _this = this;
-        var serviceContext = new __WEBPACK_IMPORTED_MODULE_4__services_commons_context_service__["a" /* ServiceContext */](this.serviceConstants.SERVICE_CONTEXT_NAME_ACCOUNT, this.serviceConstants.ACCOUNT_SERVICE_NAME_POST_TNC_CONSENT, reqObj);
-        this.dataAccessService.call(serviceContext)
-            .subscribe(function (result) {
-            var response = result.json();
-            if (!response) {
-                response = [];
-            }
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, function (error) {
-            var errorInfo = new __WEBPACK_IMPORTED_MODULE_2__dto_common_dto__["j" /* ServiceErrorInfo */]();
-            if (error) {
-                errorInfo = error.json();
-                errorInfo.code = error.status;
-            }
-            if (errorCallback) {
-                errorCallback(errorInfo);
-            }
-            if (errorInfo.code == 401) {
-                _this.events.publish(_this.appConstants.EVENT_USER_SESSION_EXPIRED);
-            }
-        });
-    };
-    return UserUtils;
-}());
-UserUtils = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__services_commons_data_access_service__["a" /* DataAccessService */],
-        __WEBPACK_IMPORTED_MODULE_5__constants_service_constants__["a" /* ServiceConstants */],
-        __WEBPACK_IMPORTED_MODULE_6__constants_app_constants__["a" /* AppConstants */],
-        __WEBPACK_IMPORTED_MODULE_7__session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_8__client_utils__["a" /* ClientUtils */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Events */]])
-], UserUtils);
-
-//# sourceMappingURL=user.utils.js.map
-
-/***/ }),
-
 /***/ 768:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_forms__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__libs_angular_svg_round_progressbar_round_progress__ = __webpack_require__(806);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__translate_translate_service__ = __webpack_require__(808);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_ng2_completer__ = __webpack_require__(291);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_commons_data_access_service__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_http_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_storage_service__ = __webpack_require__(505);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_offer_offer_service__ = __webpack_require__(511);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_menu_menu_services__ = __webpack_require__(512);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__services_account_profile_service__ = __webpack_require__(514);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_wallet_wallet_service__ = __webpack_require__(515);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_target_mytargets_service__ = __webpack_require__(516);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__services_partners_partner_service__ = __webpack_require__(517);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__services_configuration_config_service__ = __webpack_require__(513);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__services_favourites_favourites_services__ = __webpack_require__(518);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__services_industrytypes_industrytypes_services__ = __webpack_require__(519);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__services_commons_remote_notification_service__ = __webpack_require__(523);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__services_commons_device_service__ = __webpack_require__(520);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_commons_storage_service__ = __webpack_require__(504);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_offer_offer_service__ = __webpack_require__(510);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_menu_menu_services__ = __webpack_require__(511);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__services_account_profile_service__ = __webpack_require__(513);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__services_wallet_wallet_service__ = __webpack_require__(514);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__services_target_mytargets_service__ = __webpack_require__(515);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__services_partners_partner_service__ = __webpack_require__(516);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__services_configuration_config_service__ = __webpack_require__(512);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__services_favourites_favourites_services__ = __webpack_require__(517);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__services_industrytypes_industrytypes_services__ = __webpack_require__(518);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__services_commons_remote_notification_service__ = __webpack_require__(522);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__services_commons_device_service__ = __webpack_require__(519);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__services_commons_geolocation_service__ = __webpack_require__(307);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__services_commons_social_sharing_service__ = __webpack_require__(524);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__services_commons_message_content_service__ = __webpack_require__(504);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__services_commons_system_query_service__ = __webpack_require__(510);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__services_commons_google_analytics_service__ = __webpack_require__(525);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__services_locationNotification_location_notification_service__ = __webpack_require__(521);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__services_commons_social_sharing_service__ = __webpack_require__(523);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__services_commons_message_content_service__ = __webpack_require__(503);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__services_commons_system_query_service__ = __webpack_require__(509);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__services_commons_google_analytics_service__ = __webpack_require__(524);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__services_locationNotification_location_notification_service__ = __webpack_require__(520);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__services_commons_local_notification_service__ = __webpack_require__(308);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__services_commons_network_service__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__utils_commons_configuration_utils__ = __webpack_require__(526);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__services_commons_network_service__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__utils_commons_configuration_utils__ = __webpack_require__(525);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__services_commons_file_service__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__services_commons_safari_view_controller_service__ = __webpack_require__(508);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__services_commons_in_app_browser_service__ = __webpack_require__(509);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__services_commons_globalization_service__ = __webpack_require__(507);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__services_commons_app_version_service__ = __webpack_require__(527);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__services_lovItem_lov_item_service__ = __webpack_require__(522);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__services_commons_facebook_connect_service__ = __webpack_require__(528);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__services_commons_safari_view_controller_service__ = __webpack_require__(507);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__services_commons_in_app_browser_service__ = __webpack_require__(508);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__services_commons_globalization_service__ = __webpack_require__(506);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__services_commons_app_version_service__ = __webpack_require__(526);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__services_lovItem_lov_item_service__ = __webpack_require__(521);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__services_commons_facebook_connect_service__ = __webpack_require__(527);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__utils_commons_client_utils__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__utils_commons_session_utils__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__utils_commons_config_utils__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__utils_commons_menu_utils__ = __webpack_require__(201);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__utils_commons_wallet_utils__ = __webpack_require__(109);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__utils_commons_wallet_utils__ = __webpack_require__(107);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__utils_commons_offer_utils__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__utils_commons_partner_utils__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__utils_commons_target_utils__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__utils_commons_device_utils__ = __webpack_require__(144);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__utils_commons_social_sharing_utils__ = __webpack_require__(145);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__utils_commons_transaction_utils__ = __webpack_require__(203);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__utils_commons_user_address_utils__ = __webpack_require__(97);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__utils_commons_globalization_utils__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__utils_commons_user_address_utils__ = __webpack_require__(108);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__utils_commons_globalization_utils__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_51__utils_commons_location_notification_utils__ = __webpack_require__(310);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__utils_commons_user_utils__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__utils_commons_user_utils__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_53__utils_commons_google_analytics_utils__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_54__utils_commons_sync_data_utils__ = __webpack_require__(146);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__utils_commons_lov_item_utils__ = __webpack_require__(311);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__utils_commons_lov_item_utils__ = __webpack_require__(649);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_56__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_57__constants_service_constants__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_58__constants_language_constants__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__app_component__ = __webpack_require__(1083);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__pages_home_home__ = __webpack_require__(650);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__pages_login_login__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__pages_tabs_tabs__ = __webpack_require__(312);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__pages_tabs_tabs__ = __webpack_require__(311);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_63__pages_mywallet_wallet__ = __webpack_require__(654);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_64__pages_search_search__ = __webpack_require__(657);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_65__pages_profile_profile__ = __webpack_require__(660);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_66__pages_offers_offers__ = __webpack_require__(667);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_67__pages_terms_terms__ = __webpack_require__(314);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_67__pages_terms_terms__ = __webpack_require__(313);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_68__pages_widgets_offers_popup_offers_popup__ = __webpack_require__(668);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_69__pages_widgets_target_popup_target__ = __webpack_require__(315);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_69__pages_widgets_target_popup_target__ = __webpack_require__(314);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_70__pages_widgets_filters_popup_filter__ = __webpack_require__(659);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_71__pages_widgets_offline_popup_offline_popup__ = __webpack_require__(664);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_72__pages_mywallet_qrcode_qrcode__ = __webpack_require__(655);
@@ -17166,7 +17211,7 @@ UserUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_77__pages_mytargetsall_my_targets_all__ = __webpack_require__(661);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_78__pages_partners_partners__ = __webpack_require__(670);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_79__pages_partners_list_partner_list__ = __webpack_require__(147);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_80__pages_enrollment_enrollment__ = __webpack_require__(313);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_80__pages_enrollment_enrollment__ = __webpack_require__(312);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_81__pages_mcalculator_mcalculator__ = __webpack_require__(652);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_82__pages_widgets_filters_mcalculator_filters_mcalculator__ = __webpack_require__(653);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_83__pages_tutorial_tutorial__ = __webpack_require__(665);
@@ -17176,7 +17221,7 @@ UserUtils = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_87__pages_widgets_logincard_login__ = __webpack_require__(1086);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_88__pages_widgets_partners_partners__ = __webpack_require__(1087);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_89__pages_widgets_loggedin_loggedin__ = __webpack_require__(1088);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_90__services_commons_service_loading__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_90__services_commons_service_loading__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_91__pages_widgets_expandable_expandable__ = __webpack_require__(1089);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_92__pages_widgets_expandable_location_expandable_location__ = __webpack_require__(1090);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_93__pages_widgets_virtual_card_virtual_card__ = __webpack_require__(1091);
@@ -17691,8 +17736,8 @@ ServiceConstants = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RoundProgress; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__round_progress_component__ = __webpack_require__(807);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__round_progress_service__ = __webpack_require__(464);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__round_progress_ease__ = __webpack_require__(465);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__round_progress_service__ = __webpack_require__(463);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__round_progress_ease__ = __webpack_require__(464);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -17731,8 +17776,8 @@ RoundProgress = __decorate([
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RoundProgressComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__round_progress_service__ = __webpack_require__(464);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__round_progress_ease__ = __webpack_require__(465);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__round_progress_service__ = __webpack_require__(463);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__round_progress_ease__ = __webpack_require__(464);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -17903,7 +17948,7 @@ RoundProgressComponent = __decorate([
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = MyTranslateLoader;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ng2_translate__ = __webpack_require__(14);
 /**
  * Created by anjum on 03/01/17.
  */
@@ -17922,12 +17967,12 @@ function MyTranslateLoader(http) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ClientUtils; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ng2_translate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_common__ = __webpack_require__(125);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__globalization_utils__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_safari_view_controller_service__ = __webpack_require__(508);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_in_app_browser_service__ = __webpack_require__(509);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__globalization_utils__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_commons_safari_view_controller_service__ = __webpack_require__(507);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_commons_in_app_browser_service__ = __webpack_require__(508);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__constants_app_constants__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_commons_file_service__ = __webpack_require__(143);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -18454,132 +18499,6 @@ ClientUtils = __decorate([
 ], ClientUtils);
 
 //# sourceMappingURL=client.utils.js.map
-
-/***/ }),
-
-/***/ 97:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UserAddressUtils; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__session_utils__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__client_utils__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__ = __webpack_require__(1078);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/**
- * Created by sandip on 1/15/17.
- */
-
-
-
-
-var UserAddressUtils = (function () {
-    function UserAddressUtils(sessionUtils, clientUtils) {
-        this.sessionUtils = sessionUtils;
-        this.clientUtils = clientUtils;
-        this.MAX_NUM_OF_RECORDS = 11;
-    }
-    UserAddressUtils.prototype.getUserAddressContext = function () {
-        var rootContext = this.sessionUtils.getRootContext();
-        var contextObj = rootContext.geocodes;
-        if (!contextObj) {
-            contextObj = new Array();
-        }
-        return contextObj;
-    };
-    UserAddressUtils.prototype.saveUserAddressContext = function (contextObj) {
-        var rootContext = this.sessionUtils.getRootContext();
-        rootContext.geocodes = contextObj;
-        this.sessionUtils.saveRootContext(rootContext);
-    };
-    UserAddressUtils.prototype.clearUserAddressContext = function () {
-        var contextObj = new Array();
-        this.saveUserAddressContext(contextObj);
-    };
-    UserAddressUtils.prototype.fetchAddressForLocation = function (latitude, longitude, successCallback, errorCallback) {
-        var _this = this;
-        Geocode.getAddressForLocation(latitude, longitude, function (result) {
-            if (_this.clientUtils.isNullOrEmpty(result)) {
-                if (errorCallback) {
-                    errorCallback(null);
-                }
-            }
-            else {
-                var response = JSON.parse(result);
-                if (!response) {
-                    response = new __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__["a" /* GeocodeResponse */]();
-                    response.results = [];
-                }
-                if (response.results && (response.results.length > 0)) {
-                    var geocodeInfo = response.results[0];
-                    _this.storeGeocodeInfo(geocodeInfo);
-                    if (successCallback) {
-                        successCallback(geocodeInfo);
-                    }
-                }
-                else if (errorCallback) {
-                    errorCallback(null);
-                }
-            }
-        });
-    };
-    UserAddressUtils.prototype.fetchLocationsForAddress = function (searchText, successCallback, errorCallback) {
-        var _this = this;
-        Geocode.getLocationForAddress(searchText, function (result) {
-            if (_this.clientUtils.isNullOrEmpty(result)) {
-                if (errorCallback) {
-                    errorCallback(null);
-                }
-            }
-            else {
-                var response = JSON.parse(result);
-                if (!response) {
-                    response = new __WEBPACK_IMPORTED_MODULE_3__dto_geocode_dto__["a" /* GeocodeResponse */]();
-                    response.results = [];
-                }
-                if (response.results && (response.results.length > 0)) {
-                    var geocodeInfo = response.results[0];
-                    _this.storeGeocodeInfo(geocodeInfo);
-                    if (successCallback) {
-                        successCallback(geocodeInfo);
-                    }
-                }
-                else if (errorCallback) {
-                    errorCallback(null);
-                }
-            }
-        });
-    };
-    UserAddressUtils.prototype.storeGeocodeInfo = function (geocodeInfo) {
-        var geocodes = this.getUserAddressContext();
-        var tempArray = [];
-        tempArray.push(geocodeInfo);
-        for (var index = 0; index < geocodes.length; index++) {
-            if ((geocodeInfo.formatted_address != geocodes[index].formatted_address) &&
-                (index < (this.MAX_NUM_OF_RECORDS - 1))) {
-                tempArray.push(geocodes[index]);
-            }
-        }
-        this.saveUserAddressContext(tempArray);
-    };
-    return UserAddressUtils;
-}());
-UserAddressUtils = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* Injectable */])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__session_utils__["a" /* SessionUtils */],
-        __WEBPACK_IMPORTED_MODULE_2__client_utils__["a" /* ClientUtils */]])
-], UserAddressUtils);
-
-//# sourceMappingURL=user-address.utils.js.map
 
 /***/ })
 

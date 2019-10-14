@@ -7,7 +7,6 @@ import {ConfigUtils} from '../../../utils/commons/config.utils';
 import {ClientUtils} from '../../../utils/commons/client.utils';
 import {AppConstants} from '../../../constants/app.constants';
 import {NetworkService} from '../../../services/commons/network.service';
-import { TncPage } from '../../tnc/tnc';
 
 @Component({
     selector: 'login-component',

@@ -25,9 +25,9 @@
             <ion-segment-button value="tab02" (click)="activeTabEvent(SEARCH_OFFERS_TAB)">
                 {{ 'OFFERS' | translate }}
             </ion-segment-button>
-            <!-- <ion-segment-button value="tab04" (click)="activeTabEvent(SEARCH_VOUCHERS_TAB)">
+            <ion-segment-button *ngIf="shouldShowVouchers" value="tab04" (click)="activeTabEvent(SEARCH_VOUCHERS_TAB)">
                 {{ "VOUCHERS" | translate }}
-            </ion-segment-button> -->
+            </ion-segment-button>
         </ion-segment>
     </div>
 

@@ -8,7 +8,6 @@ import { SessionUtils } from '../../utils/commons/session.utils';
 import { ServiceErrorInfo, ServiceHeaderInfo } from '../../dto/common.dto';
 import { ClientUtils } from "../../utils/commons/client.utils";
 import { NetworkService } from "../../services/commons/network.service";
-import { ServiceConstants } from '../../constants/service.constants';
 
 @Injectable()
 export class CustomHttpService {
@@ -19,8 +18,7 @@ export class CustomHttpService {
         private translate: TranslateService,
         private globalizationUtils: GlobalizationUtils,
         private sessionUtils: SessionUtils,
-        private clientUtils: ClientUtils,
-        private serviceConstants: ServiceConstants) {
+        private clientUtils: ClientUtils) {
         this.baseUrl = this.getBaseURL();
     }
 

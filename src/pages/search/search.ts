@@ -72,7 +72,7 @@ export class SearchPage {
     isLoadingLocations: boolean = false;
     isLoadingVouchers: boolean = false;
     isRefreshing: boolean = false;
-
+    shouldShowVouchers = false;
 
     constructor(public navCtrl: NavController,
         public modalCtrl: ModalController,
@@ -93,6 +93,8 @@ export class SearchPage {
     }
 
     ngOnInit() {
+
+        this.shouldShowVouchers = this.sessionUtils.getVoucherFlag();
 
         this.events.subscribe(this.appConstants.EVENT_APP_LANGUAGE_CHANGED, () => {
 
@@ -117,6 +119,7 @@ export class SearchPage {
             }
             this.searchByPartnerPlaceholder = this.translate.instant('SEARCH_BY_PARTNER_NAME');
             this.updateAllIndustryTypeText();
+            
         });
 
         this.searchByPartnerPlaceholder = this.translate.instant('SEARCH_BY_PARTNER_NAME');

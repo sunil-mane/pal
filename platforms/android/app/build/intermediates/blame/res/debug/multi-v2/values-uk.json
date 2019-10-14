@@ -57,6 +57,62 @@
             ]
         },
         {
+            "outputFile": "C:\\Users\\sunil.mane\\Documents\\Project\\pal\\pal\\platforms\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-uk\\values-uk.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\sunil.mane\\.gradle\\caches\\transforms-1\\files-1.1\\play-services-basement-9.2.0.aar\\be547987ab94ec3eb8e09e80ff7ee5a2\\res\\values-uk\\values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "4",
+                        "startOffsets": "331",
+                        "endColumns": "249",
+                        "endOffsets": "576"
+                    },
+                    "to": {
+                        "startLines": "21",
+                        "startColumns": "4",
+                        "startOffsets": "3224",
+                        "endColumns": "249",
+                        "endOffsets": "3469"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sunil.mane\\.gradle\\caches\\transforms-1\\files-1.1\\support-compat-26.1.0.aar\\8a8c92408ef0480951f386ba1fff5fdd\\res\\values-uk\\values-uk.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "33",
+                        "startColumns": "4",
+                        "startOffsets": "5104",
+                        "endColumns": "100",
+                        "endOffsets": "5200"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\sunil.mane\\.gradle\\caches\\transforms-1\\files-1.1\\play-services-base-9.2.0.aar\\5e794133ca38772d1c00699ffe9db334\\res\\values-uk\\values.xml",
+                    "from": {
+                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "329,598,728,923,1052,1184,1403,1623,1754,1945,2079,2255,2376,2510,2692,2841,3018,3151,3319,3448,3708,3831,3939,4132,4259,4465,4598,4770,4870,4961",
+                        "endColumns": "268,129,194,128,131,218,219,130,190,133,175,120,133,181,148,176,132,167,128,259,122,107,192,126,205,132,171,99,90,116",
+                        "endOffsets": "593,723,918,1047,1179,1398,1618,1749,1940,2074,2250,2371,2505,2687,2836,3013,3146,3314,3443,3703,3826,3934,4127,4254,4460,4593,4765,4865,4956,5073"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,28,29,30,31,32",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,374,504,699,828,960,1179,1399,1530,1721,1855,2031,2152,2286,2468,2617,2794,2927,3095,3474,3734,3857,3965,4158,4285,4491,4624,4796,4896,4987",
+                        "endColumns": "268,129,194,128,131,218,219,130,190,133,175,120,133,181,148,176,132,167,128,259,122,107,192,126,205,132,171,99,90,116",
+                        "endOffsets": "369,499,694,823,955,1174,1394,1525,1716,1850,2026,2147,2281,2463,2612,2789,2922,3090,3219,3729,3852,3960,4153,4280,4486,4619,4791,4891,4982,5099"
+                    }
+                }
+            ]
+        },
+        {
             "outputFile": "C:\\Users\\204866\\Documents\\Mobile\\Code_to_sunil\\app_PAL\\platforms\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-uk\\values-uk.xml",
             "map": [
                 {

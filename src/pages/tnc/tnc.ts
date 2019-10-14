@@ -1,5 +1,5 @@
 import {Component, Renderer} from '@angular/core';
-import {ViewController,Events, ModalController} from 'ionic-angular';
+import {ViewController} from 'ionic-angular';
 import {TranslateService} from 'ng2-translate';
 import {UserUtils} from '../../utils/commons/user.utils';
 import {ClientUtils} from '../../utils/commons/client.utils';
@@ -12,7 +12,6 @@ import {SessionUtils} from '../../utils/commons/session.utils';
 import { MemberInfo } from '../../dto/account.dto';
 import { ServiceErrorInfo } from '../../dto/common.dto';
 import { GlobalizationUtils } from '../../utils/commons/globalization.utils';
-import { ServiceConstants } from '../../constants/service.constants';
 @Component({
     templateUrl: 'tnc.html'
 })
@@ -25,7 +24,6 @@ export class TncPage {
     consentResponse:any = {"activeCardNumber":"","consentStatus":"","consentCode":""};
     tncMessage: string;
     constructor(public viewController: ViewController,
-                private events: Events,
                 private userUtils: UserUtils,
                 private configUtils: ConfigUtils,
                 private appConstants: AppConstants,
@@ -35,9 +33,7 @@ export class TncPage {
                 private googleAnalyticsUtils: GoogleAnalyticsUtils,
                 private clientUtils: ClientUtils,
                 private sessionUtils: SessionUtils,
-                private modalCtrl: ModalController,
                 private globalizationUtils: GlobalizationUtils,
-                private serviceConstants: ServiceConstants
             ) {
     }
 

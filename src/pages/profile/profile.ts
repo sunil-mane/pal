@@ -5,7 +5,7 @@ import { MemberInfo, TransactionInfo } from '../../dto/account.dto';
 import { SessionUtils } from '../../utils/commons/session.utils';
 import { GoalInfo } from '../../dto/goal.dto';
 import { OfferInfo } from '../../dto/offers.dto';
-import { PartnerLocationInfo, VouchersInfo } from '../../dto/partners.dto';
+import { PartnerLocationInfo } from '../../dto/partners.dto';
 import { OfferUtils } from '../../utils/commons/offer.utils';
 import { PartnerUtils } from '../../utils/commons/partner.utils';
 import { TransactionUtils } from '../../utils/commons/transaction.utils';
@@ -47,7 +47,8 @@ export class ProfilePage {
     shouldShowEnrollment: boolean = false;
     shouldDisplayLoading: boolean = true;
     isRefreshing: boolean = false;
-    private backgroundImageURL: string = '';
+    backgroundImageURL: string = '';
+    shouldShowVouchers = false;
 
     constructor(public navCtrl: NavController,
         public languageConstants: LanguageConstants,
@@ -169,6 +170,8 @@ export class ProfilePage {
 
         this.shouldHideAvatar = this.clientUtils.shouldHideAvatar();
         this.shouldShowEnrollment = this.clientUtils.shouldShowEnrollment();
+
+        this.shouldShowVouchers = this.sessionUtils.getVoucherFlag();
 
         setTimeout(() => {
             this.shouldDisplayLoading = false;

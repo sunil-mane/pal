@@ -20,8 +20,6 @@ import { LocationPage } from './location/location';
 import { TranslateService } from 'ng2-translate';
 import { NetworkService } from '../../services/commons/network.service';
 import { MilesCalculatorPage } from '../../pages/mcalculator/mcalculator';
-import { UserUtils } from '../../utils/commons/user.utils';
-import { TncPage } from '../tnc/tnc';
 
 @Component({
     selector: 'page-home',
@@ -66,7 +64,6 @@ export class HomePage {
         private syncDataUtils: SyncDataUtils,
         private appConstants: AppConstants,
         private networkService: NetworkService,
-        private userUtils: UserUtils,
         public viewController: ViewController,
     ) {
 
